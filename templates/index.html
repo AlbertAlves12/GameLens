@@ -48,7 +48,6 @@
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -72,7 +71,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             
             <!-- Logo & Brand Zone -->
-            <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="switchMainTab('dashboard')">
                 <svg class="w-8 h-8 text-[#66c0f4]" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12c0 4.64 3.16 8.54 7.44 9.65l2.4-3.48a4.995 4.995 0 0 1-1.84-3.87 5 5 0 0 1 5-5c1.84 0 3.44.99 4.29 2.47l3.2-1.37C21.05 6.07 16.94 2 12 2zm3 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
                 </svg>
@@ -109,7 +108,7 @@
                     <span>Apoiar via Pix</span>
                 </button>
                 <button 
-                    onclick="refreshData()" 
+                    onclick="fetchDashboardData()" 
                     id="btn-refresh"
                     class="bg-[#2a475e] hover:bg-[#3b5f7d] text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5"
                     title="Atualizar dados da API"
@@ -200,364 +199,222 @@
         <div id="tab-section-dashboard" class="space-y-8">
             <!-- INTRO HERO BANNER -->
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Visão Geral da Biblioteca</h1>
-                <p class="text-sm text-slate-400 mt-1">Estatísticas consolidadas com cores representativas de cada título e nicho.</p>
-            </div>
-            <!-- Quick Filter Bar -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="genre-filter-container">
-                <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
-                <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
-                    <span>RPG</span>
-                </button>
-                <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
-                    <span>Ação</span>
-                </button>
-                <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
-                    <span>Estratégia</span>
-                </button>
-                <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
-                    <span>Indie</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- 3 CARDS DE MÉTRICAS EM DESTAQUE -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            
-            <!-- Card 1: Total de Horas -->
-            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4]">
-                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
-                    <span>TEMPO TOTAL REGISTRADO</span>
-                    <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="text-3xl sm:text-4xl font-bold text-white tabular-nums" id="card-total-hours">
-                    {{ stats.total_hours if stats else '0' }} <span class="text-lg font-normal text-slate-400">horas</span>
-                </div>
-                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                    <span>Em <strong class="text-white" id="card-total-games">{{ stats.total_games if stats else '0' }}</strong> jogos catalogados</span>
-                    <span aria-hidden="true">·</span>
-                    <span class="text-emerald-400">+14.2h este mês</span>
-                </div>
-            </div>
-
-            <!-- Card 2: Jogo Mais Jogado -->
-            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] cursor-pointer" onclick="openGameModal(currentStats?.most_played_game?.id || '730')">
-                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
-                    <span>JOGO MAIS JOGADO</span>
-                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                    </svg>
-                </div>
-                <div class="text-2xl font-bold text-white truncate flex items-center gap-2" id="card-most-played-name">
-                    <span class="w-3 h-3 rounded-full bg-[#f97316] shrink-0"></span>
-                    <span>{{ stats.most_played_game.name if stats and stats.most_played_game else 'Counter-Strike 2' }}</span>
-                </div>
-                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                    <span class="tabular-nums font-semibold text-[#f97316]" id="card-most-played-hours">{{ stats.most_played_game.hours_played if stats and stats.most_played_game else '845.2' }}h jogadas</span>
-                    <span aria-hidden="true">·</span>
-                    <span class="text-slate-300">Classificação: {{ stats.most_played_game.rating_label if stats and stats.most_played_game else 'Muito Positivas' }}</span>
-                </div>
-            </div>
-
-            <!-- Card 3: Avaliação Média da Biblioteca -->
-            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4]">
-                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
-                    <span>AVALIAÇÃO MÉDIA DA BIBLIOTECA</span>
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2m-7 0H4a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
-                    </svg>
-                </div>
-                <div class="text-3xl sm:text-4xl font-bold text-emerald-400 tabular-nums" id="card-avg-rating">
-                    {{ stats.avg_rating if stats else '91.8' }}%
-                </div>
-                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                    <span>Índice Positivo Global</span>
-                    <span aria-hidden="true">·</span>
-                    <span class="text-slate-300">Baseado em análises de usuários Steam</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- GRÁFICO DE LINHA: TENDÊNCIA E CRESCIMENTO DOS ÚLTIMOS 6 MESES -->
-        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 mb-8 shadow-md">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                    <div className="flex items-center gap-2 flex-wrap" style="display: flex; align-items: center; gap: 8px;">
-                        <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
-                            <span>Evolução de Horas Jogadas (Últimos 6 Meses)</span>
-                        </h2>
-                        <span id="line-growth-badge" class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-0.5 rounded-full font-bold">
-                            +123.8% de crescimento
-                        </span>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-1">Comparativo mensal de dedicação à biblioteca e aceleração de atividade no período recente.</p>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Visão Geral da Biblioteca</h1>
+                    <p class="text-sm text-slate-400 mt-1">Estatísticas consolidadas com cores representativas de cada título e nicho.</p>
                 </div>
-                <!-- Badges de Métricas do Semestre -->
-                <div class="flex items-center gap-3 text-xs flex-wrap">
-                    <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
-                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Média Mensal</span>
-                        <span class="font-mono font-bold text-white text-sm tabular-nums" id="line-avg-hours">473.9h</span>
-                    </div>
-                    <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
-                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Mês de Pico</span>
-                        <span class="font-bold text-[#66c0f4] text-sm" id="line-peak-month">Outubro (668.3h)</span>
-                    </div>
-                    <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg hidden sm:block">
-                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Total no Período</span>
-                        <span class="font-mono font-bold text-emerald-400 text-sm tabular-nums" id="line-total-hours">2.843.8h</span>
-                    </div>
+                <!-- Quick Filter Bar -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="genre-filter-container">
+                    <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
+                    <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
+                        <span>RPG</span>
+                    </button>
+                    <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
+                        <span>Ação</span>
+                    </button>
+                    <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+                        <span>Estratégia</span>
+                    </button>
+                    <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+                        <span>Indie</span>
+                    </button>
                 </div>
             </div>
-            <!-- Canvas do Gráfico de Linha -->
-            <div class="relative h-[280px] sm:h-[320px]">
-                <canvas id="trendLineChart"></canvas>
-            </div>
-            <div class="mt-4 pt-3 border-t border-[#2a475e]/60 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
-                <div class="flex items-center gap-4 flex-wrap">
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#66c0f4]"></span>
-                        <span class="text-slate-300">Tempo Efetivo Mensal</span>
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-4 h-0.5 border-t border-dashed border-[#a855f7]"></span>
-                        <span class="text-slate-300">Linha de Média Semestral</span>
-                    </span>
-                </div>
-                <span class="text-[11px] text-slate-400">Passe o mouse sobre os pontos para ver ritmo e jogo destaque de cada mês</span>
-            </div>
-        </div>
 
-        <!-- 2 GRÁFICOS INTERATIVOS ESTILIZADOS COM CHART.JS -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            
-            <!-- Gráfico 1: Barras - Top Jogos por Horas com Cores Distintas -->
-            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <!-- 3 CARDS DE MÉTRICAS EM DESTAQUE -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Card 1: Total de Horas -->
+                <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4]">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>TEMPO TOTAL REGISTRADO</span>
+                        <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl sm:text-4xl font-bold text-white tabular-nums" id="card-total-hours">
+                        {{ stats.total_hours if stats else '0' }} <span class="text-lg font-normal text-slate-400">horas</span>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                        <span>Em <strong class="text-white" id="card-total-games">{{ stats.total_games if stats else '0' }}</strong> jogos catalogados</span>
+                        <span aria-hidden="true">·</span>
+                        <span class="text-emerald-400">+14.2h este mês</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Jogo Mais Jogado -->
+                <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] cursor-pointer" onclick="openGameModal(currentStats?.most_played_game?.id || '730')">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>JOGO MAIS JOGADO</span>
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <div class="text-2xl font-bold text-white truncate flex items-center gap-2" id="card-most-played-name">
+                        <span class="w-3 h-3 rounded-full bg-[#f97316] shrink-0"></span>
+                        <span>{{ stats.most_played_game.name if stats and stats.most_played_game else 'Counter-Strike 2' }}</span>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                        <span class="tabular-nums font-semibold text-[#f97316]" id="card-most-played-hours">{{ stats.most_played_game.hours_played if stats and stats.most_played_game else '845.2' }}h jogadas</span>
+                        <span aria-hidden="true">·</span>
+                        <span class="text-slate-300">Classificação: {{ stats.most_played_game.rating_label if stats and stats.most_played_game else 'Muito Positivas' }}</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Avaliação Média da Biblioteca -->
+                <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4]">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                        <span>AVALIAÇÃO MÉDIA DA BIBLIOTECA</span>
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2m-7 0H4a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl sm:text-4xl font-bold text-emerald-400 tabular-nums" id="card-avg-rating">
+                        {{ stats.avg_rating if stats else '91.8' }}%
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                        <span>Índice Positivo Global</span>
+                        <span aria-hidden="true">·</span>
+                        <span class="text-slate-300">Baseado em análises de usuários Steam</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICO DE LINHA: TENDÊNCIA DOS ÚLTIMOS 6 MESES -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 mb-8 shadow-md">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-base font-bold text-white">Top Jogos por Horas Jogadas</h2>
-                        <p class="text-xs text-slate-400">Cores distintas identificando cada jogo</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                                <span>Evolução de Horas Jogadas (Últimos 6 Meses)</span>
+                            </h2>
+                            <span id="line-growth-badge" class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-0.5 rounded-full font-bold">
+                                +123.8% de crescimento
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Comparativo mensal de dedicação à biblioteca e aceleração de atividade no período recente.</p>
                     </div>
-                    <!-- Seletor de Modo de Cor -->
-                    <div class="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e]">
-                        <button onclick="setHtmlColorMode('game')" id="btn-colormode-game" class="px-2.5 py-1 text-[11px] rounded bg-[#66c0f4] text-[#101822] font-semibold transition">Cor do Jogo</button>
-                        <button onclick="setHtmlColorMode('genre')" id="btn-colormode-genre" class="px-2.5 py-1 text-[11px] rounded text-slate-400 hover:text-white transition">Cor do Nicho</button>
-                    </div>
-                </div>
-                <div class="relative flex-1 min-h-[300px]">
-                    <canvas id="barChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Gráfico 2: Rosca/Doughnut - Distribuição de Horas por Gênero/Nicho com Cores Semânticas -->
-            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-base font-bold text-white">Distribuição por Nicho / Gênero</h2>
-                        <p class="text-xs text-slate-400">Proporção com cores de alto contraste por categoria</p>
-                    </div>
-                    <span class="text-xs font-mono text-[#66c0f4] bg-[#171a21] px-2 py-0.5 rounded border border-[#2a475e]">Chart.js</span>
-                </div>
-                <div class="relative flex-1 min-h-[300px] flex items-center justify-center">
-                    <canvas id="doughnutChart"></canvas>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- SEÇÃO DE OFERTAS PARCEIRAS & AFILIADOS (Nuuvem & Amazon) -->
-        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 mb-8 shadow-md">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                <div>
-                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                        <span class="text-amber-400">🏷️</span>
-                        <span>Melhores Ofertas de Chaves Steam Oficiais</span>
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Adquira jogos com até 75% de desconto via parceiros autorizados e apoie a plataforma GameLens.</p>
-                </div>
-                <div class="flex items-center gap-2 text-xs">
-                    <span class="bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-md font-semibold">Parceiro Nuuvem</span>
-                    <span class="bg-amber-950/80 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-md font-semibold">Amazon Games</span>
-                </div>
-            </div>
-
-            <!-- Grid de Cards de Ofertas -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- Oferta 1: Elden Ring -->
-                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
-                    <div class="relative rounded-lg overflow-hidden mb-3">
-                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" alt="Elden Ring" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-2 left-2 bg-emerald-500 text-black text-[11px] font-extrabold px-2 py-0.5 rounded shadow">-34% OFF</span>
-                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">Chave Steam</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white text-sm truncate">Elden Ring</h3>
-                        <p class="text-[11px] text-slate-400">FromSoftware · RPG / Soulslike</p>
-                        <div class="flex items-baseline gap-2 mt-2">
-                            <span class="text-xs text-slate-500 line-through">R$ 229,90</span>
-                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 151,70</span>
+                    <div class="flex items-center gap-3 text-xs flex-wrap">
+                        <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
+                            <span class="text-slate-400 block text-[10px] uppercase font-semibold">Média Mensal</span>
+                            <span class="font-mono font-bold text-white text-sm tabular-nums" id="line-avg-hours">473.9h</span>
+                        </div>
+                        <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
+                            <span class="text-slate-400 block text-[10px] uppercase font-semibold">Mês de Pico</span>
+                            <span class="font-bold text-[#66c0f4] text-sm" id="line-peak-month">Outubro (668.3h)</span>
+                        </div>
+                        <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg hidden sm:block">
+                            <span class="text-slate-400 block text-[10px] uppercase font-semibold">Total no Período</span>
+                            <span class="font-mono font-bold text-emerald-400 text-sm tabular-nums" id="line-total-hours">2.843.8h</span>
                         </div>
                     </div>
-                    <a id="deal-link-1245620" href="https://www.nuuvem.com/item/elden-ring?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <span>Ver Oferta na Nuuvem</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
                 </div>
+                <div class="relative h-[280px] sm:h-[320px]">
+                    <canvas id="trendLineChart"></canvas>
+                </div>
+            </div>
 
-                <!-- Oferta 2: Baldur's Gate 3 -->
-                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
-                    <div class="relative rounded-lg overflow-hidden mb-3">
-                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg" alt="Baldur's Gate 3" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-2 left-2 bg-purple-500 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">GOTY 2023</span>
-                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">Chave Steam</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white text-sm truncate">Baldur's Gate 3</h3>
-                        <p class="text-[11px] text-slate-400">Larian Studios · RPG / Turnos</p>
-                        <div class="flex items-baseline gap-2 mt-2">
-                            <span class="text-xs text-slate-500 line-through">R$ 199,99</span>
-                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 159,99</span>
+            <!-- 2 GRÁFICOS INTERATIVOS ESTILIZADOS COM CHART.JS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Gráfico 1: Barras -->
+                <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-white">Top Jogos por Horas Jogadas</h2>
+                            <p class="text-xs text-slate-400">Cores distintas identificando cada jogo</p>
+                        </div>
+                        <div class="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e]">
+                            <button onclick="setHtmlColorMode('game')" id="btn-colormode-game" class="px-2.5 py-1 text-[11px] rounded bg-[#66c0f4] text-[#101822] font-semibold transition">Cor do Jogo</button>
+                            <button onclick="setHtmlColorMode('genre')" id="btn-colormode-genre" class="px-2.5 py-1 text-[11px] rounded text-slate-400 hover:text-white transition">Cor do Nicho</button>
                         </div>
                     </div>
-                    <a id="deal-link-1086940" href="https://www.nuuvem.com/item/baldurs-gate-3?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <span>Ver Oferta na Nuuvem</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
+                    <div class="relative flex-1 min-h-[300px]">
+                        <canvas id="barChart"></canvas>
+                    </div>
                 </div>
 
-                <!-- Oferta 3: Cyberpunk 2077 -->
-                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
-                    <div class="relative rounded-lg overflow-hidden mb-3">
-                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg" alt="Cyberpunk 2077" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-2 left-2 bg-emerald-500 text-black text-[11px] font-extrabold px-2 py-0.5 rounded shadow">-50% OFF</span>
-                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">GOG / Steam</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white text-sm truncate">Cyberpunk 2077</h3>
-                        <p class="text-[11px] text-slate-400">CD PROJEKT RED · RPG / Ação</p>
-                        <div class="flex items-baseline gap-2 mt-2">
-                            <span class="text-xs text-slate-500 line-through">R$ 199,90</span>
-                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 99,95</span>
+                <!-- Gráfico 2: Rosca/Doughnut -->
+                <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-white">Distribuição por Nicho / Gênero</h2>
+                            <p class="text-xs text-slate-400">Proporção com cores de alto contraste por categoria</p>
                         </div>
+                        <span class="text-xs font-mono text-[#66c0f4] bg-[#171a21] px-2 py-0.5 rounded border border-[#2a475e]">Chart.js</span>
                     </div>
-                    <a id="deal-link-1091500" href="https://www.nuuvem.com/item/cyberpunk-2077?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <span>Ver Oferta na Nuuvem</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
+                    <div class="relative flex-1 min-h-[300px] flex items-center justify-center">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Oferta 4: The Witcher 3 -->
-                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
-                    <div class="relative rounded-lg overflow-hidden mb-3">
-                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg" alt="The Witcher 3" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-2 left-2 bg-emerald-500 text-black text-[11px] font-extrabold px-2 py-0.5 rounded shadow">-75% OFF</span>
-                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">Chave Steam</span>
-                    </div>
+            <!-- TABELA DE DADOS DETALHADA COM FILTRO E ORDENAÇÃO -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
+                <div class="p-5 border-b border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h3 class="font-bold text-white text-sm truncate">The Witcher 3: Wild Hunt</h3>
-                        <p class="text-[11px] text-slate-400">CD PROJEKT RED · RPG</p>
-                        <div class="flex items-baseline gap-2 mt-2">
-                            <span class="text-xs text-slate-500 line-through">R$ 129,99</span>
-                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 32,49</span>
-                        </div>
+                        <h2 class="text-lg font-bold text-white">Catálogo Detalhado de Jogos</h2>
+                        <p class="text-xs text-slate-400">Identificação cromática por título e estilo de gameplay</p>
                     </div>
-                    <a id="deal-link-292030" href="https://www.nuuvem.com/item/the-witcher-3-wild-hunt?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <span>Ver Oferta na Nuuvem</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div id="table-active-filter-badge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded bg-[#171a21] border border-[#66c0f4]/50 text-xs text-white">
+                            <span class="w-2 h-2 rounded-full bg-[#66c0f4]"></span>
+                            <span class="text-slate-300">Nicho ativo:</span>
+                            <strong class="text-white" id="table-active-filter-text"></strong>
+                            <button onclick="filterByGenre('Todos')" class="ml-1 text-slate-400 hover:text-white transition p-0.5 rounded hover:bg-[#2a475e]" title="Remover filtro">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <span class="text-xs text-slate-400">Ordenar por:</span>
+                        <select 
+                            id="table-sort-select" 
+                            onchange="handleSortChange(this.value)"
+                            class="bg-[#171a21] border border-[#2a475e] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#66c0f4]"
+                        >
+                            <option value="hours">Mais Jogados (Horas)</option>
+                            <option value="rating">Maior Avaliação (%)</option>
+                            <option value="players">Pico 24h Jogadores</option>
+                            <option value="price">Preço</option>
+                            <option value="name">Nome (A-Z)</option>
+                        </select>
+                    </div>
                 </div>
 
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="text-xs uppercase bg-[#171a21] text-slate-400 border-b border-[#2a475e]">
+                            <tr>
+                                <th scope="col" class="px-6 py-3.5">Jogo & Cor Tema</th>
+                                <th scope="col" class="px-6 py-3.5">Nicho / Gênero</th>
+                                <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('hours')">Horas Jogadas ↕</th>
+                                <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('rating')">Avaliação Steam ↕</th>
+                                <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('players')">Pico 24h ↕</th>
+                                <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('price')">Preço ↕</th>
+                                <th scope="col" class="px-6 py-3.5 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="games-table-body" class="divide-y divide-[#2a475e]/60">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between text-xs text-slate-400">
+                    <span id="table-summary-text">Exibindo todos os jogos</span>
+                    <span>Dados sincronizados via API</span>
+                </div>
             </div>
         </div>
-
-        <!-- TABELA DE DADOS DETALHADA COM FILTRO E ORDENAÇÃO -->
-        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
-            
-            <!-- Barra superior da tabela -->
-            <div class="p-5 border-b border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-white">Catálogo Detalhado de Jogos</h2>
-                    <p class="text-xs text-slate-400">Identificação cromática por título e estilo de gameplay</p>
-                </div>
-                <!-- Filtros rápidos da tabela -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <div id="table-active-filter-badge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded bg-[#171a21] border border-[#66c0f4]/50 text-xs text-white">
-                        <span class="w-2 h-2 rounded-full bg-[#66c0f4]"></span>
-                        <span class="text-slate-300">Nicho ativo:</span>
-                        <strong class="text-white" id="table-active-filter-text"></strong>
-                        <button onclick="filterByGenre('Todos')" class="ml-1 text-slate-400 hover:text-white transition p-0.5 rounded hover:bg-[#2a475e]" title="Remover filtro e ver todos os jogos">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-
-                    <span class="text-xs text-slate-400">Ordenar por:</span>
-                    <select 
-                        id="table-sort-select" 
-                        onchange="handleSortChange(this.value)"
-                        class="bg-[#171a21] border border-[#2a475e] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#66c0f4]"
-                    >
-                        <option value="hours">Mais Jogados (Horas)</option>
-                        <option value="rating">Maior Avaliação (%)</option>
-                        <option value="players">Pico 24h Jogadores</option>
-                        <option value="price">Preço</option>
-                        <option value="name">Nome (A-Z)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Tabela responsiva -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="text-xs uppercase bg-[#171a21] text-slate-400 border-b border-[#2a475e]">
-                        <tr>
-                            <th scope="col" class="px-6 py-3.5">Jogo & Cor Tema</th>
-                            <th scope="col" class="px-6 py-3.5">Nicho / Gênero</th>
-                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('hours')">
-                                Horas Jogadas ↕
-                            </th>
-                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('rating')">
-                                Avaliação Steam ↕
-                            </th>
-                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('players')">
-                                Pico 24h (Jogadores) ↕
-                            </th>
-                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('price')">
-                                Preço Atual ↕
-                            </th>
-                            <th scope="col" class="px-6 py-3.5 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="games-table-body" class="divide-y divide-[#2a475e]/60">
-                        <!-- Linhas geradas dinamicamente pelo JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Rodapé da tabela com contador -->
-            <div class="px-6 py-4 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between text-xs text-slate-400">
-                <span id="table-summary-text">Exibindo todos os jogos</span>
-                <span>Dados sincronizados com endpoint /api/games</span>
-            </div>
-
-        </div>
-        <!-- FIM SECTION 1: DASHBOARD & BIBLIOTECA -->
+        <!-- FIM SECTION 1: DASHBOARD -->
 
         <!-- SECTION 2: RADAR DE PROMOÇÕES & DESCONTOS -->
         <div id="tab-section-deals" class="hidden space-y-8 animate-fade-in">
-            <!-- Header da Seção de Ofertas -->
             <div class="bg-gradient-to-r from-[#171a21] via-[#1b2838] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
-                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                     <div class="space-y-2">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
@@ -581,16 +438,13 @@
                 </div>
             </div>
 
-            <!-- Grade Dinâmica de Ofertas -->
             <div id="deals-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Preenchido dinamicamente pelo JavaScript -->
             </div>
         </div>
         <!-- FIM SECTION 2: RADAR DE PROMOÇÕES -->
 
-        <!-- SECTION 3: BUSCA UNIVERSAL AO VIVO DE QUALQUER JOGO -->
+        <!-- SECTION 3: BUSCA UNIVERSAL AO VIVO -->
         <div id="tab-section-search" class="hidden space-y-8 animate-fade-in">
-            <!-- Search Hero -->
             <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden shadow-xl">
                 <div class="max-w-3xl mx-auto space-y-4">
                     <span class="inline-block px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
@@ -603,7 +457,6 @@
                         Digite o nome de qualquer título lançado na Steam ou consoles para consultar preços em BRL, descontos ativos, análises e onde comprar mais barato.
                     </p>
 
-                    <!-- Barra de Pesquisa Ampla -->
                     <div class="relative max-w-xl mx-auto mt-4">
                         <input 
                             type="text" 
@@ -623,7 +476,6 @@
                         </button>
                     </div>
 
-                    <!-- Sugestões Rápidas de Jogos Populares -->
                     <div class="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
                         <span class="text-slate-400">Sugestões:</span>
                         <button onclick="triggerQuickSearch('Grand Theft Auto V')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Grand Theft Auto V</button>
@@ -631,19 +483,16 @@
                         <button onclick="triggerQuickSearch('God of War')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">God of War</button>
                         <button onclick="triggerQuickSearch('Cyberpunk 2077')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Cyberpunk 2077</button>
                         <button onclick="triggerQuickSearch('Red Dead Redemption 2')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Red Dead Redemption 2</button>
-                        <button onclick="triggerQuickSearch('Resident Evil 4')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Resident Evil 4</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Área de Resultados da Pesquisa Universal -->
             <div id="search-results-container" class="space-y-4">
                 <div class="flex items-center justify-between text-xs text-slate-400">
                     <span id="search-status-label">Digite um título acima para pesquisar</span>
                     <span id="search-count-label"></span>
                 </div>
                 <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Cards de pesquisa ao vivo gerados pelo JavaScript -->
                 </div>
             </div>
         </div>
@@ -651,7 +500,6 @@
 
         <!-- SECTION 4: HUB MULTIPLATAFORMA (PC & CONSOLES) -->
         <div id="tab-section-platforms" class="hidden space-y-8 animate-fade-in">
-            <!-- Banner Introdução Consoles -->
             <div class="bg-gradient-to-r from-[#171a21] via-[#1f1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8">
                 <div class="max-w-3xl space-y-2">
                     <span class="inline-block px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold">
@@ -664,9 +512,8 @@
                 </div>
             </div>
 
-            <!-- Cards dos 4 Grandes Pilares de Plataformas -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- PC Gamer -->
+                <!-- PC -->
                 <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-500/30 flex items-center justify-center text-[#66c0f4]">
@@ -742,11 +589,12 @@
                     </button>
                 </div>
             </div>
-        <!-- SECTION 5: CRÍTICAS & REVIEWS EDITORIAIS GAMELENS -->
+        </div>
+        <!-- FIM SECTION 4: CONSOLES -->
+
+        <!-- SECTION 5: CRÍTICAS & REVIEWS EDITORIAIS -->
         <div id="tab-section-reviews" class="hidden space-y-8 animate-fade-in">
-            <!-- Header Editorial Banner -->
             <div class="bg-gradient-to-r from-[#171a21] via-[#1e1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
-                <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                     <div class="space-y-2">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-bold">
@@ -759,7 +607,6 @@
                             Avaliações transparentes sem filtro corporativo. Dissecamos gameplay, otimização gráfica, narrativa, rejogabilidade e custo-benefício em reais para você investir seu tempo e dinheiro com segurança.
                         </p>
                     </div>
-                    <!-- Filtros Rápidos de Críticas -->
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
                         <button onclick="filterReviews('all')" class="review-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition">Todas</button>
                         <button onclick="filterReviews('masterpiece')" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">Obras-Primas (9.8+)</button>
@@ -770,9 +617,7 @@
                 </div>
             </div>
 
-            <!-- Grade Dinâmica de Críticas -->
             <div id="reviews-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Preenchido dinamicamente pelo JavaScript -->
             </div>
         </div>
         <!-- FIM SECTION 5: CRÍTICAS & REVIEWS -->
@@ -781,9 +626,7 @@
 
     <!-- MODAL DE DETALHES DO JOGO (/api/game/{game_id}) -->
     <div id="game-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl animate-fade-in relative">
-            
-            <!-- Botão fechar -->
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl animate-fade-in relative max-h-[90vh] flex flex-col">
             <button 
                 onclick="closeGameModal()" 
                 class="absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white rounded-full p-2 transition z-10"
@@ -794,8 +637,7 @@
                 </svg>
             </button>
 
-            <!-- Imagem de Capa do Jogo -->
-            <div class="relative h-48 sm:h-56 w-full bg-[#171a21] overflow-hidden">
+            <div class="relative h-48 sm:h-56 w-full bg-[#171a21] overflow-hidden shrink-0">
                 <img id="modal-banner" src="" alt="Banner do Jogo" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
                 <div id="modal-accent-line" class="absolute top-0 left-0 right-0 h-1 bg-[#66c0f4]"></div>
@@ -805,14 +647,11 @@
                 </div>
             </div>
 
-            <!-- Conteúdo do Modal -->
-            <div class="p-6 space-y-6">
-                
+            <div class="p-6 space-y-6 overflow-y-auto flex-1">
                 <p id="modal-description" class="text-sm text-slate-300 leading-relaxed">
                     Carregando detalhes do jogo via API...
                 </p>
 
-                <!-- Grid de Métricas do Jogo -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#171a21] p-4 rounded-lg border border-[#2a475e]">
                     <div>
                         <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Horas Jogadas</span>
@@ -832,7 +671,6 @@
                     </div>
                 </div>
 
-                <!-- Conquistas e Gêneros -->
                 <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 pt-2 border-t border-[#2a475e]">
                     <div id="modal-genres">
                         <span>Gêneros: <strong class="text-slate-200">Ação, RPG</strong></span>
@@ -842,7 +680,6 @@
                     </div>
                 </div>
 
-                <!-- Onde Comprar com Desconto (Afiliados Nuuvem & Amazon) -->
                 <div class="bg-[#121c27] border border-[#2a475e] rounded-xl p-4 space-y-2.5">
                     <div class="flex items-center justify-between text-xs">
                         <span class="font-bold text-white flex items-center gap-1.5">
@@ -860,7 +697,6 @@
                             class="px-3.5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm"
                         >
                             <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                                 <span>Comprar na Nuuvem</span>
                             </span>
                             <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Ativação Steam</span>
@@ -873,7 +709,6 @@
                             class="px-3.5 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-black rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm"
                         >
                             <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                 <span>Ver na Amazon</span>
                             </span>
                             <span class="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Ofertas PC</span>
@@ -881,7 +716,6 @@
                     </div>
                 </div>
 
-                <!-- Botões de Ação do Rodapé do Modal -->
                 <div class="flex items-center justify-between gap-3 pt-2">
                     <button 
                         onclick="closeGameModal()" 
@@ -897,21 +731,15 @@
                         class="px-4 py-2 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5"
                     >
                         <span>Abrir na Loja Steam</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
                     </a>
                 </div>
-
             </div>
-
         </div>
     </div>
 
-    <!-- MODAL DE LEITURA COMPLETA DE CRÍTICA EDITORIAL -->
+    <!-- MODAL DE CRÍTICA EDITORIAL -->
     <div id="review-detail-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl animate-fade-in relative my-8 max-h-[90vh] flex flex-col">
-            <!-- Header Modal Banner -->
             <div class="relative h-56 sm:h-64 w-full bg-[#101822] shrink-0 overflow-hidden">
                 <img id="review-modal-banner" src="" alt="Capa" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-[#1b2838]/60 to-transparent"></div>
@@ -937,44 +765,36 @@
                 </div>
             </div>
 
-            <!-- Conteúdo com Scroll -->
             <div class="p-6 sm:p-8 space-y-6 overflow-y-auto flex-1">
-                <!-- Headline e Lead -->
                 <div class="bg-[#171a21] border-l-4 border-amber-400 p-4 rounded-r-xl">
                     <h3 id="review-modal-headline" class="text-base sm:text-lg font-bold text-white mb-1.5"></h3>
                     <p id="review-modal-lead" class="text-xs sm:text-sm text-slate-300 italic leading-relaxed"></p>
                 </div>
 
-                <!-- Texto Completo da Análise -->
                 <div class="space-y-4 text-sm text-slate-300 leading-relaxed" id="review-modal-body">
                 </div>
 
-                <!-- Tabela de Avaliação por Pilares Técnicos -->
                 <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-5 space-y-3">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Avaliação por Pilares (0 a 10)</h4>
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center" id="review-modal-scores-grid">
                     </div>
                 </div>
 
-                <!-- Prós e Contras -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-4 space-y-2">
                         <h4 class="text-xs font-bold uppercase tracking-wide text-emerald-400 flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span>Pontos Fortes (Prós)</span>
                         </h4>
                         <ul id="review-modal-pros" class="space-y-1.5 text-xs text-slate-300"></ul>
                     </div>
                     <div class="bg-rose-950/40 border border-rose-500/30 rounded-xl p-4 space-y-2">
                         <h4 class="text-xs font-bold uppercase tracking-wide text-rose-400 flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             <span>Ressalvas (Contras)</span>
                         </h4>
                         <ul id="review-modal-cons" class="space-y-1.5 text-xs text-slate-300"></ul>
                     </div>
                 </div>
 
-                <!-- Box de Onde Comprar Mais Barato -->
                 <div class="bg-gradient-to-r from-[#171a21] to-[#121c27] border border-[#2a475e] rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                         <span class="text-[10px] uppercase font-bold text-emerald-400 block">Melhor Oportunidade Atual</span>
@@ -992,7 +812,6 @@
                 </div>
             </div>
 
-            <!-- Footer Modal -->
             <div class="p-4 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between">
                 <span class="text-xs text-slate-400">GameLens Editorial · Opinião 100% Autoral</span>
                 <button onclick="closeReviewModal()" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#1b2838] hover:bg-[#233446] rounded-lg border border-[#2a475e] transition">
@@ -1027,86 +846,68 @@
         </div>
     </footer>
 
-    <!-- JAVASCRIPT PURO COM CONTROLE DOS DADOS, CORES E GRÁFICOS -->
+    <!-- SCRIPT DA APLICAÇÃO -->
     <script>
-        // Mapeamento de Cores por Nicho (Gênero)
+        // Mapeamento de Cores
         const GENRE_COLORS = {
-            'Ação': '#ef4444',        // Vermelho
-            'RPG': '#a855f7',         // Púrpura
-            'Estratégia': '#f59e0b',  // Âmbar/Dourado
-            'Indie': '#10b981',       // Verde Esmeralda
-            'Simulação': '#06b6d4',   // Ciano
-            'Aventura': '#3b82f6',    // Azul Safira
-            'Soulslike': '#f97316',   // Laranja
-            'Competitivo': '#ec4899', // Pink
+            'Ação': '#ef4444',
+            'RPG': '#a855f7',
+            'Estratégia': '#f59e0b',
+            'Indie': '#10b981',
+            'Simulação': '#06b6d4',
+            'Aventura': '#3b82f6',
+            'Soulslike': '#f97316',
+            'Competitivo': '#ec4899',
             'Outros': '#94a3b8'
         };
 
-        // Mapeamento de Cores por Jogo
         const GAME_COLORS = {
-            '730': '#f97316',      // CS2 (Laranja)
-            '570': '#dc2626',      // Dota 2 (Vermelho)
-            '1086940': '#a855f7',  // Baldur's Gate 3 (Púrpura)
-            '1245620': '#eab308',  // Elden Ring (Dourado)
-            '105600': '#22c55e',   // Terraria (Verde)
-            '292030': '#f43f5e',   // The Witcher 3 (Carmesim)
-            '1091500': '#facc15',  // Cyberpunk 2077 (Amarelo Neon)
-            '289070': '#0284c7',   // Civilization VI (Azul)
-            '413150': '#10b981',   // Stardew Valley (Esmeralda)
-            '553850': '#fb923c',   // Helldivers 2 (Laranja/Amarelo)
-            '1145360': '#e11d48',  // Hades (Vermelho Escuro)
-            '367520': '#38bdf8'    // Hollow Knight (Ciano)
+            '730': '#f97316',
+            '570': '#dc2626',
+            '1086940': '#a855f7',
+            '1245620': '#eab308',
+            '105600': '#22c55e',
+            '292030': '#f43f5e',
+            '1091500': '#facc15',
+            '289070': '#0284c7',
+            '413150': '#10b981',
+            '553850': '#fb923c',
+            '1145360': '#e11d48',
+            '367520': '#38bdf8'
         };
-
-        function getGameColor(gameId, primaryGenre) {
-            return GAME_COLORS[gameId] || GENRE_COLORS[primaryGenre] || '#66c0f4';
-        }
 
         function getGenreColor(genre) {
             return GENRE_COLORS[genre] || '#66c0f4';
         }
 
-        // Configuração de Afiliados (Rakuten Advertising, Hype Games, Nuuvem & Amazon)
-        const DEFAULT_AFFILIATE_CONFIG = {
-            rakutenSid: '4770537',        // Site ID oficial do Albert na Rakuten
-            hypeMid: '53304',            // MID oficial da Hype Games (Level Up)
-            nuuvemMid: '46796',          // MID da Nuuvem na Rakuten
-            nuuvemPartnerId: 'albertgamer', // Slug/ID de Parceiro Nuuvem
-            amazonTag: 'albertgames-20'  // Tag Amazon Associates Brasil
-        };
+        function getGameColor(gameId, fallbackGenre) {
+            return GAME_COLORS[gameId] || getGenreColor(fallbackGenre);
+        }
 
+        // Funções de Afiliados
         function getAffiliateConfig() {
             try {
-                const saved = localStorage.getItem('gamelens_affiliate_config');
-                if (saved) return { ...DEFAULT_AFFILIATE_CONFIG, ...JSON.parse(saved) };
+                const saved = localStorage.getItem('gamelens_affiliate_cfg');
+                if (saved) return JSON.parse(saved);
             } catch (e) {}
-            return DEFAULT_AFFILIATE_CONFIG;
+            return {
+                rakutenSid: '4770537',
+                hypeMid: '53304',
+                nuuvemMid: '46796',
+                nuuvemPartnerId: 'albertgamer',
+                amazonTag: 'albertgames-20'
+            };
         }
 
         function saveAffiliateConfig(cfg) {
             try {
-                localStorage.setItem('gamelens_affiliate_config', JSON.stringify(cfg));
+                localStorage.setItem('gamelens_affiliate_cfg', JSON.stringify(cfg));
             } catch (e) {}
         }
 
-        const GAME_SLUGS = {
-            '1245620': 'elden-ring',
-            '1086940': 'baldurs-gate-3',
-            '292030': 'the-witcher-3-wild-hunt',
-            '1091500': 'cyberpunk-2077',
-            '105600': 'terraria',
-            '289070': 'sid-meiers-civilization-vi',
-            '413150': 'stardew-valley',
-            '553850': 'helldivers-2',
-            '1145360': 'hades',
-            '367520': 'hollow-knight',
-            '730': 'counter-strike-2',
-            '570': 'dota-2'
-        };
-
         function getAffiliateNuuvemUrl(game) {
             const cfg = getAffiliateConfig();
-            const slug = (game && game.id && GAME_SLUGS[String(game.id)]) || (game && game.name ? game.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'games');
+            const slug = (game.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
             return `https://www.nuuvem.com/item/${slug}?partner=${encodeURIComponent(cfg.nuuvemPartnerId)}`;
         }
 
@@ -1114,723 +915,58 @@
             const cfg = getAffiliateConfig();
             const sid = cfg.rakutenSid || '4770537';
             const mid = cfg.hypeMid || '53304';
-            const targetUrl = encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(gameName || 'jogos')}`);
-            return `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${targetUrl}`;
+            const targetUrl = `https://hype.games/br/search?q=${encodeURIComponent(gameName)}`;
+            return `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(targetUrl)}`;
         }
 
         function getAffiliateAmazonUrl(game) {
             const cfg = getAffiliateConfig();
-            const query = encodeURIComponent(((game && game.name) || 'jogo') + ' jogo');
-            return `https://www.amazon.com.br/s?k=${query}&tag=${encodeURIComponent(cfg.amazonTag)}`;
+            const tag = cfg.amazonTag || 'albertgames-20';
+            return `https://www.amazon.com.br/s?k=${encodeURIComponent((game.name || '') + ' jogo')}&tag=${encodeURIComponent(tag)}`;
         }
 
-        function updateAllAffiliateLinks() {
-            const cfg = getAffiliateConfig();
-            Object.keys(GAME_SLUGS).forEach(id => {
-                const el = document.getElementById(`deal-link-${id}`);
-                if (el) {
-                    el.href = `https://www.nuuvem.com/item/${GAME_SLUGS[id]}?partner=${encodeURIComponent(cfg.nuuvemPartnerId)}`;
-                }
-            });
-        }
-
-        // ==============================================================================
-        // CONTROLE DAS ABAS PRINCIPAIS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES, CRÍTICAS)
-        // ==============================================================================
-        let activeTab = 'dashboard';
-        let allDeals = [];
-        let currentDealsPlatform = 'all';
-        let currentReviewFilter = 'all';
-
-        function switchMainTab(tab) {
-            activeTab = tab;
-            const tabs = ['dashboard', 'deals', 'search', 'platforms', 'reviews'];
-            
-            tabs.forEach(t => {
-                const btn = document.getElementById(`nav-btn-${t}`);
-                const section = document.getElementById(`tab-section-${t}`);
-                if (!btn || !section) return;
-
-                if (t === tab) {
-                    btn.className = 'nav-tab-btn active px-4 py-2 rounded-lg text-xs font-bold text-[#101822] bg-[#66c0f4] transition flex items-center gap-2 shadow-sm whitespace-nowrap';
-                    section.classList.remove('hidden');
-                } else {
+        // TROCA DE NAVEGAÇÃO DE TABS
+        function switchMainTab(tabName) {
+            const sections = ['dashboard', 'deals', 'search', 'platforms', 'reviews'];
+            sections.forEach(s => {
+                const el = document.getElementById(`tab-section-${s}`);
+                if (el) el.classList.add('hidden');
+                const btn = document.getElementById(`nav-btn-${s}`);
+                if (btn) {
                     btn.className = 'nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap';
-                    section.classList.add('hidden');
                 }
             });
 
-            // Ações específicas ao abrir cada aba
-            if (tab === 'deals' && allDeals.length === 0) {
-                fetchDeals();
-            } else if (tab === 'search') {
-                const input = document.getElementById('universal-search-input');
-                if (input && !input.value) {
-                    input.focus();
-                    triggerQuickSearch('Elden Ring');
-                }
-            } else if (tab === 'reviews') {
+            const targetSection = document.getElementById(`tab-section-${tabName}`);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`nav-btn-${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = 'nav-tab-btn active px-4 py-2 rounded-lg text-xs font-bold text-[#101822] bg-[#66c0f4] transition flex items-center gap-2 shadow-sm whitespace-nowrap';
+            }
+
+            if (tabName === 'deals') {
+                fetchDeals(currentDealsPlatform);
+            } else if (tabName === 'reviews') {
                 renderReviewsGrid();
             }
         }
 
-        // ==============================================================================
-        // BASE DE DADOS EDITORIAL DE CRÍTICAS & REVIEWS GAMELENS
-        // ==============================================================================
-        const REVIEWS_DATABASE = {
-            '1086940': {
-                id: '1086940',
-                name: "Baldur's Gate 3",
-                badge: 'Obra-Prima',
-                badgeColor: '#a855f7',
-                score: 9.9,
-                genre: 'RPG',
-                scores: { gameplay: 10, graphics: 9.6, narrative: 10, replayability: 10, valueForMoney: 10 },
-                headline: "O novo marco histórico dos RPGs: liberdade absoluta que redefine os videogames",
-                verdictLead: "Uma aula magistral de design, narrativa reativa e respeito inegociável à inteligência e criatividade do jogador.",
-                fullAnalysis: "Baldur's Gate 3 é mais do que um grande RPG; é um ponto de inflexão na indústria. A Larian Studios conseguiu transpor para o meio digital a sensação tátil de uma mesa de D&D de alto nível com mestres e amigos inspirados. Cada combate se transforma em um quebra-cabeça tático tridimensional onde empurrar um inimigo de um penhasco, eletrificar uma poça d'água ou conjurar trevas são soluções tão viáveis quanto um ataque de espada.\n\nO elenco de companheiros (como Astarion, Shadowheart e Gale) possui camadas emocionais e conflitos morais raramente vistos com tanta maturidade. O jogo não tem medo de deixar você cometer erros grotescos e abraçar as consequências dramáticas disso. É uma compra obrigatória e o investimento com o maior retorno de horas por real gasto de toda a década.",
-                pros: ["Liberdade de escolha e improvisação sem precedentes", "Combate por turnos rico, vertical e profundamente estratégico", "Companheiros inesquecíveis e dublagem impecável", "Centenas de horas de conteúdo sem microtransações predatórias"],
-                cons: ["Curva de aprendizado das regras da 5ª edição de D&D para novatos", "Ato 3 pode exigir CPUs potentes em áreas densas de cidade"],
-                bottomLine: "Um jogo que será lembrado e jogado pelas próximas duas décadas. Vale cada centavo do valor cheio.",
-                author: "Redação GameLens",
-                readTime: "4 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
-                bestDeal: { store: "Nuuvem", price: "R$ 159,99 (-20%)" }
-            },
-            '1245620': {
-                id: '1245620',
-                name: "Elden Ring",
-                badge: 'Obra-Prima',
-                badgeColor: '#eab308',
-                score: 9.8,
-                genre: 'RPG',
-                scores: { gameplay: 9.9, graphics: 9.7, narrative: 9.5, replayability: 10, valueForMoney: 9.9 },
-                headline: "A apoteose do design de mundo aberto com a brutalidade poética de Hidetaka Miyazaki",
-                verdictLead: "As Terras Intermédias recompensam a curiosidade como nenhum outro mapa aberto já fez antes.",
-                fullAnalysis: "Elden Ring pega a fórmula refinada dos Soulslike e a transporta para um mundo colossal onde nenhum ponto de interrogação precisa ser marcado no minimapa: o próprio horizonte seduz o jogador a cavalgar até castelos flutuantes, catacumbas secretas e florestas enevoadas.\n\nA variedade de arquétipos, armas, magias e invocações de cinzas democratiza a dificuldade sem jamais diminuir o senso de conquista. Vencer um semideus após dezenas de tentativas continua sendo um dos momentos mais eufóricos que um videogame pode proporcionar.",
-                pros: ["Direção de arte monumental que compensa qualquer limitação técnica", "Liberdade de rota que elimina a frustração de ficar travado em um chefe", "Centenas de armas, magias e builds radicalmente diferentes", "Trilha sonora épica com coros e orquestrações inesquecíveis"],
-                cons: ["Narrativa fragmentada que exige atenção a descrições de itens", "Alguns chefes do final do jogo têm janelas de ataque implacáveis"],
-                bottomLine: "Um dos jogos mais aclamados de todos os tempos. Se ainda não jogou, aproveite a primeira promoção disponível.",
-                author: "Redação GameLens",
-                readTime: "4 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
-                bestDeal: { store: "Nuuvem", price: "R$ 151,70 (-34%)" }
-            },
-            '730': {
-                id: '730',
-                name: "Counter-Strike 2",
-                badge: 'Essencial',
-                badgeColor: '#f97316',
-                score: 9.3,
-                genre: 'Ação',
-                scores: { gameplay: 9.8, graphics: 9.2, narrative: 7.0, replayability: 10, valueForMoney: 10 },
-                headline: "O soberano dos FPS táticos entra em sua era gráfica mais refinada na Source 2",
-                verdictLead: "Com fumaças volumétricas interativas e gunplay incomparável, CS2 continua sendo o teste de precisão definitivo.",
-                fullAnalysis: "A transição de CS:GO para Counter-Strike 2 trouxe o motor Source 2 com iluminação impecável, materiais reativos e a mecânica revolucionária de fumaças responsivas a disparos e granadas HE. Para quem busca maestria mecânica, posicionamento e comunicação sob pressão, nenhum outro título no mercado entrega tanta adrenalina por rodada.\n\nEmbora o sistema de sub-tick e o anti-cheat continuem sendo alvos de constante aprimoramento por parte da Valve, a base do jogo permanece intocável: uma fórmula limpa, puramente competitiva e gratuita para jogar.",
-                pros: ["Gunplay e resposta de tiro mais precisos da história dos videogames", "Novas fumaças volumétricas que mudam totalmente o metagame", "Gratuito para começar e mercado econômico de skins vibrante", "Comunidade gigantesca com servidores ativos 24 horas por dia"],
-                cons: ["Curva de aprendizado impiedosa contra jogadores veteranos", "Necessita do Status Prime para partidas ranqueadas limpas"],
-                bottomLine: "Indispensável na biblioteca de qualquer fã de FPS. O Prime se paga sozinho com os drops semanais de caixas.",
-                author: "Redação GameLens",
-                readTime: "3 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
-                bestDeal: { store: "Hype Games", price: "Gratuito (Prime R$ 74,99)" }
-            },
-            '1091500': {
-                id: '1091500',
-                name: "Cyberpunk 2077",
-                badge: 'Obra-Prima',
-                badgeColor: '#facc15',
-                score: 9.5,
-                genre: 'RPG',
-                scores: { gameplay: 9.4, graphics: 10, narrative: 9.7, replayability: 9.3, valueForMoney: 9.5 },
-                headline: "A redenção definitiva: Night City atinge o ápice de imersão e narrativa",
-                verdictLead: "Após a atualização 2.0 e a expansão Phantom Liberty, Cyberpunk se tornou uma das maiores experiências audiovisuais já criadas.",
-                fullAnalysis: "Night City é uma cidade que respira verticalidade, decadência e luz neon. A revisão do sistema policial, das árvores de habilidades e do combate veicular finalmente entregou a visão que os desenvolvedores prometeram inicialmente.\n\nA expansão Phantom Liberty, estrelando Idris Elba em Dogtown, oferece uma das melhores tramas de espionagem política dos games, coroando Cyberpunk 2077 como compra indispensável para quem possui hardware moderno.",
-                pros: ["Gráficos e Ray Tracing que definem o padrão visual da atual geração", "Trilha sonora frenética e design de som de primeira grandeza", "Personagens memoráveis com dublagem primorosa em português", "História emocionante com múltiplos finais dramáticos"],
-                cons: ["Exige hardware de ponta para aproveitar o Path Tracing máximo", "Certas mecânicas de física veicular continuam um pouco leves"],
-                bottomLine: "Um espetáculo visual e emocional indispensável. Vale cada minuto.",
-                author: "Redação GameLens",
-                readTime: "4 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
-                bestDeal: { store: "Nuuvem", price: "R$ 99,95 (-50%)" }
-            },
-            '292030': {
-                id: '292030',
-                name: "The Witcher 3: Wild Hunt",
-                badge: 'Obra-Prima',
-                badgeColor: '#f43f5e',
-                score: 9.8,
-                genre: 'RPG',
-                scores: { gameplay: 9.5, graphics: 9.8, narrative: 10, replayability: 9.6, valueForMoney: 10 },
-                headline: "O épico maduro de Geralt de Rívia que estabeleceu a régua narrativa dos mundos abertos",
-                verdictLead: "Mesmo anos após o lançamento, as missões secundárias de The Witcher 3 humilham histórias principais de rivais.",
-                fullAnalysis: "The Witcher 3: Wild Hunt não trata o jogador como uma criança. Em Velen, Novigrad e Skellige, suas escolhas não são entre 'bem absoluto' ou 'mal cartunesco', mas sim entre o mal menor e as consequências imprevisíveis da guerra e do preconceito.\n\nCom a atualização Next-Gen gratuita trazendo Ray Tracing, texturas em 4K e melhorias de câmera, e as expansões Hearts of Stone e Blood and Wine (esta última com o tamanho de um jogo inteiro à parte), este pacote é uma das maiores experiências culturais da nossa era.",
-                pros: ["Roteiro impecável até mesmo nas menores missões secundárias", "Mundo vivo, melancólico e deslumbrante com Ray Tracing", "Duas das melhores expansões de DLC já lançadas", "O minigame Gwent é tão bom que mereceu jogo próprio"],
-                cons: ["Combate corpo a corpo pode parecer levemente escorregadio", "Excesso de pontos de interrogação no mapa de Skellige"],
-                bottomLine: "Uma obra indispensável que transcende o gênero. Em promoção com todas as expansões, é imperdível.",
-                author: "Redação GameLens",
-                readTime: "4 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
-                bestDeal: { store: "Nuuvem", price: "R$ 32,49 (-75%)" }
-            },
-            '105600': {
-                id: '105600',
-                name: "Terraria",
-                badge: 'Obra-Prima',
-                badgeColor: '#10b981',
-                score: 9.7,
-                genre: 'Indie',
-                scores: { gameplay: 9.9, graphics: 9.2, narrative: 8.0, replayability: 10, valueForMoney: 10 },
-                headline: "O maior tesouro de exploração 2D, combate a chefes e progressão de itens",
-                verdictLead: "Mais de 13 anos de suporte carinhoso transformaram Terraria em um gigante de conteúdo.",
-                fullAnalysis: "Reduzir Terraria a um 'Minecraft 2D' é um erro crasso. Terraria é, antes de tudo, um RPG de ação focado em progressão brutal de equipamentos, criação de arenas, mineração perigosa nas profundezas do inferno e batalhas contra chefes titânicos que disparam projéteis em padrões de bullet hell.\n\nCom suporte completo a mods através do tModLoader e modo cooperativo impecável, Terraria por menos de R$ 35,00 é um dos maiores absurdos de custo-benefício de toda a história dos games.",
-                pros: ["Quantidade astronômica de armas, armaduras, acessórios e magias", "Progressão Hardmode que dobra o tamanho e desafio do jogo", "Suporte oficial nativo a mods com o tModLoader", "Preço extremamente acessível em qualquer promoção"],
-                cons: ["Exige consulta frequente à wiki oficial para entender receitas", "Interface de inventário densa para quem joga em controle"],
-                bottomLine: "Qualquer pessoa que goste de videogames precisa ter Terraria instalado. Compra indispensável.",
-                author: "Redação GameLens",
-                readTime: "3 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/105600/header.jpg",
-                bestDeal: { store: "Hype Games", price: "R$ 16,49 (-50%)" }
-            },
-            '553850': {
-                id: '553850',
-                name: "HELLDIVERS 2",
-                badge: 'Essencial',
-                badgeColor: '#fb923c',
-                score: 9.2,
-                genre: 'Ação',
-                scores: { gameplay: 9.8, graphics: 9.4, narrative: 8.5, replayability: 9.5, valueForMoney: 9.0 },
-                headline: "A glória da cooperação caótica e satírica em defesa da Democracia Gerenciada",
-                verdictLead: "Combate visceral, física imprevisível e fogo amigo transformam cada missão em uma comédia épica de ação.",
-                fullAnalysis: "HELLDIVERS 2 capturou o espírito dos filmes de ação militar dos anos 80 e 90 com uma sátira perfeita de Tropas Estelares. Chamar bombardeios orbitais, armas pesadas e lutar contra hordas de insetos Terminídios e robôs Automatons nunca envelhece.\n\nA guerra galáctica comunitária e os comandos de estratégia mantêm a comunidade unida em um propósito comum de libertação estelar.",
-                pros: ["Sensação de impacto e poder das armas e bombardeios", "Humor satírico brilhante e momentos cinematográficos espontâneos", "Progressão constante com passes de batalha permanentes", "Excelente trabalho de áudio e música triunfante"],
-                cons: ["Exige jogar com microfone ou amigos para coordenação tática máxima", "Requer conexão com internet constante"],
-                bottomLine: "O melhor jogo cooperativo de tiro da década. Pura diversão garantida.",
-                author: "Redação GameLens",
-                readTime: "3 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/553850/header.jpg",
-                bestDeal: { store: "Nuuvem", price: "R$ 179,50 (-10%)" }
-            },
-            '1145360': {
-                id: '1145360',
-                name: "Hades",
-                badge: 'Obra-Prima',
-                badgeColor: '#e11d48',
-                score: 9.8,
-                genre: 'Indie',
-                scores: { gameplay: 10, graphics: 10, narrative: 9.8, replayability: 10, valueForMoney: 10 },
-                headline: "O roguelike que transformou cada morte em avanço narrativo apaixonante",
-                verdictLead: "A Supergiant Games alcançou a perfeição do ciclo de jogabilidade, arte e mitologia grega.",
-                fullAnalysis: "Zagreus tentando escapar dos domínios de seu pai Hades é uma aula de ritmo. A combinação de bênçãos dos deuses do Olimpo cria sinergias explosivas e viciantes.\n\nAo contrário de roguelikes tradicionais que parecem punitivos, morrer em Hades é apenas o começo de novos diálogos envolventes com Aquiles, Nyx, Cérbero e Megaira.",
-                pros: ["Combate responsivo e satisfatório na taxa máxima de quadros", "Direção de arte ilustrada e trilha sonora de Darren Korb de tirar o fôlego", "Narrativa que avança mesmo na derrota", "Tradução primorosa para português do Brasil"],
-                cons: ["Pode causar dores nos dedos após sessões muito intensas em controles", "Poucos ambientes principais de bioma"],
-                bottomLine: "Um dos melhores jogos da década. Se você ainda não tem na sua conta, pegue já.",
-                author: "Redação GameLens",
-                readTime: "3 min de leitura",
-                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1145360/header.jpg",
-                bestDeal: { store: "Hype Games", price: "R$ 29,59 (-60%)" }
-            }
-        };
-
-        function filterReviews(category) {
-            currentReviewFilter = category;
-            document.querySelectorAll('.review-filter-btn').forEach(btn => {
-                const text = btn.textContent.toLowerCase();
-                const isMatch = (category === 'all' && text.includes('todas')) ||
-                                (category === 'masterpiece' && text.includes('obra')) ||
-                                (text.includes(category.toLowerCase()));
-                if (isMatch) {
-                    btn.className = 'review-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition';
-                } else {
-                    btn.className = 'review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition';
-                }
-            });
-            renderReviewsGrid();
-        }
-
-        function renderReviewsGrid() {
-            const grid = document.getElementById('reviews-cards-grid');
-            if (!grid) return;
-
-            const reviewsList = Object.values(REVIEWS_DATABASE).filter(r => {
-                if (currentReviewFilter === 'all') return true;
-                if (currentReviewFilter === 'masterpiece') return r.score >= 9.8;
-                return r.genre === currentReviewFilter;
-            });
-
-            if (reviewsList.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8">
-                        <p class="text-sm font-semibold text-white mb-1">Nenhuma crítica encontrada nesta categoria.</p>
-                        <p class="text-xs">Clique em "Todas" para ver o catálogo completo de análises.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = reviewsList.map(r => {
-                const nuuvemUrl = getAffiliateNuuvemUrl({ id: r.id, name: r.name });
-                const hypeUrl = getAffiliateHypeUrl(r.name);
-
-                return `
-                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
-                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
-                            <img src="${r.banner}" alt="${r.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
-                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                                <span class="px-2.5 py-0.5 rounded text-[11px] font-black text-black shadow-md" style="background-color: ${r.badgeColor}">
-                                    ${r.badge}
-                                </span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-200 border border-white/10">
-                                    ${r.genre}
-                                </span>
-                            </div>
-                            <div class="absolute top-2.5 right-2.5">
-                                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-black/80 text-amber-300 border border-amber-500/40">
-                                    ★ ${r.score}
-                                </span>
-                            </div>
-                            <div class="absolute bottom-2 left-3 right-3">
-                                <span class="text-[10px] text-slate-400 block">${r.author} · ${r.readTime}</span>
-                                <h3 class="text-base font-extrabold text-white truncate">${r.name}</h3>
-                            </div>
-                        </div>
-
-                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-200 line-clamp-1 mb-1">${r.headline}</h4>
-                                <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                                    ${r.verdictLead}
-                                </p>
-                            </div>
-
-                            <!-- Prós rápidos -->
-                            <div class="space-y-1 bg-[#171a21] p-2.5 rounded-lg border border-[#2a475e]/60 text-[11px]">
-                                <div class="text-emerald-400 flex items-center gap-1 font-semibold truncate">
-                                    <span>✔</span>
-                                    <span>${r.pros[0]}</span>
-                                </div>
-                                <div class="text-emerald-400 flex items-center gap-1 font-semibold truncate">
-                                    <span>✔</span>
-                                    <span>${r.pros[1]}</span>
-                                </div>
-                            </div>
-
-                            <!-- Onde Comprar Mais Barato -->
-                            <div class="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Menor Preço Ativo</span>
-                                    <span class="text-sm font-extrabold text-emerald-400 font-mono">${r.bestDeal.price}</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[10px] text-slate-400 block">Loja Parceira</span>
-                                    <span class="text-xs font-bold text-slate-200">${r.bestDeal.store}</span>
-                                </div>
-                            </div>
-
-                            <!-- Ações -->
-                            <div class="grid grid-cols-2 gap-2 pt-1">
-                                <button onclick="openReviewModal('${r.id}')" class="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1">
-                                    <span>📖 Ler Análise</span>
-                                </button>
-                                <a href="${nuuvemUrl}" target="_blank" rel="noreferrer" class="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1">
-                                    <span>🛒 Ver Oferta</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function openReviewModal(gameId) {
-            const r = REVIEWS_DATABASE[gameId] || REVIEWS_DATABASE['1086940'];
-            if (!r) return;
-
-            document.getElementById('review-modal-banner').src = r.banner;
-            document.getElementById('review-modal-title').textContent = r.name;
-            document.getElementById('review-modal-badge').textContent = r.badge;
-            document.getElementById('review-modal-badge').style.backgroundColor = r.badgeColor;
-            document.getElementById('review-modal-meta').textContent = `${r.author} · ${r.readTime}`;
-            document.getElementById('review-modal-score').textContent = `★ ${r.score}`;
-
-            document.getElementById('review-modal-headline').textContent = r.headline;
-            document.getElementById('review-modal-lead').textContent = `"${r.verdictLead}"`;
-
-            // Parágrafos da análise
-            const paragraphs = r.fullAnalysis.split('\n\n').map(p => `<p>${p}</p>`).join('');
-            document.getElementById('review-modal-body').innerHTML = paragraphs;
-
-            // Pilares de notas
-            const scoresGrid = document.getElementById('review-modal-scores-grid');
-            if (scoresGrid) {
-                scoresGrid.innerHTML = `
-                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
-                        <span class="text-[10px] text-slate-400 block uppercase">Gameplay</span>
-                        <span class="text-base font-bold text-white font-mono">${r.scores.gameplay}/10</span>
-                    </div>
-                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
-                        <span class="text-[10px] text-slate-400 block uppercase">Gráficos</span>
-                        <span class="text-base font-bold text-white font-mono">${r.scores.graphics}/10</span>
-                    </div>
-                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
-                        <span class="text-[10px] text-slate-400 block uppercase">Narrativa</span>
-                        <span class="text-base font-bold text-white font-mono">${r.scores.narrative}/10</span>
-                    </div>
-                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
-                        <span class="text-[10px] text-slate-400 block uppercase">Rejogabilidade</span>
-                        <span class="text-base font-bold text-white font-mono">${r.scores.replayability}/10</span>
-                    </div>
-                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
-                        <span class="text-[10px] text-slate-400 block uppercase">Custo-Benefício</span>
-                        <span class="text-base font-bold text-emerald-400 font-mono">${r.scores.valueForMoney}/10</span>
-                    </div>
-                `;
-            }
-
-            // Prós e Contras
-            document.getElementById('review-modal-pros').innerHTML = r.pros.map(p => `<li class="flex items-start gap-1.5"><span class="text-emerald-400">✔</span><span>${p}</span></li>`).join('');
-            document.getElementById('review-modal-cons').innerHTML = r.cons.map(c => `<li class="flex items-start gap-1.5"><span class="text-rose-400">✖</span><span>${c}</span></li>`).join('');
-
-            // Deal box
-            document.getElementById('review-modal-deal-title').textContent = `${r.name} - ${r.bestDeal.price}`;
-            document.getElementById('review-modal-deal-sub').textContent = `Menor preço recomendado na loja parceira oficial ${r.bestDeal.store} com ativação imediata.`;
-
-            const nuuvemBtn = document.getElementById('review-modal-nuuvem-btn');
-            if (nuuvemBtn) nuuvemBtn.href = getAffiliateNuuvemUrl({ id: r.id, name: r.name });
-
-            const hypeBtn = document.getElementById('review-modal-hype-btn');
-            if (hypeBtn) hypeBtn.href = getAffiliateHypeUrl(r.name);
-
-            document.getElementById('review-detail-modal').classList.remove('hidden');
-        }
-
-        function closeReviewModal() {
-            document.getElementById('review-detail-modal').classList.add('hidden');
-        }
-
-        // Fechar ao clicar fora
-        document.getElementById('review-detail-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'review-detail-modal') closeReviewModal();
-        });
-
-        // ==============================================================================
-        // RADAR DE PROMOÇÕES E OFERTAS
-        // ==============================================================================
-        async function fetchDeals(platform = 'all') {
-            currentDealsPlatform = platform;
-            const grid = document.getElementById('deals-grid');
-            if (grid && allDeals.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
-                        <div class="w-8 h-8 border-2 border-[#66c0f4] border-t-transparent rounded-full animate-spin"></div>
-                        <span class="text-xs">Sincronizando radar de promoções ativas...</span>
-                    </div>
-                `;
-            }
-
-            try {
-                const url = platform === 'all' ? '/api/deals' : `/api/deals?platform=${encodeURIComponent(platform)}`;
-                const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    allDeals = data.deals || [];
-                    renderDealsGrid(allDeals);
-                }
-            } catch (e) {
-                console.error("Erro ao carregar ofertas:", e);
-            }
-        }
-
-        function filterDealsPlatform(platform) {
-            currentDealsPlatform = platform;
-            document.querySelectorAll('.deal-pill-btn').forEach(btn => {
-                const text = btn.textContent.toLowerCase();
-                const isMatch = (platform === 'all' && text.includes('todas')) || text.includes(platform.toLowerCase());
-                if (isMatch) {
-                    btn.className = 'deal-pill-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition';
-                } else {
-                    btn.className = 'deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition';
-                }
-            });
-
-            if (allDeals.length === 0) {
-                fetchDeals(platform);
-            } else {
-                const filtered = platform === 'all' ? allDeals : allDeals.filter(d => (d.platform || '').toLowerCase() === platform.toLowerCase());
-                renderDealsGrid(filtered);
-            }
-        }
-
-        function renderDealsGrid(deals) {
-            const grid = document.getElementById('deals-grid');
-            if (!grid) return;
-
-            if (!deals || deals.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8">
-                        <p class="text-sm font-semibold text-white mb-1">Nenhuma oferta encontrada para esta categoria no momento.</p>
-                        <p class="text-xs">O radar verifica novas promoções diariamente.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = deals.map(d => {
-                const disc = d.discount_percent || 0;
-                const discBadge = disc > 0 ? `<span class="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md">-${disc}%</span>` : '';
-                const oldPriceFormatted = d.regular_price ? `R$ ${d.regular_price.toFixed(2).replace('.', ',')}` : '';
-                const dealPriceFormatted = d.deal_price ? `R$ ${d.deal_price.toFixed(2).replace('.', ',')}` : 'Sob Consulta';
-                
-                // Link de afiliado inteligente conforme a loja
-                let buyUrl = d.deal_url;
-                if (d.store === 'Hype Games') {
-                    buyUrl = getAffiliateHypeUrl(d.name);
-                } else if (d.store === 'Nuuvem') {
-                    buyUrl = getAffiliateNuuvemUrl({ id: d.id, name: d.name });
-                } else if (d.store === 'Amazon') {
-                    buyUrl = getAffiliateAmazonUrl({ name: d.name });
-                }
-
-                return `
-                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
-                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
-                            <img src="${d.image}" alt="${d.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x300/171a21/66c0f4?text=GameLens'">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
-                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                                ${discBadge}
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-200 backdrop-blur-sm border border-white/10">
-                                    ${d.platform_label || d.platform}
-                                </span>
-                            </div>
-                            <div class="absolute top-2.5 right-2.5">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#171a21]/90 text-amber-300 border border-amber-500/30">
-                                    ★ ${d.rating}%
-                                </span>
-                            </div>
-                            <div class="absolute bottom-2 left-3 right-3">
-                                <span class="text-[10px] text-emerald-400 font-bold block">${d.badge || 'Oferta Oficial'}</span>
-                                <h3 class="text-sm font-extrabold text-white truncate">${d.name}</h3>
-                            </div>
-                        </div>
-
-                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                            <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">
-                                ${d.review_verdict || 'Excelente oportunidade para adquirir e jogar com ativação imediata.'}
-                            </p>
-
-                            <div class="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 line-through block">${oldPriceFormatted}</span>
-                                    <span class="text-lg font-black text-emerald-400">${dealPriceFormatted}</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[10px] text-slate-400 block">Loja Parceira</span>
-                                    <span class="text-xs font-bold text-slate-200">${d.store}</span>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 pt-1">
-                                <button onclick="openEditorialCritique('${d.id}')" class="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1">
-                                    <span>📝 Crítica</span>
-                                </button>
-                                <a href="${buyUrl}" target="_blank" rel="noreferrer" class="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1">
-                                    <span>🛒 Pegar</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ==============================================================================
-        // BUSCA UNIVERSAL AO VIVO NA STEAM STORE API & DEALS
-        // ==============================================================================
-        async function executeUniversalSearch() {
-            const input = document.getElementById('universal-search-input');
-            const query = (input ? input.value : '').trim();
-            if (!query || query.length < 2) return;
-
-            const status = document.getElementById('search-status-label');
-            const count = document.getElementById('search-count-label');
-            const grid = document.getElementById('search-results-grid');
-
-            if (status) status.textContent = `Consultando base global da Steam para "${query}"...`;
-            if (grid) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
-                        <div class="w-8 h-8 border-2 border-[#66c0f4] border-t-transparent rounded-full animate-spin"></div>
-                        <span class="text-xs">Buscando na API pública oficial da Valve...</span>
-                    </div>
-                `;
-            }
-
-            try {
-                const res = await fetch(`/api/search_store?q=${encodeURIComponent(query)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    renderUniversalSearchResults(data);
-                } else {
-                    if (status) status.textContent = 'Erro ao consultar a API.';
-                }
-            } catch (err) {
-                console.error("Erro na busca universal:", err);
-                if (status) status.textContent = 'Falha temporária de conexão com a API da Steam.';
-            }
-        }
-
-        function triggerQuickSearch(title) {
-            const input = document.getElementById('universal-search-input');
-            if (input) input.value = title;
-            executeUniversalSearch();
-        }
-
-        function renderUniversalSearchResults(data) {
-            const status = document.getElementById('search-status-label');
-            const count = document.getElementById('search-count-label');
-            const grid = document.getElementById('search-results-grid');
-
-            const allResults = [];
-
-            // Adiciona correspondências locais enriquecidas
-            (data.local_games || []).forEach(g => {
-                allResults.push({
-                    id: g.id,
-                    name: g.name,
-                    image: g.header_image || `https://cdn.akamai.steamstatic.com/steam/apps/${g.id}/header.jpg`,
-                    price: g.price_formatted || (g.current_price_brl > 0 ? `R$ ${g.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito'),
-                    discount: g.discount_percent || 0,
-                    source: 'Catálogo Verificado GameLens',
-                    isLocal: true
-                });
-            });
-
-            // Adiciona resultados ao vivo da Steam Store
-            (data.steam_live_results || []).forEach(s => {
-                if (!allResults.some(r => String(r.id) === String(s.id))) {
-                    allResults.push({
-                        id: s.id,
-                        name: s.name,
-                        image: s.header_image,
-                        price: s.price_formatted,
-                        discount: s.discount_percent || 0,
-                        source: 'Steam Store Oficial',
-                        isLocal: false
-                    });
-                }
-            });
-
-            if (status) status.textContent = `Resultados encontrados para "${data.query}"`;
-            if (count) count.textContent = `${allResults.length} título(s)`;
-
-            if (allResults.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8">
-                        <p class="text-sm font-semibold text-white mb-1">Nenhum título encontrado com o termo "${data.query}".</p>
-                        <p class="text-xs">Tente buscar pelo nome oficial em inglês ou título principal.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = allResults.map(item => {
-                const discBadge = item.discount > 0 ? `<span class="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">-${item.discount}%</span>` : '';
-                const nuuvemUrl = getAffiliateNuuvemUrl({ id: item.id, name: item.name });
-                const hypeUrl = getAffiliateHypeUrl(item.name);
-                const amazonUrl = getAffiliateAmazonUrl({ name: item.name });
-
-                return `
-                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
-                        <div class="relative h-40 w-full bg-[#101822] overflow-hidden">
-                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x300/171a21/66c0f4?text=Steam'">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
-                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                                ${discBadge}
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-300 border border-white/10">
-                                    AppID ${item.id}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] text-cyan-400 font-semibold block">${item.source}</span>
-                                <h3 class="text-sm font-bold text-white truncate" title="${item.name}">${item.name}</h3>
-                                <div class="mt-2 text-base font-extrabold text-emerald-400">
-                                    ${item.price}
-                                </div>
-                            </div>
-
-                            <div class="space-y-1.5 pt-2 border-t border-[#2a475e]">
-                                <a href="${nuuvemUrl}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#171a21] hover:bg-cyan-600 text-cyan-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between">
-                                    <span>Buscar Menor Preço Nuuvem</span>
-                                    <span>→</span>
-                                </a>
-                                <a href="${hypeUrl}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#171a21] hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between">
-                                    <span>Ver Ofertas Hype Games</span>
-                                    <span>→</span>
-                                </a>
-                                <a href="https://store.steampowered.com/app/${item.id}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#101822] hover:bg-[#233446] text-slate-400 hover:text-white text-[11px] rounded-lg transition flex items-center justify-between">
-                                    <span>Abrir Loja Steam Oficial</span>
-                                    <span>↗</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ==============================================================================
-        // MODAL DE CRÍTICA EDITORIAL GAMELENS
-        // ==============================================================================
-        function openEditorialCritique(dealId) {
-            const deal = allDeals.find(d => d.id === dealId) || allDeals[0];
-            if (!deal) return;
-
-            const modal = document.getElementById('game-modal');
-            modal.classList.remove('hidden');
-
-            document.getElementById('modal-title').textContent = deal.name;
-            document.getElementById('modal-accent-line').style.backgroundColor = '#10b981';
-            document.getElementById('modal-dev').textContent = `Plataforma: ${deal.platform_label || deal.platform} · Loja: ${deal.store}`;
-            document.getElementById('modal-banner').src = deal.image;
-            document.getElementById('modal-description').textContent = deal.review_verdict || 'Título selecionado com selo de recomendação GameLens.';
-            
-            const modalHours = document.getElementById('modal-hours');
-            modalHours.textContent = `${deal.discount_percent}% OFF`;
-            modalHours.style.color = '#10b981';
-
-            document.getElementById('modal-rating').textContent = `${deal.rating}%`;
-            document.getElementById('modal-players').textContent = 'Recomendado';
-            document.getElementById('modal-price').textContent = `R$ ${deal.deal_price.toFixed(2).replace('.', ',')}`;
-            
-            document.getElementById('modal-genres').innerHTML = `Selo: <strong class="text-emerald-400 font-bold">${deal.badge || 'Oferta em Destaque'}</strong>`;
-            document.getElementById('modal-achievements').innerHTML = `Economia de: <strong class="text-[#66c0f4] tabular-nums">R$ ${(deal.regular_price - deal.deal_price).toFixed(2).replace('.', ',')}</strong>`;
-            
-            document.getElementById('modal-steam-link').href = deal.deal_url;
-            
-            const nuuvemLink = document.getElementById('modal-nuuvem-link');
-            if (nuuvemLink) nuuvemLink.href = deal.store === 'Nuuvem' ? deal.deal_url : getAffiliateNuuvemUrl({ name: deal.name });
-
-            const amazonLink = document.getElementById('modal-amazon-link');
-            if (amazonLink) amazonLink.href = getAffiliateAmazonUrl({ name: deal.name });
-        }
-
-        // Estado global da aplicação cliente
+        // Estado global
         let currentStats = null;
         let allGames = [];
         let filteredGames = [];
+        let allDeals = [];
+        let currentDealsPlatform = 'all';
+        let currentReviewFilter = 'all';
         let currentSort = 'hours';
         let sortAsc = false;
         let selectedGenre = 'Todos';
-        let currentBarColorMode = 'game'; // 'game' ou 'genre'
+        let currentBarColorMode = 'game';
         let barChartInstance = null;
         let doughnutChartInstance = null;
         let lineChartInstance = null;
 
-        // Dados mockados de fallback
         const FALLBACK_DATA = {
             "total_games": 12,
             "total_hours": 2843.8,
@@ -1864,12 +1000,89 @@
             ]
         };
 
-        // Inicialização
+        const REVIEWS_DATABASE = {
+            '1086940': {
+                id: '1086940',
+                name: "Baldur's Gate 3",
+                badge: 'Obra-Prima',
+                badgeColor: '#a855f7',
+                score: 9.9,
+                genre: 'RPG',
+                scores: { gameplay: 10, graphics: 9.8, narrative: 10, replayability: 10, valueForMoney: 9.8 },
+                headline: "A obra máxima dos cRPGs modernos e o maior divisor de águas da década",
+                verdictLead: "Uma aula magistral de design, narrativa reativa e respeito inegociável à inteligência do jogador.",
+                fullAnalysis: "Baldur's Gate 3 redefiniu o que esperamos de um RPG em turnos. A liberdade concedida para resolver cada quest, assassinar antagonistas antes do combate iniciar, usar feitiços de manipulação ambiental ou persuadir chefes a cometerem suicídio cria uma ilusão quase perfeita de livre arbítrio.",
+                pros: ["Liberdade narrativa e reatividade do mundo sem precedentes", "Personagens complexos com atuações de dublagem dignas de Oscar", "Sistema de combate tático em turnos incrivelmente satisfatório", "Suporte completo a modo cooperativo local e online"],
+                cons: ["Avançar pelo Ato 3 exige processamento intensivo em CPUs mais antigas"],
+                bottomLine: "Um marco na história dos videogames. Compra indispensável para qualquer fã de RPG.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 159,99 (-20%)" }
+            },
+            '1245620': {
+                id: '1245620',
+                name: "Elden Ring",
+                badge: 'Obra-Prima',
+                badgeColor: '#eab308',
+                score: 9.8,
+                genre: 'RPG',
+                scores: { gameplay: 10, graphics: 9.7, narrative: 9.5, replayability: 9.9, valueForMoney: 10 },
+                headline: "O ápice da exploração e do combate recompensador nas Terras Intermédias",
+                verdictLead: "As Terras Intermédias recompensam a curiosidade como nenhum outro mapa aberto já fez antes.",
+                fullAnalysis: "A FromSoftware pegou a fórmula brutal de Dark Souls e a expandiu para um mundo aberto colossal. Descobrir cavernas escondidas, castelos legados com arquitetura vertiginosa e vencer um semideus após dezenas de tentativas continua sendo um dos momentos mais eufóricos que um videogame pode proporcionar.",
+                pros: ["Direção de arte monumental que compensa qualquer limitação técnica", "Liberdade de rota que elimina a frustração de ficar travado em um chefe", "Centenas de armas, magias e builds radicalmente diferentes"],
+                cons: ["Narrativa fragmentada que exige atenção a descrições de itens"],
+                bottomLine: "Um dos jogos mais aclamados de todos os tempos.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 151,70 (-34%)" }
+            },
+            '730': {
+                id: '730',
+                name: "Counter-Strike 2",
+                badge: 'Essencial',
+                badgeColor: '#f97316',
+                score: 9.3,
+                genre: 'Ação',
+                scores: { gameplay: 9.8, graphics: 9.2, narrative: 7.0, replayability: 10, valueForMoney: 10 },
+                headline: "O soberano dos FPS táticos entra em sua era gráfica mais refinada na Source 2",
+                verdictLead: "Com fumaças volumétricas interativas e gunplay incomparável, CS2 continua sendo o teste de precisão definitivo.",
+                fullAnalysis: "A transição de CS:GO para Counter-Strike 2 trouxe o motor Source 2 com iluminação impecável, materiais reativos e a mecânica revolucionária de fumaças responsivas a disparos e granadas HE.",
+                pros: ["Gunplay e resposta de tiro mais precisos da história dos videogames", "Novas fumaças volumétricas que mudam totalmente o metagame", "Gratuito para começar e mercado econômico de skins vibrante"],
+                cons: ["Curva de aprendizado impiedosa contra jogadores veteranos"],
+                bottomLine: "Indispensável na biblioteca de qualquer fã de FPS.",
+                author: "Redação GameLens",
+                readTime: "3 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
+                bestDeal: { store: "Hype Games", price: "Gratuito (Prime R$ 74,99)" }
+            },
+            '1091500': {
+                id: '1091500',
+                name: "Cyberpunk 2077",
+                badge: 'Obra-Prima',
+                badgeColor: '#facc15',
+                score: 9.5,
+                genre: 'RPG',
+                scores: { gameplay: 9.4, graphics: 10, narrative: 9.7, replayability: 9.3, valueForMoney: 9.5 },
+                headline: "A redenção definitiva: Night City atinge o ápice de imersão e narrativa",
+                verdictLead: "Após a atualização 2.0 e a expansão Phantom Liberty, Cyberpunk se tornou uma das maiores experiências audiovisuais já criadas.",
+                fullAnalysis: "Night City é uma cidade que respira verticalidade, decadência e luz neon. A revisão do sistema policial, das árvores de habilidades e do combate veicular finalmente entregou a visão que os desenvolvedores prometeram.",
+                pros: ["Gráficos e Ray Tracing que definem o padrão visual da atual geração", "Trilha sonora frenética e design de som de primeira grandeza", "Personagens memoráveis com dublagem primorosa em português"],
+                cons: ["Exige hardware de ponta para aproveitar o Path Tracing máximo"],
+                bottomLine: "Um espetáculo visual e emocional indispensável.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 99,95 (-50%)" }
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             fetchDashboardData();
         });
 
-        // Alternar modo de cor do gráfico de barras
         function setHtmlColorMode(mode) {
             currentBarColorMode = mode;
             const btnGame = document.getElementById('btn-colormode-game');
@@ -1884,7 +1097,6 @@
             if (currentStats) renderCharts(currentStats);
         }
 
-        // Carrega dados da API (/api/stats)
         async function fetchDashboardData() {
             try {
                 const response = await fetch('/api/stats');
@@ -1897,13 +1109,11 @@
             }
         }
 
-        // Aplica os dados nos cards, gráficos e tabela
         function applyData(data) {
             currentStats = data;
             allGames = data.top_games || [];
             filteredGames = [...allGames];
 
-            // Atualiza Cards de Métricas
             document.getElementById('card-total-hours').innerHTML = `${data.total_hours.toLocaleString('pt-BR')} <span class="text-lg font-normal text-slate-400">horas</span>`;
             document.getElementById('card-total-games').textContent = data.total_games;
             if (data.most_played_game) {
@@ -1918,53 +1128,17 @@
             }
             document.getElementById('card-avg-rating').textContent = `${data.avg_rating}%`;
 
-            // Atualiza Badges do Gráfico de Linha
-            const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
-            const monthlyHours = monthlyWeights.map(w => Math.round(data.total_hours * w * 10) / 10);
-            const growthRate = monthlyHours[0] > 0 ? (((monthlyHours[5] - monthlyHours[0]) / monthlyHours[0]) * 100).toFixed(1) : '0';
-            const avgSemester = Math.round((monthlyHours.reduce((a, b) => a + b, 0) / 6) * 10) / 10;
-            const peakMonthHours = Math.max(...monthlyHours);
-
-            const growthBadge = document.getElementById('line-growth-badge');
-            if (growthBadge) growthBadge.textContent = `+${growthRate}% de crescimento`;
-            const avgHoursEl = document.getElementById('line-avg-hours');
-            if (avgHoursEl) avgHoursEl.textContent = `${avgSemester}h`;
-            const peakMonthEl = document.getElementById('line-peak-month');
-            if (peakMonthEl) peakMonthEl.textContent = `Outubro (${peakMonthHours}h)`;
-            const totalHoursEl = document.getElementById('line-total-hours');
-            if (totalHoursEl) totalHoursEl.textContent = `${data.total_hours.toLocaleString('pt-BR')}h`;
-
-            // Renderiza Gráficos
             renderCharts(data);
-
-            // Renderiza Tabela
             renderTable();
         }
 
-        // Renderiza os Gráficos Chart.js
         function renderCharts(data) {
-            // 0. Gráfico de Linha: Tendência dos Últimos 6 Meses
             const lineCtx = document.getElementById('trendLineChart');
             if (lineCtx) {
                 const months = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'];
                 const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
                 const monthlyHours = monthlyWeights.map(w => Math.round(data.total_hours * w * 10) / 10);
                 const avgHours = Math.round((monthlyHours.reduce((a, b) => a + b, 0) / 6) * 10) / 10;
-                
-                let cumulativeSum = 0;
-                const cumulativeHours = monthlyHours.map(h => {
-                    cumulativeSum += h;
-                    return Math.round(cumulativeSum * 10) / 10;
-                });
-
-                const monthlyTopGames = [
-                    (data.top_games && data.top_games[0]) ? data.top_games[0].name : 'CS2',
-                    (data.top_games && data.top_games[1]) ? data.top_games[1].name : 'Dota 2',
-                    (data.top_games && data.top_games[3]) ? data.top_games[3].name : 'Elden Ring',
-                    (data.top_games && data.top_games[2]) ? data.top_games[2].name : "Baldur's Gate 3",
-                    (data.top_games && data.top_games[4]) ? data.top_games[4].name : 'Terraria',
-                    (data.top_games && data.top_games[0]) ? data.top_games[0].name : 'CS2'
-                ];
 
                 if (lineChartInstance) lineChartInstance.destroy();
 
@@ -1983,10 +1157,7 @@
                                 borderWidth: 2.5,
                                 pointBackgroundColor: '#66c0f4',
                                 pointBorderColor: '#0e141b',
-                                pointBorderWidth: 2,
-                                pointRadius: 5,
-                                pointHoverRadius: 8,
-                                pointHoverBackgroundColor: '#38bdf8'
+                                pointRadius: 5
                             },
                             {
                                 label: 'Média Semestral',
@@ -1995,100 +1166,23 @@
                                 borderDash: [5, 5],
                                 borderWidth: 1.5,
                                 pointRadius: 0,
-                                fill: false,
-                                tension: 0
+                                fill: false
                             }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top',
-                                align: 'end',
-                                labels: {
-                                    color: '#cbd5e1',
-                                    font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' },
-                                    boxWidth: 12,
-                                    usePointStyle: true
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(23, 26, 33, 0.96)',
-                                borderColor: '#66c0f4',
-                                borderWidth: 1.5,
-                                padding: 12,
-                                cornerRadius: 8,
-                                titleColor: '#ffffff',
-                                titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
-                                bodyColor: '#e2e8f0',
-                                bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
-                                displayColors: false,
-                                callbacks: {
-                                    title: (items) => {
-                                        if (!items.length) return '';
-                                        const idx = items[0].dataIndex;
-                                        return `📅 ${months[idx]} de 2026`;
-                                    },
-                                    beforeBody: (items) => {
-                                        if (!items.length) return [];
-                                        const idx = items[0].dataIndex;
-                                        const curHours = monthlyHours[idx];
-                                        const prevHours = idx > 0 ? monthlyHours[idx - 1] : null;
-                                        let diff = 'Início do período analisado';
-                                        if (prevHours !== null && prevHours > 0) {
-                                            const pct = (((curHours - prevHours) / prevHours) * 100).toFixed(1);
-                                            diff = Number(pct) >= 0 ? `+${pct}% vs mês anterior` : `${pct}% vs mês anterior`;
-                                        }
-                                        const daily = (curHours / 30).toFixed(1);
-                                        const topG = monthlyTopGames[idx] || 'Nenhum';
-
-                                        return [
-                                            `⏱️ Horas Registradas: ${curHours.toLocaleString('pt-BR')}h`,
-                                            `📈 Variação: ${diff}`,
-                                            `🏆 Jogo Mais Jogado no Mês: ${topG}`,
-                                            `⚡ Ritmo Médio Diário: ~${daily}h/dia`
-                                        ];
-                                    },
-                                    label: () => '',
-                                    afterBody: (items) => {
-                                        if (!items.length) return [];
-                                        const idx = items[0].dataIndex;
-                                        return [`📊 Total Acumulado até este mês: ${cumulativeHours[idx]}h`];
-                                    }
-                                }
-                            }
-                        },
                         scales: {
-                            x: {
-                                grid: { color: 'rgba(42, 71, 94, 0.25)' },
-                                ticks: {
-                                    color: '#cbd5e1',
-                                    font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' }
-                                }
-                            },
-                            y: {
-                                grid: { color: 'rgba(42, 71, 94, 0.4)' },
-                                ticks: {
-                                    color: '#94a3b8',
-                                    font: { family: 'JetBrains Mono' },
-                                    callback: (val) => `${val}h`
-                                }
-                            }
+                            x: { grid: { color: 'rgba(42, 71, 94, 0.25)' }, ticks: { color: '#cbd5e1' } },
+                            y: { grid: { color: 'rgba(42, 71, 94, 0.4)' }, ticks: { color: '#94a3b8', callback: (val) => `${val}h` } }
                         }
                     }
                 });
             }
-            // 1. Gráfico de Barras: Top 6 Jogos por Horas
+
             const topSix = (data.top_games || []).slice(0, 6);
             const barCtx = document.getElementById('barChart').getContext('2d');
-            
             const barColors = topSix.map(g => {
                 const primaryGenre = g.genres && g.genres.length > 0 ? g.genres[0] : 'Ação';
                 return currentBarColorMode === 'genre' ? getGenreColor(primaryGenre) : getGameColor(g.id, primaryGenre);
@@ -2104,9 +1198,7 @@
                         label: 'Horas Registradas',
                         data: topSix.map(g => g.hours_played),
                         backgroundColor: barColors,
-                        hoverBackgroundColor: barColors,
-                        borderRadius: 6,
-                        borderSkipped: false
+                        borderRadius: 6
                     }]
                 },
                 options: {
@@ -2115,78 +1207,17 @@
                     onClick: (event, elements) => {
                         if (elements.length > 0) {
                             const idx = elements[0].index;
-                            if (topSix[idx]) {
-                                openGameModal(topSix[idx].id);
-                            }
+                            if (topSix[idx]) openGameModal(topSix[idx].id);
                         }
                     },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(23, 26, 33, 0.96)',
-                            borderColor: '#38bdf8',
-                            borderWidth: 1.5,
-                            padding: 12,
-                            cornerRadius: 8,
-                            titleColor: '#ffffff',
-                            titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
-                            bodyColor: '#e2e8f0',
-                            bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
-                            displayColors: true,
-                            boxWidth: 8,
-                            boxHeight: 8,
-                            callbacks: {
-                                title: (items) => {
-                                    if (!items.length) return '';
-                                    const idx = items[0].dataIndex;
-                                    const game = topSix[idx];
-                                    return game ? `🎮 ${game.name}` : items[0].label;
-                                },
-                                beforeBody: (items) => {
-                                    if (!items.length) return [];
-                                    const idx = items[0].dataIndex;
-                                    const game = topSix[idx];
-                                    if (!game) return [];
-                                    const percent = data.total_hours > 0 ? ((game.hours_played / data.total_hours) * 100).toFixed(1) : '0';
-                                    const primaryGenre = game.genres && game.genres[0] ? game.genres[0] : 'Geral';
-                                    const otherGenres = game.genres && game.genres.length > 1 ? ` (${game.genres.slice(1).join(', ')})` : '';
-                                    return [
-                                        `🏷️ Nicho Principal: ${primaryGenre}${otherGenres}`,
-                                        `⏱️ Tempo Jogado: ${game.hours_played.toLocaleString('pt-BR')} horas`,
-                                        `📊 Participação: ${percent}% do total da biblioteca`,
-                                        `⭐ Avaliação na Steam: ${game.user_rating}% (${game.rating_label || 'Positiva'})`,
-                                        `👥 Pico de Jogadores (24h): ${(game.peak_24h_players || 0).toLocaleString('pt-BR')}`,
-                                        `💰 Preço Atual: ${game.price_formatted || 'Gratuito'}`
-                                    ];
-                                },
-                                label: () => '',
-                                afterBody: () => ['👉 Clique na barra para abrir a ficha completa deste jogo']
-                            }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#e2e8f0',
-                                font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' },
-                                maxRotation: 25,
-                                minRotation: 20
-                            }
-                        },
-                        y: {
-                            grid: { color: 'rgba(42, 71, 94, 0.4)' },
-                            ticks: {
-                                color: '#94a3b8',
-                                font: { family: 'JetBrains Mono' },
-                                callback: (val) => `${val}h`
-                            }
-                        }
+                        x: { grid: { display: false }, ticks: { color: '#e2e8f0' } },
+                        y: { grid: { color: 'rgba(42, 71, 94, 0.4)' }, ticks: { color: '#94a3b8', callback: (val) => `${val}h` } }
                     }
                 }
             });
 
-            // 2. Gráfico Doughnut: Cores de alto contraste por Nicho de Gênero
             const genres = Object.keys(data.genre_distribution || {});
             const genreValues = Object.values(data.genre_distribution || {});
             const doughnutColors = genres.map(g => getGenreColor(g));
@@ -2202,101 +1233,26 @@
                         data: genreValues,
                         backgroundColor: doughnutColors,
                         borderColor: '#1b2838',
-                        borderWidth: 3,
-                        hoverOffset: 8
+                        borderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '68%',
-                    onClick: (event, elements) => {
-                        if (elements.length > 0) {
-                            const idx = elements[0].index;
-                            if (genres[idx]) {
-                                filterByGenre(genres[idx]);
-                            }
-                        }
-                    },
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#e2e8f0',
-                                font: { size: 12, family: 'Plus Jakarta Sans', weight: 'bold' },
-                                boxWidth: 12,
-                                padding: 15,
-                                usePointStyle: true
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(23, 26, 33, 0.96)',
-                            borderColor: '#a855f7',
-                            borderWidth: 1.5,
-                            padding: 12,
-                            cornerRadius: 8,
-                            titleColor: '#ffffff',
-                            titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
-                            bodyColor: '#e2e8f0',
-                            bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
-                            displayColors: true,
-                            boxWidth: 8,
-                            boxHeight: 8,
-                            callbacks: {
-                                title: (items) => {
-                                    if (!items.length) return '';
-                                    const genre = items[0].label;
-                                    return `🎯 Nicho: ${genre}`;
-                                },
-                                beforeBody: (items) => {
-                                    if (!items.length) return [];
-                                    const idx = items[0].dataIndex;
-                                    const genre = genres[idx];
-                                    const hours = data.genre_distribution[genre] || 0;
-                                    const percent = data.total_hours > 0 ? ((hours / data.total_hours) * 100).toFixed(1) : '0';
-                                    
-                                    const gamesInGenre = (data.top_games || []).filter(g => g.genres && g.genres.includes(genre));
-                                    const topInGenre = gamesInGenre.length > 0 ? gamesInGenre[0] : null;
-
-                                    return [
-                                        `⏱️ Total no Nicho: ${hours.toLocaleString('pt-BR')} horas`,
-                                        `📊 Participação Geral: ${percent}% de todo o tempo jogado`,
-                                        `📚 Títulos na Biblioteca: ${gamesInGenre.length} jogo(s)`,
-                                        topInGenre ? `🏆 Título Destaque: ${topInGenre.name} (${topInGenre.hours_played}h)` : ''
-                                    ].filter(Boolean);
-                                },
-                                label: () => '',
-                                afterBody: (items) => {
-                                    if (!items.length) return [];
-                                    const idx = items[0].dataIndex;
-                                    const genre = genres[idx];
-                                    const isCurrent = selectedGenre === genre;
-                                    return [
-                                        isCurrent
-                                            ? '↩️ Clique novamente na fatia para desmarcar e ver Todos os jogos'
-                                            : '👉 Clique na fatia para filtrar a tabela por este nicho'
-                                    ];
-                                }
-                            }
-                        }
+                        legend: { position: 'bottom', labels: { color: '#e2e8f0', boxWidth: 12 } }
                     }
                 }
             });
         }
 
-        // Renderiza as Linhas da Tabela
         function renderTable() {
             const tbody = document.getElementById('games-table-body');
             tbody.innerHTML = '';
 
             if (filteredGames.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-slate-400">
-                            Nenhum jogo encontrado com os filtros selecionados.
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Nenhum jogo encontrado.</td></tr>`;
                 document.getElementById('table-summary-text').textContent = 'Nenhum resultado';
                 return;
             }
@@ -2310,7 +1266,6 @@
                 const genreColor = getGenreColor(primaryGenre);
                 const gameColor = getGameColor(game.id, primaryGenre);
                 const priceFormatted = game.price_formatted || (game.current_price_brl > 0 ? `R$ ${game.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito');
-                const playersFormatted = (game.peak_24h_players || 0).toLocaleString('pt-BR');
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 flex items-center gap-3">
@@ -2330,26 +1285,14 @@
                             <span class="text-slate-200 text-xs font-medium">${primaryGenre}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-right tabular-nums font-semibold text-white">
-                        ${game.hours_played.toLocaleString('pt-BR')}h
-                    </td>
-                    <td class="px-6 py-4 text-right tabular-nums">
-                        <span class="text-emerald-400 font-bold">${game.user_rating}%</span>
-                    </td>
-                    <td class="px-6 py-4 text-right tabular-nums text-slate-300">
-                        ${playersFormatted}
-                    </td>
-                    <td class="px-6 py-4 text-right tabular-nums font-medium text-white">
-                        ${priceFormatted}
-                    </td>
+                    <td class="px-6 py-4 text-right tabular-nums font-semibold text-white">${game.hours_played.toLocaleString('pt-BR')}h</td>
+                    <td class="px-6 py-4 text-right tabular-nums"><span class="text-emerald-400 font-bold">${game.user_rating}%</span></td>
+                    <td class="px-6 py-4 text-right tabular-nums text-slate-300">${(game.peak_24h_players || 0).toLocaleString('pt-BR')}</td>
+                    <td class="px-6 py-4 text-right tabular-nums font-medium text-white">${priceFormatted}</td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="event.stopPropagation(); openGameModal('${game.id}')" class="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition">
-                                Detalhes
-                            </button>
-                            <a href="${getAffiliateNuuvemUrl(game)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-semibold px-2 py-1.5 rounded transition flex items-center gap-1" title="Comprar Chave na Nuuvem com Desconto Parceiro">
-                                <span>🛒 Oferta</span>
-                            </a>
+                            <button onclick="event.stopPropagation(); openGameModal('${game.id}')" class="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition">Detalhes</button>
+                            <a href="${getAffiliateNuuvemUrl(game)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-semibold px-2 py-1.5 rounded transition">🛒 Oferta</a>
                         </div>
                     </td>
                 `;
@@ -2360,65 +1303,39 @@
             document.getElementById('table-summary-text').textContent = `Exibindo ${filteredGames.length} de ${allGames.length} jogos`;
         }
 
-        // Filtro em tempo real por busca de texto
         function handleSearch(query) {
             const term = query.toLowerCase().trim();
             applyFilters(term, selectedGenre);
         }
 
-        // Filtro por Gênero com alternância (Toggle)
         function filterByGenre(genre) {
-            // Se clicar no mesmo gênero que já está ativo, desmarca e volta para 'Todos'
             if (selectedGenre === genre && genre !== 'Todos') {
                 selectedGenre = 'Todos';
             } else {
                 selectedGenre = genre;
             }
 
-            // Atualiza botões
             document.querySelectorAll('.genre-btn').forEach(btn => {
                 const btnText = btn.textContent.trim();
-                const isSelected = selectedGenre === 'Todos'
-                    ? btnText === 'Todos'
-                    : btnText.includes(selectedGenre);
-
-                if (isSelected) {
-                    btn.className = 'genre-btn px-3 py-1.5 text-xs font-semibold rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap flex items-center gap-1.5 shadow-sm';
-                } else {
-                    btn.className = 'genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5 border border-[#2a475e]';
-                }
+                const isSelected = selectedGenre === 'Todos' ? btnText === 'Todos' : btnText.includes(selectedGenre);
+                btn.className = isSelected
+                    ? 'genre-btn px-3 py-1.5 text-xs font-semibold rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap flex items-center gap-1.5 shadow-sm'
+                    : 'genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5 border border-[#2a475e]';
             });
 
-            // Atualiza badge de filtro na barra da tabela
-            const filterBadge = document.getElementById('table-active-filter-badge');
-            if (filterBadge) {
-                if (selectedGenre !== 'Todos') {
-                    filterBadge.classList.remove('hidden');
-                    filterBadge.classList.add('flex');
-                    document.getElementById('table-active-filter-text').textContent = selectedGenre;
-                } else {
-                    filterBadge.classList.add('hidden');
-                    filterBadge.classList.remove('flex');
-                }
-            }
-
-            const searchTerm = document.getElementById('global-search').value.toLowerCase().trim();
-            applyFilters(searchTerm, selectedGenre);
+            applyFilters(document.getElementById('global-search').value.toLowerCase().trim(), selectedGenre);
         }
 
-        // Aplica busca e gênero juntos
         function applyFilters(term, genre) {
             filteredGames = allGames.filter(game => {
                 const matchesSearch = !term || game.name.toLowerCase().includes(term) || (game.developer && game.developer.toLowerCase().includes(term));
                 const matchesGenre = genre === 'Todos' || (game.genres && game.genres.includes(genre));
                 return matchesSearch && matchesGenre;
             });
-
             sortGames();
             renderTable();
         }
 
-        // Ordenação rápida da tabela
         function handleSortChange(sortField) {
             currentSort = sortField;
             sortGames();
@@ -2426,40 +1343,273 @@
         }
 
         function toggleSort(field) {
-            if (currentSort === field) {
-                sortAsc = !sortAsc;
-            } else {
-                currentSort = field;
-                sortAsc = false;
-            }
+            if (currentSort === field) sortAsc = !sortAsc;
+            else { currentSort = field; sortAsc = false; }
             sortGames();
             renderTable();
         }
 
         function sortGames() {
             filteredGames.sort((a, b) => {
-                let valA, valB;
-                if (currentSort === 'hours') {
-                    valA = a.hours_played;
-                    valB = b.hours_played;
-                } else if (currentSort === 'rating') {
-                    valA = a.user_rating;
-                    valB = b.user_rating;
-                } else if (currentSort === 'players') {
-                    valA = a.peak_24h_players || 0;
-                    valB = b.peak_24h_players || 0;
-                } else if (currentSort === 'price') {
-                    valA = a.current_price_brl || 0;
-                    valB = b.current_price_brl || 0;
-                } else if (currentSort === 'name') {
-                    return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-                }
-
+                let valA = a.hours_played, valB = b.hours_played;
+                if (currentSort === 'rating') { valA = a.user_rating; valB = b.user_rating; }
+                else if (currentSort === 'players') { valA = a.peak_24h_players || 0; valB = b.peak_24h_players || 0; }
+                else if (currentSort === 'price') { valA = a.current_price_brl || 0; valB = b.current_price_brl || 0; }
+                else if (currentSort === 'name') { return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name); }
                 return sortAsc ? valA - valB : valB - valA;
             });
         }
 
-        // Abertura do Modal de Detalhes (/api/game/{game_id})
+        // DEALS & RADAR
+        async function fetchDeals(platform = 'all') {
+            currentDealsPlatform = platform;
+            try {
+                const url = platform === 'all' ? '/api/deals' : `/api/deals?platform=${encodeURIComponent(platform)}`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    allDeals = data.deals || [];
+                    renderDealsGrid(allDeals);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar ofertas:", e);
+            }
+        }
+
+        function filterDealsPlatform(platform) {
+            currentDealsPlatform = platform;
+            document.querySelectorAll('.deal-pill-btn').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                const isMatch = (platform === 'all' && text.includes('todas')) || text.includes(platform.toLowerCase());
+                btn.className = isMatch
+                    ? 'deal-pill-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition'
+                    : 'deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition';
+            });
+            fetchDeals(platform);
+        }
+
+        function renderDealsGrid(deals) {
+            const grid = document.getElementById('deals-grid');
+            if (!grid) return;
+
+            if (!deals || deals.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8"><p class="text-sm font-semibold text-white">Nenhuma oferta encontrada para esta categoria.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = deals.map(d => {
+                const disc = d.discount_percent || 0;
+                const discBadge = disc > 0 ? `<span class="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md">-${disc}%</span>` : '';
+                const oldPrice = d.regular_price ? `R$ ${d.regular_price.toFixed(2).replace('.', ',')}` : '';
+                const dealPrice = d.deal_price ? `R$ ${d.deal_price.toFixed(2).replace('.', ',')}` : 'Sob Consulta';
+
+                let buyUrl = d.deal_url;
+                if (d.store === 'Hype Games') buyUrl = getAffiliateHypeUrl(d.name);
+                else if (d.store === 'Nuuvem') buyUrl = getAffiliateNuuvemUrl({ id: d.id, name: d.name });
+                else if (d.store === 'Amazon') buyUrl = getAffiliateAmazonUrl({ name: d.name });
+
+                return `
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="${d.image}" alt="${d.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x300/171a21/66c0f4?text=GameLens'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">${discBadge}<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-200 border border-white/10">${d.platform_label || d.platform}</span></div>
+                            <div class="absolute top-2.5 right-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#171a21]/90 text-amber-300 border border-amber-500/30">★ ${d.rating}%</span></div>
+                            <div class="absolute bottom-2 left-3 right-3">
+                                <span class="text-[10px] text-emerald-400 font-bold block">${d.badge || 'Oferta Oficial'}</span>
+                                <h3 class="text-sm font-extrabold text-white truncate">${d.name}</h3>
+                            </div>
+                        </div>
+
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">${d.review_verdict || 'Excelente oportunidade para adquirir e jogar com ativação imediata.'}</p>
+                            <div class="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
+                                <div><span class="text-[10px] text-slate-400 line-through block">${oldPrice}</span><span class="text-lg font-black text-emerald-400">${dealPrice}</span></div>
+                                <div class="text-right"><span class="text-[10px] text-slate-400 block">Loja Parceira</span><span class="text-xs font-bold text-slate-200">${d.store}</span></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button onclick="openEditorialCritique('${d.id}')" class="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e]">📝 Detalhes</button>
+                                <a href="${buyUrl}" target="_blank" rel="noreferrer" class="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition text-center">🛒 Pegar</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // BUSCA UNIVERSAL
+        async function executeUniversalSearch() {
+            const input = document.getElementById('universal-search-input');
+            const query = (input ? input.value : '').trim();
+            if (!query || query.length < 2) return;
+
+            const status = document.getElementById('search-status-label');
+            const grid = document.getElementById('search-results-grid');
+
+            if (status) status.textContent = `Consultando base global para "${query}"...`;
+            if (grid) grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><div class="w-8 h-8 border-2 border-[#66c0f4] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div><span class="text-xs">Buscando na API oficial...</span></div>`;
+
+            try {
+                const res = await fetch(`/api/search_store?q=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    renderUniversalSearchResults(data);
+                }
+            } catch (err) {
+                console.error("Erro na busca:", err);
+            }
+        }
+
+        function triggerQuickSearch(title) {
+            const input = document.getElementById('universal-search-input');
+            if (input) input.value = title;
+            executeUniversalSearch();
+        }
+
+        function renderUniversalSearchResults(data) {
+            const status = document.getElementById('search-status-label');
+            const count = document.getElementById('search-count-label');
+            const grid = document.getElementById('search-results-grid');
+
+            const allResults = [];
+            (data.local_games || []).forEach(g => {
+                allResults.push({ id: g.id, name: g.name, image: g.header_image, price: g.price_formatted, discount: g.discount_percent || 0, source: 'Catálogo Verificado' });
+            });
+            (data.steam_live_results || []).forEach(s => {
+                if (!allResults.some(r => String(r.id) === String(s.id))) {
+                    allResults.push({ id: s.id, name: s.name, image: s.header_image, price: s.price_formatted, discount: s.discount_percent || 0, source: 'Steam Store' });
+                }
+            });
+
+            if (status) status.textContent = `Resultados para "${data.query}"`;
+            if (count) count.textContent = `${allResults.length} título(s)`;
+
+            if (allResults.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8"><p class="text-sm font-semibold text-white">Nenhum título encontrado.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = allResults.map(item => {
+                const discBadge = item.discount > 0 ? `<span class="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">-${item.discount}%</span>` : '';
+                return `
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
+                        <div class="relative h-40 w-full bg-[#101822] overflow-hidden">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x300/171a21/66c0f4?text=Steam'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">${discBadge}<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-300">AppID ${item.id}</span></div>
+                        </div>
+
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] text-cyan-400 font-semibold block">${item.source}</span>
+                                <h3 class="text-sm font-bold text-white truncate">${item.name}</h3>
+                                <div class="mt-2 text-base font-extrabold text-emerald-400">${item.price}</div>
+                            </div>
+                            <div class="space-y-1.5 pt-2 border-t border-[#2a475e]">
+                                <a href="${getAffiliateNuuvemUrl({ name: item.name })}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#171a21] hover:bg-cyan-600 text-cyan-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] block text-center">Nuuvem →</a>
+                                <a href="${getAffiliateHypeUrl(item.name)}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#171a21] hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] block text-center">Hype Games →</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // CRÍTICAS
+        function filterReviews(category) {
+            currentReviewFilter = category;
+            document.querySelectorAll('.review-filter-btn').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                const isMatch = (category === 'all' && text.includes('todas')) || (category === 'masterpiece' && text.includes('obra')) || text.includes(category.toLowerCase());
+                btn.className = isMatch
+                    ? 'review-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition'
+                    : 'review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition';
+            });
+            renderReviewsGrid();
+        }
+
+        function renderReviewsGrid() {
+            const grid = document.getElementById('reviews-cards-grid');
+            if (!grid) return;
+
+            const reviewsList = Object.values(REVIEWS_DATABASE).filter(r => {
+                if (currentReviewFilter === 'all') return true;
+                if (currentReviewFilter === 'masterpiece') return r.score >= 9.8;
+                return r.genre === currentReviewFilter;
+            });
+
+            if (reviewsList.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8"><p class="text-sm font-semibold text-white">Nenhuma crítica nesta categoria.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = reviewsList.map(r => `
+                <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
+                    <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                        <img src="${r.banner}" alt="${r.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                        <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5"><span class="px-2.5 py-0.5 rounded text-[11px] font-black text-black shadow-md" style="background-color: ${r.badgeColor}">${r.badge}</span></div>
+                        <div class="absolute top-2.5 right-2.5"><span class="px-2.5 py-1 rounded-lg text-xs font-black bg-black/80 text-amber-300">★ ${r.score}</span></div>
+                        <div class="absolute bottom-2 left-3 right-3"><h3 class="text-base font-extrabold text-white truncate">${r.name}</h3></div>
+                    </div>
+                    <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${r.verdictLead}</p>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="openReviewModal('${r.id}')" class="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e]">📖 Ler Análise</button>
+                            <a href="${getAffiliateNuuvemUrl({ name: r.name })}" target="_blank" rel="noreferrer" class="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition text-center">🛒 Ver Oferta</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openReviewModal(gameId) {
+            const r = REVIEWS_DATABASE[gameId] || REVIEWS_DATABASE['1086940'];
+            if (!r) return;
+
+            document.getElementById('review-modal-banner').src = r.banner;
+            document.getElementById('review-modal-title').textContent = r.name;
+            document.getElementById('review-modal-badge').textContent = r.badge;
+            document.getElementById('review-modal-badge').style.backgroundColor = r.badgeColor;
+            document.getElementById('review-modal-meta').textContent = `${r.author} · ${r.readTime}`;
+            document.getElementById('review-modal-score').textContent = `★ ${r.score}`;
+
+            document.getElementById('review-modal-headline').textContent = r.headline;
+            document.getElementById('review-modal-lead').textContent = `"${r.verdictLead}"`;
+
+            document.getElementById('review-modal-body').innerHTML = `<p>${r.fullAnalysis}</p>`;
+
+            const scoresGrid = document.getElementById('review-modal-scores-grid');
+            if (scoresGrid) {
+                scoresGrid.innerHTML = `
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]"><span class="text-[10px] text-slate-400 block">Gameplay</span><span class="text-base font-bold text-white">${r.scores.gameplay}/10</span></div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]"><span class="text-[10px] text-slate-400 block">Gráficos</span><span class="text-base font-bold text-white">${r.scores.graphics}/10</span></div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]"><span class="text-[10px] text-slate-400 block">Narrativa</span><span class="text-base font-bold text-white">${r.scores.narrative}/10</span></div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]"><span class="text-[10px] text-slate-400 block">Rejogabilidade</span><span class="text-base font-bold text-white">${r.scores.replayability}/10</span></div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]"><span class="text-[10px] text-slate-400 block">Custo-Benefício</span><span class="text-base font-bold text-emerald-400">${r.scores.valueForMoney}/10</span></div>
+                `;
+            }
+
+            document.getElementById('review-modal-pros').innerHTML = r.pros.map(p => `<li class="flex items-start gap-1.5"><span class="text-emerald-400">✔</span><span>${p}</span></li>`).join('');
+            document.getElementById('review-modal-cons').innerHTML = r.cons.map(c => `<li class="flex items-start gap-1.5"><span class="text-rose-400">✖</span><span>${c}</span></li>`).join('');
+
+            document.getElementById('review-modal-deal-title').textContent = `${r.name} - ${r.bestDeal.price}`;
+            document.getElementById('review-modal-nuuvem-btn').href = getAffiliateNuuvemUrl({ name: r.name });
+            document.getElementById('review-modal-hype-btn').href = getAffiliateHypeUrl(r.name);
+
+            document.getElementById('review-detail-modal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-detail-modal').classList.add('hidden');
+        }
+
+        function openEditorialCritique(dealId) {
+            const deal = allDeals.find(d => d.id === dealId) || allDeals[0];
+            if (!deal) return;
+            openGameModal(deal.id);
+        }
+
         async function openGameModal(gameId) {
             const modal = document.getElementById('game-modal');
             modal.classList.remove('hidden');
@@ -2467,11 +1617,8 @@
             try {
                 const res = await fetch(`/api/game/${gameId}`);
                 let game = null;
-                if (res.ok) {
-                    game = await res.json();
-                } else {
-                    game = allGames.find(g => String(g.id) === String(gameId)) || allGames[0];
-                }
+                if (res.ok) game = await res.json();
+                else game = allGames.find(g => String(g.id) === String(gameId)) || allGames[0];
 
                 const primaryGenre = game.genres && game.genres.length > 0 ? game.genres[0] : 'Ação';
                 const gameColor = getGameColor(game.id, primaryGenre);
@@ -2480,26 +1627,19 @@
                 document.getElementById('modal-accent-line').style.backgroundColor = gameColor;
                 document.getElementById('modal-dev').textContent = `Desenvolvedora: ${game.developer || 'Steam Games'}`;
                 document.getElementById('modal-banner').src = `https://cdn.akamai.steamstatic.com/steam/apps/${game.id}/header.jpg`;
-                document.getElementById('modal-description').textContent = game.short_description || `${game.name} é um dos títulos mais influentes da biblioteca, acumulando alto índice de horas e engajamento da comunidade.`;
-                
-                const modalHours = document.getElementById('modal-hours');
-                modalHours.textContent = `${game.hours_played}h`;
-                modalHours.style.color = gameColor;
+                document.getElementById('modal-description').textContent = game.short_description || `${game.name} é um dos títulos mais influentes da biblioteca.`;
 
+                document.getElementById('modal-hours').textContent = `${game.hours_played}h`;
                 document.getElementById('modal-rating').textContent = `${game.user_rating}%`;
                 document.getElementById('modal-players').textContent = (game.peak_24h_players || 12000).toLocaleString('pt-BR');
-                document.getElementById('modal-price').textContent = game.price_formatted || (game.current_price_brl > 0 ? `R$ ${game.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito');
-                
-                document.getElementById('modal-genres').innerHTML = `Gêneros: <strong class="text-slate-200">${(game.genres || []).join(', ')}</strong>`;
-                document.getElementById('modal-achievements').innerHTML = `Conquistas: <strong class="text-[#66c0f4] tabular-nums">${game.achievements_unlocked || 0} / ${game.total_achievements || 0}</strong>`;
-                
-                document.getElementById('modal-steam-link').href = `https://store.steampowered.com/app/${game.id}`;
-                
-                const nuuvemLink = document.getElementById('modal-nuuvem-link');
-                if (nuuvemLink) nuuvemLink.href = getAffiliateNuuvemUrl(game);
+                document.getElementById('modal-price').textContent = game.price_formatted || 'Gratuito';
 
-                const amazonLink = document.getElementById('modal-amazon-link');
-                if (amazonLink) amazonLink.href = getAffiliateAmazonUrl(game);
+                document.getElementById('modal-genres').innerHTML = `Gêneros: <strong class="text-slate-200">${(game.genres || []).join(', ')}</strong>`;
+                document.getElementById('modal-achievements').innerHTML = `Conquistas: <strong class="text-[#66c0f4]">${game.achievements_unlocked || 0} / ${game.total_achievements || 0}</strong>`;
+
+                document.getElementById('modal-steam-link').href = `https://store.steampowered.com/app/${game.id}`;
+                document.getElementById('modal-nuuvem-link').href = getAffiliateNuuvemUrl(game);
+                document.getElementById('modal-amazon-link').href = getAffiliateAmazonUrl(game);
             } catch (err) {
                 console.error("Erro ao carregar detalhes:", err);
             }
@@ -2509,12 +1649,6 @@
             document.getElementById('game-modal').classList.add('hidden');
         }
 
-        // Fechar modal ao clicar fora
-        document.getElementById('game-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'game-modal') closeGameModal();
-        });
-
-        // Modal Pix
         function openPixModal() {
             document.getElementById('pix-modal').classList.remove('hidden');
         }
@@ -2529,21 +1663,14 @@
                 const btn = document.getElementById('btn-copy-pix');
                 const orig = btn.innerHTML;
                 btn.innerHTML = '<span>Chave Copiada!</span>';
-                btn.classList.add('bg-emerald-500', 'text-black');
-                setTimeout(() => {
-                    btn.innerHTML = orig;
-                    btn.classList.remove('bg-emerald-500', 'text-black');
-                }, 2000);
+                setTimeout(() => { btn.innerHTML = orig; }, 2000);
             });
         }
 
-        // Modal de Afiliados (Rakuten SID, Hype Games, Nuuvem & Amazon)
         function openAffiliatesModal() {
             const cfg = getAffiliateConfig();
-            const sidInput = document.getElementById('input-rakuten-sid');
-            if (sidInput) sidInput.value = cfg.rakutenSid || '4770537';
-            const hypeInput = document.getElementById('input-hype-mid');
-            if (hypeInput) hypeInput.value = cfg.hypeMid || '53304';
+            document.getElementById('input-rakuten-sid').value = cfg.rakutenSid || '4770537';
+            document.getElementById('input-hype-mid').value = cfg.hypeMid || '53304';
             document.getElementById('input-nuuvem-id').value = cfg.nuuvemPartnerId || 'albertgamer';
             document.getElementById('input-amazon-id').value = cfg.amazonTag || 'albertgames-20';
             document.getElementById('affiliates-modal').classList.remove('hidden');
@@ -2554,36 +1681,19 @@
         }
 
         function saveAffiliateSettings() {
-            const sidInput = document.getElementById('input-rakuten-sid');
-            const hypeInput = document.getElementById('input-hype-mid');
-            const rakutenSid = (sidInput ? sidInput.value.trim() : '') || '4770537';
-            const hypeMid = (hypeInput ? hypeInput.value.trim() : '') || '53304';
+            const rakutenSid = document.getElementById('input-rakuten-sid').value.trim() || '4770537';
+            const hypeMid = document.getElementById('input-hype-mid').value.trim() || '53304';
             const nuuvemId = document.getElementById('input-nuuvem-id').value.trim() || 'albertgamer';
             const amazonId = document.getElementById('input-amazon-id').value.trim() || 'albertgames-20';
-            
-            saveAffiliateConfig({
-                rakutenSid,
-                hypeMid,
-                nuuvemMid: '46796',
-                nuuvemPartnerId: nuuvemId,
-                amazonTag: amazonId
-            });
-            
-            const btn = document.getElementById('btn-save-affiliates');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<span>Salvo com Sucesso!</span>';
-            btn.classList.add('bg-emerald-500', 'text-black');
-            setTimeout(() => {
-                btn.innerHTML = orig;
-                btn.classList.remove('bg-emerald-500', 'text-black');
-                closeAffiliatesModal();
-                renderTable();
-                if (allDeals.length > 0) renderDealsGrid(allDeals);
-            }, 1200);
+
+            saveAffiliateConfig({ rakutenSid, hypeMid, nuuvemMid: '46796', nuuvemPartnerId: nuuvemId, amazonTag: amazonId });
+            closeAffiliatesModal();
+            renderTable();
+            if (allDeals.length > 0) renderDealsGrid(allDeals);
         }
     </script>
 
-    <!-- PIX DONATION MODAL -->
+    <!-- PIX MODAL -->
     <div id="pix-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-md w-full p-6 text-slate-200 relative shadow-2xl">
             <button onclick="closePixModal()" class="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg">
@@ -2625,7 +1735,7 @@
         </div>
     </div>
 
-    <!-- AFFILIATES CONFIG MODAL -->
+    <!-- AFFILIATES MODAL -->
     <div id="affiliates-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-lg w-full p-6 text-slate-200 relative shadow-2xl">
             <button onclick="closeAffiliatesModal()" class="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg">
@@ -2642,82 +1752,30 @@
             </div>
 
             <div class="space-y-4 mb-6">
-                <!-- Rakuten Advertising Site ID (SID) -->
                 <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                            <span>🏢 Rakuten Advertising (Site ID / SID)</span>
-                        </label>
-                        <span class="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">Seu Perfil Ativo</span>
-                    </div>
-                    <input 
-                        id="input-rakuten-sid" 
-                        type="text" 
-                        placeholder="Ex: 4770537" 
-                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
-                    />
-                    <p class="text-[10px] text-slate-400 mt-1.5">Seu código oficial na Rakuten: <code>SID 4770537</code> (GameLens - Portal Gamer).</p>
+                    <label class="text-xs font-bold text-emerald-400 block mb-1">Rakuten Advertising (Site ID / SID)</label>
+                    <input id="input-rakuten-sid" type="text" placeholder="Ex: 4770537" class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"/>
                 </div>
 
-                <!-- Hype Games MID -->
                 <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                            <span>⚡ Hype Games (Level Up · MID 53304)</span>
-                        </label>
-                        <span class="text-[10px] text-slate-400">Chaves Steam & Consoles</span>
-                    </div>
-                    <input 
-                        id="input-hype-mid" 
-                        type="text" 
-                        placeholder="Ex: 53304" 
-                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
-                    />
-                    <p class="text-[10px] text-slate-400 mt-1.5">Gera links rastreados: <code>https://click.linksynergy.com/deeplink?id=4770537&mid=53304...</code></p>
+                    <label class="text-xs font-bold text-purple-300 block mb-1">Hype Games (MID 53304)</label>
+                    <input id="input-hype-mid" type="text" placeholder="Ex: 53304" class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"/>
                 </div>
 
-                <!-- Nuuvem Partner ID -->
                 <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-                            <span>🎮 Nuuvem Partner ID</span>
-                        </label>
-                        <span class="text-[10px] text-slate-400">Chaves Steam (BRL)</span>
-                    </div>
-                    <input 
-                        id="input-nuuvem-id" 
-                        type="text" 
-                        placeholder="Ex: albertgamer" 
-                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
-                    />
-                    <p class="text-[10px] text-slate-400 mt-1.5">Gera links: <code>https://www.nuuvem.com/item/slug?partner=SEU_ID</code> (MID 46796).</p>
+                    <label class="text-xs font-bold text-cyan-300 block mb-1">Nuuvem Partner ID</label>
+                    <input id="input-nuuvem-id" type="text" placeholder="Ex: albertgamer" class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"/>
                 </div>
 
-                <!-- Amazon Associate Tag -->
                 <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                            <span>📦 Amazon Associates Tag</span>
-                        </label>
-                        <span class="text-[10px] text-slate-400">Hardware & Jogos PC</span>
-                    </div>
-                    <input 
-                        id="input-amazon-id" 
-                        type="text" 
-                        placeholder="Ex: albertgames-20" 
-                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
-                    />
-                    <p class="text-[10px] text-slate-400 mt-1.5">Gera links com a tag <code>&tag=SEU_ID-20</code> nas buscas da Amazon Brasil.</p>
+                    <label class="text-xs font-bold text-amber-300 block mb-1">Amazon Associates Tag</label>
+                    <input id="input-amazon-id" type="text" placeholder="Ex: albertgames-20" class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"/>
                 </div>
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-3 border-t border-[#2a475e]">
-                <button onclick="closeAffiliatesModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition">
-                    Cancelar
-                </button>
-                <button id="btn-save-affiliates" onclick="saveAffiliateSettings()" class="px-5 py-2 text-xs font-bold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition shadow-md">
-                    Salvar e Atualizar Links
-                </button>
+                <button onclick="closeAffiliatesModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition">Cancelar</button>
+                <button id="btn-save-affiliates" onclick="saveAffiliateSettings()" class="px-5 py-2 text-xs font-bold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition shadow-md">Salvar e Atualizar</button>
             </div>
         </div>
     </div>
