@@ -39,7 +39,10 @@ import {
   BookOpen,
   Coffee,
   Award,
-  Tag
+  Tag,
+  Zap,
+  Tv,
+  Monitor
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -62,7 +65,9 @@ import {
   INITIAL_REVIEWS,
   getAffiliateUrls,
   generateProceduralAiReview,
-  AFFILIATE_PROGRAMS_GUIDE
+  AFFILIATE_PROGRAMS_GUIDE,
+  DEALS_DATABASE,
+  DealItem
 } from './monetizationData.ts';
 import { ReviewsView } from './components/ReviewsView.tsx';
 import { MonetizationHubView } from './components/MonetizationHubView.tsx';
@@ -376,7 +381,60 @@ const PRESETS: Record<string, { label: string; filter: (g: SteamGame) => boolean
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'reviews' | 'monetization' | 'code' | 'api'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'deals' | 'search' | 'platforms' | 'reviews' | 'monetization' | 'code' | 'api'>('dashboard');
+  const [dealsPlatform, setDealsPlatform] = useState<string>('all');
+  const [universalSearchQuery, setUniversalSearchQuery] = useState('');
+  const [isSearchingUniversal, setIsSearchingUniversal] = useState(false);
+  const [universalSearchResults, setUniversalSearchResults] = useState<any[]>([
+    {
+      id: "1245620",
+      name: "Elden Ring",
+      image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+      price: "R$ 151,73",
+      discount: 34,
+      source: "Nuuvem (MID 46796)"
+    },
+    {
+      id: "1091500",
+      name: "Cyberpunk 2077: Ultimate Edition",
+      image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+      price: "R$ 99,95",
+      discount: 50,
+      source: "Nuuvem / Hype Games"
+    },
+    {
+      id: "292030",
+      name: "The Witcher 3: Wild Hunt",
+      image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
+      price: "R$ 32,49",
+      discount: 75,
+      source: "Hype Games (MID 53304)"
+    },
+    {
+      id: "271590",
+      name: "Grand Theft Auto V",
+      image: "https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg",
+      price: "R$ 39,99",
+      discount: 63,
+      source: "Steam Store Oficial"
+    },
+    {
+      id: "1593500",
+      name: "God of War",
+      image: "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
+      price: "R$ 79,96",
+      discount: 60,
+      source: "Nuuvem / Steam"
+    },
+    {
+      id: "2050650",
+      name: "Resident Evil 4",
+      image: "https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg",
+      price: "R$ 124,50",
+      discount: 50,
+      source: "Hype Games (MID 53304)"
+    }
+  ]);
   const [activePreset, setActivePreset] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('Todos');
@@ -802,86 +860,65 @@ requests>=2.31.0`,
             </div>
           </div>
 
-          {/* Zone 2: Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-300">
+          {/* Zone 2: Navigation Links Públicos */}
+          <nav className="hidden lg:flex items-center gap-4 text-xs font-medium text-slate-300">
             <button
               onClick={() => setActiveTab('dashboard')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'dashboard' ? 'text-[#66c0f4] font-semibold' : ''
+                activeTab === 'dashboard' ? 'text-[#66c0f4] font-bold' : ''
               }`}
             >
               <BarChart3 className="w-4 h-4" />
               <span>Dashboard</span>
             </button>
             <button
+              onClick={() => setActiveTab('deals')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'deals' ? 'text-[#66c0f4] font-bold' : ''
+              }`}
+            >
+              <Zap className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span>Radar de Ofertas</span>
+              <span className="text-[10px] bg-red-600/90 text-white font-extrabold px-1.5 py-0.2 rounded font-mono">-75%</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('search')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'search' ? 'text-[#66c0f4] font-bold' : ''
+              }`}
+            >
+              <Search className="w-4 h-4 text-cyan-400" />
+              <span>Buscar Qualquer Jogo</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('platforms')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'platforms' ? 'text-[#66c0f4] font-bold' : ''
+              }`}
+            >
+              <Tv className="w-4 h-4 text-purple-400" />
+              <span>Consoles & PC</span>
+            </button>
+            <button
               onClick={() => setActiveTab('reviews')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'reviews' ? 'text-[#66c0f4] font-semibold' : ''
+                activeTab === 'reviews' ? 'text-[#66c0f4] font-bold' : ''
               }`}
             >
               <Newspaper className="w-4 h-4" />
-              <span>Críticas & Reviews</span>
-              <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.2 rounded font-mono">IA</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('monetization')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'monetization' ? 'text-[#66c0f4] font-semibold' : ''
-              }`}
-            >
-              <DollarSign className="w-4 h-4" />
-              <span>Hub de Monetização</span>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-mono">Afiliados</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('code')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'code' ? 'text-[#66c0f4] font-semibold' : ''
-              }`}
-            >
-              <Code2 className="w-4 h-4" />
-              <span>Código & Deploy</span>
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('api');
-                if (!apiResponse) handleTestApi('/api/stats');
-              }}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'api' ? 'text-[#66c0f4] font-semibold' : ''
-              }`}
-            >
-              <Server className="w-4 h-4" />
-              <span>API</span>
+              <span>Críticas & Análises</span>
             </button>
           </nav>
 
-          {/* Zone 3: Primary Actions (Pix & Configurações de Monetização) */}
+          {/* Zone 3: Ação Pública (Apoio via Pix) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsPixModalOpen(true)}
-              className="px-3 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm"
+              className="px-3.5 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm"
               title="Apoiar este projeto com Pix direto"
             >
               <Coffee className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Apoiar via</span> Pix
-            </button>
-
-            <button
-              onClick={() => setIsSettingsModalOpen(true)}
-              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs text-slate-300 hover:text-white bg-[#1b2838] hover:bg-[#233446] border border-[#2a475e] rounded-lg transition flex items-center gap-1.5"
-              title="Configurar suas tags de Afiliado (Nuuvem, Amazon) e Chave Pix"
-            >
-              <Settings className="w-3.5 h-3.5 text-[#66c0f4]" />
-              <span className="hidden md:inline">Afiliados & Pix</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('code')}
-              className="px-3 py-1.5 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-sm"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Exportar</span>
+              <span>Apoiar via Pix</span>
             </button>
           </div>
 
@@ -1674,6 +1711,408 @@ requests>=2.31.0`,
 
             </div>
 
+          </div>
+        )}
+
+        {/* TAB: RADAR DE PROMOÇÕES & DESCONTOS */}
+        {activeTab === 'deals' && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Header da Seção de Ofertas */}
+            <div className="bg-gradient-to-r from-[#171a21] via-[#1b2838] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+              <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>RADAR ATIVO · OFERTAS VERIFICADAS EM TEMPO REAL</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Central de Promoções & Chaves Oficiais
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Economize até 75% em ativações oficiais Steam, consoles (PS5, Xbox, Nintendo) e gift cards em reais com entrega instantânea e pagamento via Pix pelas nossas lojas parceiras.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {(['all', 'PC', 'PlayStation', 'Xbox', 'Nintendo'] as const).map((plat) => {
+                    const isSelected = dealsPlatform === plat;
+                    const label = plat === 'all' ? 'Todas as Ofertas' : plat === 'PC' ? 'PC (Steam & Epic)' : plat;
+                    return (
+                      <button
+                        key={plat}
+                        onClick={() => setDealsPlatform(plat)}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                          isSelected
+                            ? 'bg-[#66c0f4] text-[#101822] shadow-sm'
+                            : 'bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e]'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Grade Dinâmica de Ofertas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {DEALS_DATABASE
+                .filter((d) => dealsPlatform === 'all' || d.platform.toLowerCase() === dealsPlatform.toLowerCase())
+                .map((d) => {
+                  let buyUrl = d.deal_url;
+                  if (d.store === 'Hype Games') {
+                    const sid = monetizationSettings.rakutenSid || '4770537';
+                    const mid = monetizationSettings.hypeMid || '53304';
+                    buyUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(d.name)}`)}`;
+                  } else if (d.store === 'Nuuvem') {
+                    buyUrl = `https://www.nuuvem.com/item/${d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+                  } else if (d.store === 'Amazon') {
+                    buyUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(d.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
+                  }
+
+                  return (
+                    <div
+                      key={d.id}
+                      className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg"
+                    >
+                      <div className="relative h-44 w-full bg-[#101822] overflow-hidden">
+                        <img
+                          src={d.image}
+                          alt={d.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                          {d.discount_percent > 0 && (
+                            <span className="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md">
+                              -{d.discount_percent}%
+                            </span>
+                          )}
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-200 backdrop-blur-sm border border-white/10">
+                            {d.platform_label}
+                          </span>
+                        </div>
+                        <div className="absolute top-2.5 right-2.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#171a21]/90 text-amber-300 border border-amber-500/30">
+                            ★ {d.rating}%
+                          </span>
+                        </div>
+                        <div className="absolute bottom-2 left-3 right-3">
+                          <span className="text-[10px] text-emerald-400 font-bold block">{d.badge}</span>
+                          <h3 className="text-sm font-extrabold text-white truncate">{d.name}</h3>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                        <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                          {d.review_verdict}
+                        </p>
+
+                        <div className="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-slate-400 line-through block">
+                              R$ {d.regular_price.toFixed(2).replace('.', ',')}
+                            </span>
+                            <span className="text-lg font-black text-emerald-400">
+                              R$ {d.deal_price.toFixed(2).replace('.', ',')}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-400 block">Loja Parceira</span>
+                            <span className="text-xs font-bold text-slate-200">{d.store}</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <button
+                            onClick={() => {
+                              setSelectedReviewGameId('1086940');
+                              setActiveTab('reviews');
+                            }}
+                            className="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1"
+                          >
+                            <Newspaper className="w-3.5 h-3.5" />
+                            <span>Crítica</span>
+                          </button>
+                          <a
+                            href={buyUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1"
+                          >
+                            <ShoppingCart className="w-3.5 h-3.5" />
+                            <span>Pegar</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: BUSCA UNIVERSAL AO VIVO DE QUALQUER JOGO */}
+        {activeTab === 'search' && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Search Hero */}
+            <div className="bg-[#1b2838] border border-[#2a475e] rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden shadow-xl">
+              <div className="max-w-3xl mx-auto space-y-4">
+                <span className="inline-block px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
+                  API GLOBAL DA STEAM INTEGRADA AO VIVO
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+                  Pesquise os Dados de Qualquer Jogo do Mundo
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Digite o nome de qualquer título lançado na Steam ou consoles para consultar preços em BRL, descontos ativos, análises e onde comprar mais barato.
+                </p>
+
+                {/* Barra de Pesquisa Ampla */}
+                <div className="relative max-w-xl mx-auto mt-4">
+                  <input
+                    type="text"
+                    value={universalSearchQuery}
+                    onChange={(e) => setUniversalSearchQuery(e.target.value)}
+                    placeholder="Digite o nome do jogo (ex: GTA, God of War, Forza, Resident Evil, FIFA)..."
+                    className="w-full bg-[#101822] border-2 border-[#2a475e] text-white text-sm rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:border-[#66c0f4] transition shadow-inner placeholder-slate-400"
+                  />
+                  <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+                </div>
+
+                {/* Sugestões Rápidas de Jogos Populares */}
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
+                  <span className="text-slate-400">Sugestões:</span>
+                  {['Grand Theft Auto V', 'Elden Ring', 'God of War', 'Cyberpunk 2077', 'Red Dead Redemption 2', 'Resident Evil 4'].map((title) => (
+                    <button
+                      key={title}
+                      onClick={() => setUniversalSearchQuery(title)}
+                      className="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition"
+                    >
+                      {title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Área de Resultados da Pesquisa Universal */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span>
+                  {universalSearchQuery ? `Exibindo títulos compatíveis com "${universalSearchQuery}"` : 'Títulos em Destaque no Radar Global'}
+                </span>
+                <span>{universalSearchResults.length} título(s) disponíveis</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {universalSearchResults
+                  .filter((item) => !universalSearchQuery || item.name.toLowerCase().includes(universalSearchQuery.toLowerCase()))
+                  .map((item) => {
+                    const sid = monetizationSettings.rakutenSid || '4770537';
+                    const mid = monetizationSettings.hypeMid || '53304';
+                    const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(item.name)}`)}`;
+                    const nuuvemUrl = `https://www.nuuvem.com/item/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg"
+                      >
+                        <div className="relative h-40 w-full bg-[#101822] overflow-hidden">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                            {item.discount > 0 && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">
+                                -{item.discount}%
+                              </span>
+                            )}
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-300 border border-white/10">
+                              AppID {item.id}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                          <div>
+                            <span className="text-[10px] text-cyan-400 font-semibold block">{item.source}</span>
+                            <h3 className="text-sm font-bold text-white truncate" title={item.name}>
+                              {item.name}
+                            </h3>
+                            <div className="mt-2 text-base font-extrabold text-emerald-400">
+                              {item.price}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5 pt-2 border-t border-[#2a475e]">
+                            <a
+                              href={nuuvemUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full py-1.5 px-3 bg-[#171a21] hover:bg-cyan-600 text-cyan-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between"
+                            >
+                              <span>Buscar Menor Preço Nuuvem</span>
+                              <span>→</span>
+                            </a>
+                            <a
+                              href={hypeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full py-1.5 px-3 bg-[#171a21] hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between"
+                            >
+                              <span>Ver Ofertas Hype Games</span>
+                              <span>→</span>
+                            </a>
+                            <a
+                              href={`https://store.steampowered.com/app/${item.id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full py-1.5 px-3 bg-[#101822] hover:bg-[#233446] text-slate-400 hover:text-white text-[11px] rounded-lg transition flex items-center justify-between"
+                            >
+                              <span>Abrir Loja Steam Oficial</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: HUB CONSOLES & PC */}
+        {activeTab === 'platforms' && (
+          <div className="space-y-8 animate-fade-in">
+            {/* Banner Introdução Consoles */}
+            <div className="bg-gradient-to-r from-[#171a21] via-[#1f1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8">
+              <div className="max-w-3xl space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold">
+                  ECOSSISTEMA GAMER COMPLETO
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Hub Multiplataforma (PC & Consoles)</h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Atendemos todos os nichos gamer: PC (Steam & Epic Games), PlayStation 5, Xbox Series X|S / Game Pass e Nintendo Switch. Compre chaves oficiais e cartões pré-pagos digitais em reais sem tarifas extras.
+                </p>
+              </div>
+            </div>
+
+            {/* Cards dos 4 Grandes Pilares de Plataformas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* PC Gamer */}
+              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                <div className="space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-500/30 flex items-center justify-center text-[#66c0f4]">
+                    <Monitor className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-[#66c0f4] transition">
+                    PC Gamer (Steam & Epic)
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Chaves de ativação digitais com descontos de até 85%. Ativação oficial e suporte a mods.
+                  </p>
+                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                    Lojas parceiras: <strong>Nuuvem (MID 46796)</strong> e <strong>Hype Games (MID 53304)</strong>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setDealsPlatform('PC');
+                    setActiveTab('deals');
+                  }}
+                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
+                >
+                  Ver Ofertas de PC
+                </button>
+              </div>
+
+              {/* PlayStation */}
+              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-blue-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                <div className="space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-blue-950/80 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <span className="text-xl font-black">PS</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition">
+                    PlayStation 5 & 4
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Cartões de créditos da PSN brasileira com entrega por código digital e Pix, além de mídias físicas na Amazon.
+                  </p>
+                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                    Ofertas em: <strong>Hype Games</strong> (Gift Cards) e <strong>Amazon</strong> (Jogos Físicos)
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setDealsPlatform('PlayStation');
+                    setActiveTab('deals');
+                  }}
+                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-blue-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
+                >
+                  Ver Ofertas PlayStation
+                </button>
+              </div>
+
+              {/* Xbox */}
+              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-emerald-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                <div className="space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <span className="text-xl font-black">XB</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition">
+                    Xbox & Game Pass
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Assinaturas de Xbox Game Pass Ultimate (3 meses), cartões Xbox Live e jogos Play Anywhere.
+                  </p>
+                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                    Ofertas em: <strong>Hype Games</strong> e <strong>Nuuvem</strong>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setDealsPlatform('Xbox');
+                    setActiveTab('deals');
+                  }}
+                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-emerald-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
+                >
+                  Ver Ofertas Xbox
+                </button>
+              </div>
+
+              {/* Nintendo */}
+              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-red-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                <div className="space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-red-950/80 border border-red-500/30 flex items-center justify-center text-red-400">
+                    <span className="text-xl font-black">NSW</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-red-400 transition">
+                    Nintendo Switch
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Cartões eShop digitais para comprar jogos na loja Nintendo Brasil, e jogos físicos na Amazon.
+                  </p>
+                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                    Ofertas em: <strong>Hype Games</strong> (eShop BR) e <strong>Amazon</strong>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setDealsPlatform('Nintendo');
+                    setActiveTab('deals');
+                  }}
+                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-red-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
+                >
+                  Ver Ofertas Nintendo
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

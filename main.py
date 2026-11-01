@@ -758,6 +758,67 @@ async def search_steam_store(q: str = Query(..., min_length=2, description="Nome
     }
 
 
+@app.get("/api/reviews")
+async def get_reviews():
+    """
+    Retorna catálogo de críticas e análises técnicas editoriais do GameLens.
+    """
+    return {
+        "total": len(GAMES_DATABASE),
+        "editorial": "GameLens Editorial & Reviews",
+        "featured": [
+            {
+                "id": "1086940",
+                "name": "Baldur's Gate 3",
+                "badge": "Obra-Prima",
+                "score": 9.9,
+                "genre": "RPG",
+                "verdict_lead": "Uma aula magistral de design, narrativa reativa e respeito inegociável à inteligência do jogador."
+            },
+            {
+                "id": "1245620",
+                "name": "Elden Ring",
+                "badge": "Obra-Prima",
+                "score": 9.8,
+                "genre": "RPG",
+                "verdict_lead": "As Terras Intermédias recompensam a curiosidade como nenhum outro mapa aberto já fez antes."
+            },
+            {
+                "id": "730",
+                "name": "Counter-Strike 2",
+                "badge": "Essencial",
+                "score": 9.3,
+                "genre": "Ação",
+                "verdict_lead": "Com fumaças volumétricas interativas e gunplay incomparável, CS2 continua sendo o teste de precisão definitivo."
+            },
+            {
+                "id": "1091500",
+                "name": "Cyberpunk 2077",
+                "badge": "Obra-Prima",
+                "score": 9.5,
+                "genre": "RPG",
+                "verdict_lead": "Após a atualização 2.0 e Phantom Liberty, Cyberpunk se tornou uma das maiores experiências audiovisuais já criadas."
+            },
+            {
+                "id": "292030",
+                "name": "The Witcher 3: Wild Hunt",
+                "badge": "Obra-Prima",
+                "score": 9.8,
+                "genre": "RPG",
+                "verdict_lead": "Mesmo anos após o lançamento, as missões secundárias de The Witcher 3 humilham histórias principais de rivais."
+            },
+            {
+                "id": "105600",
+                "name": "Terraria",
+                "badge": "Obra-Prima",
+                "score": 9.7,
+                "genre": "Indie",
+                "verdict_lead": "Mais de 13 anos de suporte carinhoso transformaram Terraria em um gigante de conteúdo."
+            }
+        ]
+    }
+
+
 @app.get("/api/health")
 async def health_check():
     """Endpoint de checagem de integridade para monitoramento (Render/UptimeRobot)."""

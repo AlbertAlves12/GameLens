@@ -38,6 +38,8 @@ export interface MonetizationSettings {
   pixKey: string;
   pixReceiverName: string;
   pixCity: string;
+  rakutenSid?: string;
+  hypeMid?: string;
   nuuvemPartnerId: string;
   amazonAssociateId: string;
   gmgAffiliateId: string;
@@ -47,10 +49,211 @@ export interface MonetizationSettings {
   editorialName: string;
 }
 
+export interface DealItem {
+  id: string;
+  name: string;
+  platform: 'PC' | 'PlayStation' | 'Xbox' | 'Nintendo';
+  platform_label: string;
+  store: 'Nuuvem' | 'Hype Games' | 'Amazon';
+  regular_price: number;
+  deal_price: number;
+  discount_percent: number;
+  rating: number;
+  deal_url: string;
+  image: string;
+  badge: string;
+  review_verdict: string;
+}
+
+export const DEALS_DATABASE: DealItem[] = [
+  {
+    id: "deal-elden-ring",
+    name: "Elden Ring",
+    platform: "PC",
+    platform_label: "PC / Steam",
+    store: "Nuuvem",
+    regular_price: 229.90,
+    deal_price: 151.73,
+    discount_percent: 34,
+    rating: 93,
+    deal_url: "https://www.nuuvem.com/item/elden-ring",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+    badge: "Menor Preço em 3 Meses",
+    review_verdict: "Obra-prima imperdível do estilo soulslike em mundo aberto. Vale cada centavo."
+  },
+  {
+    id: "deal-cyberpunk",
+    name: "Cyberpunk 2077: Ultimate Edition",
+    platform: "PC",
+    platform_label: "PC / Steam",
+    store: "Nuuvem",
+    regular_price: 199.90,
+    deal_price: 99.95,
+    discount_percent: 50,
+    rating: 89,
+    deal_url: "https://www.nuuvem.com/item/cyberpunk-2077",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+    badge: "Sucesso de Vendas",
+    review_verdict: "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
+  },
+  {
+    id: "deal-witcher3",
+    name: "The Witcher 3: Wild Hunt - Complete Edition",
+    platform: "PC",
+    platform_label: "PC / Steam",
+    store: "Hype Games",
+    regular_price: 129.99,
+    deal_price: 32.49,
+    discount_percent: 75,
+    rating: 97,
+    deal_url: "https://hype.games/br",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
+    badge: "Desconto Histórico -75%",
+    review_verdict: "Um dos maiores RPGs da história. Por esse valor, é compra obrigatória."
+  },
+  {
+    id: "deal-rdr2",
+    name: "Red Dead Redemption 2",
+    platform: "PC",
+    platform_label: "PC / Steam & Epic",
+    store: "Hype Games",
+    regular_price: 299.90,
+    deal_price: 98.96,
+    discount_percent: 67,
+    rating: 92,
+    deal_url: "https://hype.games/br",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg",
+    badge: "Top Avaliado",
+    review_verdict: "Narrativa cinematográfica sem paralelo com mundo aberto hiper-realista da Rockstar."
+  },
+  {
+    id: "deal-gow",
+    name: "God of War",
+    platform: "PC",
+    platform_label: "PC / Steam",
+    store: "Nuuvem",
+    regular_price: 199.90,
+    deal_price: 79.96,
+    discount_percent: 60,
+    rating: 96,
+    deal_url: "https://www.nuuvem.com/item/god-of-war",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
+    badge: "PlayStation no PC -60%",
+    review_verdict: "A jornada nórdica de Kratos e Atreus com combate visceral e excelente port de PC."
+  },
+  {
+    id: "deal-re4",
+    name: "Resident Evil 4 Remake",
+    platform: "PC",
+    platform_label: "PC / Steam",
+    store: "Hype Games",
+    regular_price: 249.00,
+    deal_price: 124.50,
+    discount_percent: 50,
+    rating: 97,
+    deal_url: "https://hype.games/br",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg",
+    badge: "Terror Clássico -50%",
+    review_verdict: "Um dos melhores remakes já feitos na indústria. Ação intensa e visuais deslumbrantes."
+  },
+  {
+    id: "deal-spiderman2",
+    name: "Marvel's Spider-Man 2",
+    platform: "PlayStation",
+    platform_label: "PlayStation 5",
+    store: "Amazon",
+    regular_price: 349.90,
+    deal_price: 239.90,
+    discount_percent: 31,
+    rating: 90,
+    deal_url: "https://www.amazon.com.br",
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+    badge: "Exclusivo PS5",
+    review_verdict: "Gráficos de tirar o fôlego, exploração ágil por Nova York e combate refinado de Peter e Miles."
+  },
+  {
+    id: "deal-psn-card",
+    name: "Cartão Presente PlayStation Store R$ 100",
+    platform: "PlayStation",
+    platform_label: "PS5 / PS4 Gift Card",
+    store: "Hype Games",
+    regular_price: 100.00,
+    deal_price: 95.00,
+    discount_percent: 5,
+    rating: 99,
+    deal_url: "https://hype.games/br",
+    image: "https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600&auto=format&fit=crop&q=80",
+    badge: "Crédito Digital Instantâneo",
+    review_verdict: "Ativação oficial de créditos na PSN brasileira com entrega imediata e Pix."
+  },
+  {
+    id: "deal-gamepass",
+    name: "Xbox Game Pass Ultimate (3 Meses)",
+    platform: "Xbox",
+    platform_label: "Xbox & PC Cloud",
+    store: "Hype Games",
+    regular_price: 179.99,
+    deal_price: 149.90,
+    discount_percent: 17,
+    rating: 98,
+    deal_url: "https://hype.games/br",
+    image: "https://images.unsplash.com/photo-1605901309584-818e25960a8f?w=600&auto=format&fit=crop&q=80",
+    badge: "O Melhor Custo-Benefício Gamer",
+    review_verdict: "Centenas de jogos no catálogo, lançamentos Day One, EA Play e nuvem no celular e PC."
+  },
+  {
+    id: "deal-forza5",
+    name: "Forza Horizon 5",
+    platform: "Xbox",
+    platform_label: "Xbox Series & PC",
+    store: "Nuuvem",
+    regular_price: 249.00,
+    deal_price: 124.50,
+    discount_percent: 50,
+    rating: 88,
+    deal_url: "https://www.nuuvem.com",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1551360/header.jpg",
+    badge: "Corrida em Mundo Aberto -50%",
+    review_verdict: "O melhor jogo de corrida arcade da atualidade, ambientado no vibrante México."
+  },
+  {
+    id: "deal-zelda-totk",
+    name: "The Legend of Zelda: Tears of the Kingdom",
+    platform: "Nintendo",
+    platform_label: "Nintendo Switch",
+    store: "Amazon",
+    regular_price: 399.00,
+    deal_price: 289.00,
+    discount_percent: 28,
+    rating: 96,
+    deal_url: "https://www.amazon.com.br",
+    image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&auto=format&fit=crop&q=80",
+    badge: "Jogo do Ano Switch",
+    review_verdict: "Criatividade sem limites com a mecânica de fusão e exploração vertical fantástica."
+  },
+  {
+    id: "deal-nintendo-eshop",
+    name: "Cartão Presente Nintendo eShop R$ 100",
+    platform: "Nintendo",
+    platform_label: "Nintendo Switch eShop",
+    store: "Hype Games",
+    regular_price: 100.00,
+    deal_price: 96.00,
+    discount_percent: 4,
+    rating: 99,
+    deal_url: "https://hype.games/br",
+    image: "https://images.unsplash.com/photo-1612287233215-d227f2f111ee?w=600&auto=format&fit=crop&q=80",
+    badge: "Crédito Oficial Nintendo",
+    review_verdict: "Compre jogos digitais e DLCs na eShop brasileira com facilidade e segurança."
+  }
+];
+
 export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   pixKey: 'albertalves1205@gmail.com',
   pixReceiverName: 'Albert Alves',
   pixCity: 'SAO PAULO',
+  rakutenSid: '4770537',
+  hypeMid: '53304',
   nuuvemPartnerId: 'albertgamer',
   amazonAssociateId: 'albertgames-20',
   gmgAffiliateId: 'albertgmg',

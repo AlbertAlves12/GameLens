@@ -101,14 +101,6 @@
             <!-- Actions / Status -->
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button 
-                    onclick="openAffiliatesModal()" 
-                    class="bg-[#1b2838] hover:bg-[#233446] border border-[#2a475e] text-amber-300 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm"
-                    title="Configurar códigos de Afiliados (Nuuvem & Amazon)"
-                >
-                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="hidden sm:inline">Meus Afiliados</span>
-                </button>
-                <button 
                     onclick="openPixModal()" 
                     class="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm"
                     title="Apoiar este projeto com Pix"
@@ -166,7 +158,7 @@
         </div>
     </div>
 
-    <!-- PRIMARY NAVIGATION TABS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES) -->
+    <!-- PRIMARY NAVIGATION TABS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES, CRÍTICAS) -->
     <nav class="bg-[#101822] border-b border-[#2a475e] sticky top-16 z-30 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 overflow-x-auto py-2.5">
             <div class="flex items-center gap-2">
@@ -181,17 +173,21 @@
                 </button>
                 <button id="nav-btn-search" onclick="switchMainTab('search')" class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap">
                     <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <span>🔍 Buscar Qualquer Jogo (Steam Ao Vivo)</span>
+                    <span>🔍 Buscar Qualquer Jogo</span>
                 </button>
                 <button id="nav-btn-platforms" onclick="switchMainTab('platforms')" class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap">
                     <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>🎮 Hub Consoles & PC (PS5, Xbox, Switch)</span>
+                    <span>🎮 Consoles & PC</span>
+                </button>
+                <button id="nav-btn-reviews" onclick="switchMainTab('reviews')" class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    <span>⭐ Críticas & Reviews</span>
                 </button>
             </div>
             <div class="hidden lg:flex items-center gap-3 text-[11px] text-slate-400 shrink-0">
                 <span class="flex items-center gap-1.5 text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-md">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    <span>Afiliados: Hype Games (MID 53304) · Nuuvem (MID 46796)</span>
+                    <span>🛡️ Chaves Oficiais · Entrega Imediata · Pix</span>
                 </span>
             </div>
         </div>
@@ -746,8 +742,40 @@
                     </button>
                 </div>
             </div>
+        <!-- SECTION 5: CRÍTICAS & REVIEWS EDITORIAIS GAMELENS -->
+        <div id="tab-section-reviews" class="hidden space-y-8 animate-fade-in">
+            <!-- Header Editorial Banner -->
+            <div class="bg-gradient-to-r from-[#171a21] via-[#1e1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-bold">
+                            <span>⭐ GAMELENS EDITORIAL · JORNALISMO GAMER INDEPENDENTE</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Críticas, Análises Técnicas & Vereditos
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                            Avaliações transparentes sem filtro corporativo. Dissecamos gameplay, otimização gráfica, narrativa, rejogabilidade e custo-benefício em reais para você investir seu tempo e dinheiro com segurança.
+                        </p>
+                    </div>
+                    <!-- Filtros Rápidos de Críticas -->
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button onclick="filterReviews('all')" class="review-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition">Todas</button>
+                        <button onclick="filterReviews('masterpiece')" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">Obras-Primas (9.8+)</button>
+                        <button onclick="filterReviews('RPG')" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">RPGs</button>
+                        <button onclick="filterReviews('Ação')" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">Ação / FPS</button>
+                        <button onclick="filterReviews('Indie')" class="review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">Indies & Sandbox</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Dinâmica de Críticas -->
+            <div id="reviews-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Preenchido dinamicamente pelo JavaScript -->
+            </div>
         </div>
-        <!-- FIM SECTION 4: HUB MULTIPLATAFORMA -->
+        <!-- FIM SECTION 5: CRÍTICAS & REVIEWS -->
 
     </main>
 
@@ -877,6 +905,100 @@
 
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODAL DE LEITURA COMPLETA DE CRÍTICA EDITORIAL -->
+    <div id="review-detail-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl animate-fade-in relative my-8 max-h-[90vh] flex flex-col">
+            <!-- Header Modal Banner -->
+            <div class="relative h-56 sm:h-64 w-full bg-[#101822] shrink-0 overflow-hidden">
+                <img id="review-modal-banner" src="" alt="Capa" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-[#1b2838]/60 to-transparent"></div>
+                <button 
+                    onclick="closeReviewModal()" 
+                    class="absolute top-4 right-4 bg-black/70 hover:bg-black text-white rounded-full p-2.5 transition z-20 shadow-md"
+                    title="Fechar"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <div class="absolute bottom-4 left-6 right-6 flex items-end justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span id="review-modal-badge" class="px-2.5 py-0.5 rounded text-[11px] font-black text-black bg-amber-400">Obra-Prima</span>
+                            <span id="review-modal-meta" class="text-xs text-slate-300">Redação GameLens · 4 min de leitura</span>
+                        </div>
+                        <h2 id="review-modal-title" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Baldur's Gate 3</h2>
+                    </div>
+                    <div class="text-right shrink-0 bg-black/60 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Nota Editorial</span>
+                        <span id="review-modal-score" class="text-2xl sm:text-3xl font-black text-amber-300">★ 9.9</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo com Scroll -->
+            <div class="p-6 sm:p-8 space-y-6 overflow-y-auto flex-1">
+                <!-- Headline e Lead -->
+                <div class="bg-[#171a21] border-l-4 border-amber-400 p-4 rounded-r-xl">
+                    <h3 id="review-modal-headline" class="text-base sm:text-lg font-bold text-white mb-1.5"></h3>
+                    <p id="review-modal-lead" class="text-xs sm:text-sm text-slate-300 italic leading-relaxed"></p>
+                </div>
+
+                <!-- Texto Completo da Análise -->
+                <div class="space-y-4 text-sm text-slate-300 leading-relaxed" id="review-modal-body">
+                </div>
+
+                <!-- Tabela de Avaliação por Pilares Técnicos -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-5 space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Avaliação por Pilares (0 a 10)</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center" id="review-modal-scores-grid">
+                    </div>
+                </div>
+
+                <!-- Prós e Contras -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-4 space-y-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wide text-emerald-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Pontos Fortes (Prós)</span>
+                        </h4>
+                        <ul id="review-modal-pros" class="space-y-1.5 text-xs text-slate-300"></ul>
+                    </div>
+                    <div class="bg-rose-950/40 border border-rose-500/30 rounded-xl p-4 space-y-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wide text-rose-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <span>Ressalvas (Contras)</span>
+                        </h4>
+                        <ul id="review-modal-cons" class="space-y-1.5 text-xs text-slate-300"></ul>
+                    </div>
+                </div>
+
+                <!-- Box de Onde Comprar Mais Barato -->
+                <div class="bg-gradient-to-r from-[#171a21] to-[#121c27] border border-[#2a475e] rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-emerald-400 block">Melhor Oportunidade Atual</span>
+                        <h4 class="text-sm font-bold text-white" id="review-modal-deal-title">Chave Oficial com Desconto</h4>
+                        <p class="text-xs text-slate-400" id="review-modal-deal-sub">Ativação instantânea em reais e suporte a Pix</p>
+                    </div>
+                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                        <a id="review-modal-nuuvem-btn" href="#" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-extrabold text-center transition shadow-md">
+                            Pegar na Nuuvem
+                        </a>
+                        <a id="review-modal-hype-btn" href="#" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-extrabold text-center transition shadow-md">
+                            Hype Games
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="p-4 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between">
+                <span class="text-xs text-slate-400">GameLens Editorial · Opinião 100% Autoral</span>
+                <button onclick="closeReviewModal()" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#1b2838] hover:bg-[#233446] rounded-lg border border-[#2a475e] transition">
+                    Fechar Crítica
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1013,15 +1135,16 @@
         }
 
         // ==============================================================================
-        // CONTROLE DAS ABAS PRINCIPAIS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES)
+        // CONTROLE DAS ABAS PRINCIPAIS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES, CRÍTICAS)
         // ==============================================================================
         let activeTab = 'dashboard';
         let allDeals = [];
         let currentDealsPlatform = 'all';
+        let currentReviewFilter = 'all';
 
         function switchMainTab(tab) {
             activeTab = tab;
-            const tabs = ['dashboard', 'deals', 'search', 'platforms'];
+            const tabs = ['dashboard', 'deals', 'search', 'platforms', 'reviews'];
             
             tabs.forEach(t => {
                 const btn = document.getElementById(`nav-btn-${t}`);
@@ -1046,8 +1169,350 @@
                     input.focus();
                     triggerQuickSearch('Elden Ring');
                 }
+            } else if (tab === 'reviews') {
+                renderReviewsGrid();
             }
         }
+
+        // ==============================================================================
+        // BASE DE DADOS EDITORIAL DE CRÍTICAS & REVIEWS GAMELENS
+        // ==============================================================================
+        const REVIEWS_DATABASE = {
+            '1086940': {
+                id: '1086940',
+                name: "Baldur's Gate 3",
+                badge: 'Obra-Prima',
+                badgeColor: '#a855f7',
+                score: 9.9,
+                genre: 'RPG',
+                scores: { gameplay: 10, graphics: 9.6, narrative: 10, replayability: 10, valueForMoney: 10 },
+                headline: "O novo marco histórico dos RPGs: liberdade absoluta que redefine os videogames",
+                verdictLead: "Uma aula magistral de design, narrativa reativa e respeito inegociável à inteligência e criatividade do jogador.",
+                fullAnalysis: "Baldur's Gate 3 é mais do que um grande RPG; é um ponto de inflexão na indústria. A Larian Studios conseguiu transpor para o meio digital a sensação tátil de uma mesa de D&D de alto nível com mestres e amigos inspirados. Cada combate se transforma em um quebra-cabeça tático tridimensional onde empurrar um inimigo de um penhasco, eletrificar uma poça d'água ou conjurar trevas são soluções tão viáveis quanto um ataque de espada.\n\nO elenco de companheiros (como Astarion, Shadowheart e Gale) possui camadas emocionais e conflitos morais raramente vistos com tanta maturidade. O jogo não tem medo de deixar você cometer erros grotescos e abraçar as consequências dramáticas disso. É uma compra obrigatória e o investimento com o maior retorno de horas por real gasto de toda a década.",
+                pros: ["Liberdade de escolha e improvisação sem precedentes", "Combate por turnos rico, vertical e profundamente estratégico", "Companheiros inesquecíveis e dublagem impecável", "Centenas de horas de conteúdo sem microtransações predatórias"],
+                cons: ["Curva de aprendizado das regras da 5ª edição de D&D para novatos", "Ato 3 pode exigir CPUs potentes em áreas densas de cidade"],
+                bottomLine: "Um jogo que será lembrado e jogado pelas próximas duas décadas. Vale cada centavo do valor cheio.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 159,99 (-20%)" }
+            },
+            '1245620': {
+                id: '1245620',
+                name: "Elden Ring",
+                badge: 'Obra-Prima',
+                badgeColor: '#eab308',
+                score: 9.8,
+                genre: 'RPG',
+                scores: { gameplay: 9.9, graphics: 9.7, narrative: 9.5, replayability: 10, valueForMoney: 9.9 },
+                headline: "A apoteose do design de mundo aberto com a brutalidade poética de Hidetaka Miyazaki",
+                verdictLead: "As Terras Intermédias recompensam a curiosidade como nenhum outro mapa aberto já fez antes.",
+                fullAnalysis: "Elden Ring pega a fórmula refinada dos Soulslike e a transporta para um mundo colossal onde nenhum ponto de interrogação precisa ser marcado no minimapa: o próprio horizonte seduz o jogador a cavalgar até castelos flutuantes, catacumbas secretas e florestas enevoadas.\n\nA variedade de arquétipos, armas, magias e invocações de cinzas democratiza a dificuldade sem jamais diminuir o senso de conquista. Vencer um semideus após dezenas de tentativas continua sendo um dos momentos mais eufóricos que um videogame pode proporcionar.",
+                pros: ["Direção de arte monumental que compensa qualquer limitação técnica", "Liberdade de rota que elimina a frustração de ficar travado em um chefe", "Centenas de armas, magias e builds radicalmente diferentes", "Trilha sonora épica com coros e orquestrações inesquecíveis"],
+                cons: ["Narrativa fragmentada que exige atenção a descrições de itens", "Alguns chefes do final do jogo têm janelas de ataque implacáveis"],
+                bottomLine: "Um dos jogos mais aclamados de todos os tempos. Se ainda não jogou, aproveite a primeira promoção disponível.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 151,70 (-34%)" }
+            },
+            '730': {
+                id: '730',
+                name: "Counter-Strike 2",
+                badge: 'Essencial',
+                badgeColor: '#f97316',
+                score: 9.3,
+                genre: 'Ação',
+                scores: { gameplay: 9.8, graphics: 9.2, narrative: 7.0, replayability: 10, valueForMoney: 10 },
+                headline: "O soberano dos FPS táticos entra em sua era gráfica mais refinada na Source 2",
+                verdictLead: "Com fumaças volumétricas interativas e gunplay incomparável, CS2 continua sendo o teste de precisão definitivo.",
+                fullAnalysis: "A transição de CS:GO para Counter-Strike 2 trouxe o motor Source 2 com iluminação impecável, materiais reativos e a mecânica revolucionária de fumaças responsivas a disparos e granadas HE. Para quem busca maestria mecânica, posicionamento e comunicação sob pressão, nenhum outro título no mercado entrega tanta adrenalina por rodada.\n\nEmbora o sistema de sub-tick e o anti-cheat continuem sendo alvos de constante aprimoramento por parte da Valve, a base do jogo permanece intocável: uma fórmula limpa, puramente competitiva e gratuita para jogar.",
+                pros: ["Gunplay e resposta de tiro mais precisos da história dos videogames", "Novas fumaças volumétricas que mudam totalmente o metagame", "Gratuito para começar e mercado econômico de skins vibrante", "Comunidade gigantesca com servidores ativos 24 horas por dia"],
+                cons: ["Curva de aprendizado impiedosa contra jogadores veteranos", "Necessita do Status Prime para partidas ranqueadas limpas"],
+                bottomLine: "Indispensável na biblioteca de qualquer fã de FPS. O Prime se paga sozinho com os drops semanais de caixas.",
+                author: "Redação GameLens",
+                readTime: "3 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
+                bestDeal: { store: "Hype Games", price: "Gratuito (Prime R$ 74,99)" }
+            },
+            '1091500': {
+                id: '1091500',
+                name: "Cyberpunk 2077",
+                badge: 'Obra-Prima',
+                badgeColor: '#facc15',
+                score: 9.5,
+                genre: 'RPG',
+                scores: { gameplay: 9.4, graphics: 10, narrative: 9.7, replayability: 9.3, valueForMoney: 9.5 },
+                headline: "A redenção definitiva: Night City atinge o ápice de imersão e narrativa",
+                verdictLead: "Após a atualização 2.0 e a expansão Phantom Liberty, Cyberpunk se tornou uma das maiores experiências audiovisuais já criadas.",
+                fullAnalysis: "Night City é uma cidade que respira verticalidade, decadência e luz neon. A revisão do sistema policial, das árvores de habilidades e do combate veicular finalmente entregou a visão que os desenvolvedores prometeram inicialmente.\n\nA expansão Phantom Liberty, estrelando Idris Elba em Dogtown, oferece uma das melhores tramas de espionagem política dos games, coroando Cyberpunk 2077 como compra indispensável para quem possui hardware moderno.",
+                pros: ["Gráficos e Ray Tracing que definem o padrão visual da atual geração", "Trilha sonora frenética e design de som de primeira grandeza", "Personagens memoráveis com dublagem primorosa em português", "História emocionante com múltiplos finais dramáticos"],
+                cons: ["Exige hardware de ponta para aproveitar o Path Tracing máximo", "Certas mecânicas de física veicular continuam um pouco leves"],
+                bottomLine: "Um espetáculo visual e emocional indispensável. Vale cada minuto.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 99,95 (-50%)" }
+            },
+            '292030': {
+                id: '292030',
+                name: "The Witcher 3: Wild Hunt",
+                badge: 'Obra-Prima',
+                badgeColor: '#f43f5e',
+                score: 9.8,
+                genre: 'RPG',
+                scores: { gameplay: 9.5, graphics: 9.8, narrative: 10, replayability: 9.6, valueForMoney: 10 },
+                headline: "O épico maduro de Geralt de Rívia que estabeleceu a régua narrativa dos mundos abertos",
+                verdictLead: "Mesmo anos após o lançamento, as missões secundárias de The Witcher 3 humilham histórias principais de rivais.",
+                fullAnalysis: "The Witcher 3: Wild Hunt não trata o jogador como uma criança. Em Velen, Novigrad e Skellige, suas escolhas não são entre 'bem absoluto' ou 'mal cartunesco', mas sim entre o mal menor e as consequências imprevisíveis da guerra e do preconceito.\n\nCom a atualização Next-Gen gratuita trazendo Ray Tracing, texturas em 4K e melhorias de câmera, e as expansões Hearts of Stone e Blood and Wine (esta última com o tamanho de um jogo inteiro à parte), este pacote é uma das maiores experiências culturais da nossa era.",
+                pros: ["Roteiro impecável até mesmo nas menores missões secundárias", "Mundo vivo, melancólico e deslumbrante com Ray Tracing", "Duas das melhores expansões de DLC já lançadas", "O minigame Gwent é tão bom que mereceu jogo próprio"],
+                cons: ["Combate corpo a corpo pode parecer levemente escorregadio", "Excesso de pontos de interrogação no mapa de Skellige"],
+                bottomLine: "Uma obra indispensável que transcende o gênero. Em promoção com todas as expansões, é imperdível.",
+                author: "Redação GameLens",
+                readTime: "4 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 32,49 (-75%)" }
+            },
+            '105600': {
+                id: '105600',
+                name: "Terraria",
+                badge: 'Obra-Prima',
+                badgeColor: '#10b981',
+                score: 9.7,
+                genre: 'Indie',
+                scores: { gameplay: 9.9, graphics: 9.2, narrative: 8.0, replayability: 10, valueForMoney: 10 },
+                headline: "O maior tesouro de exploração 2D, combate a chefes e progressão de itens",
+                verdictLead: "Mais de 13 anos de suporte carinhoso transformaram Terraria em um gigante de conteúdo.",
+                fullAnalysis: "Reduzir Terraria a um 'Minecraft 2D' é um erro crasso. Terraria é, antes de tudo, um RPG de ação focado em progressão brutal de equipamentos, criação de arenas, mineração perigosa nas profundezas do inferno e batalhas contra chefes titânicos que disparam projéteis em padrões de bullet hell.\n\nCom suporte completo a mods através do tModLoader e modo cooperativo impecável, Terraria por menos de R$ 35,00 é um dos maiores absurdos de custo-benefício de toda a história dos games.",
+                pros: ["Quantidade astronômica de armas, armaduras, acessórios e magias", "Progressão Hardmode que dobra o tamanho e desafio do jogo", "Suporte oficial nativo a mods com o tModLoader", "Preço extremamente acessível em qualquer promoção"],
+                cons: ["Exige consulta frequente à wiki oficial para entender receitas", "Interface de inventário densa para quem joga em controle"],
+                bottomLine: "Qualquer pessoa que goste de videogames precisa ter Terraria instalado. Compra indispensável.",
+                author: "Redação GameLens",
+                readTime: "3 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/105600/header.jpg",
+                bestDeal: { store: "Hype Games", price: "R$ 16,49 (-50%)" }
+            },
+            '553850': {
+                id: '553850',
+                name: "HELLDIVERS 2",
+                badge: 'Essencial',
+                badgeColor: '#fb923c',
+                score: 9.2,
+                genre: 'Ação',
+                scores: { gameplay: 9.8, graphics: 9.4, narrative: 8.5, replayability: 9.5, valueForMoney: 9.0 },
+                headline: "A glória da cooperação caótica e satírica em defesa da Democracia Gerenciada",
+                verdictLead: "Combate visceral, física imprevisível e fogo amigo transformam cada missão em uma comédia épica de ação.",
+                fullAnalysis: "HELLDIVERS 2 capturou o espírito dos filmes de ação militar dos anos 80 e 90 com uma sátira perfeita de Tropas Estelares. Chamar bombardeios orbitais, armas pesadas e lutar contra hordas de insetos Terminídios e robôs Automatons nunca envelhece.\n\nA guerra galáctica comunitária e os comandos de estratégia mantêm a comunidade unida em um propósito comum de libertação estelar.",
+                pros: ["Sensação de impacto e poder das armas e bombardeios", "Humor satírico brilhante e momentos cinematográficos espontâneos", "Progressão constante com passes de batalha permanentes", "Excelente trabalho de áudio e música triunfante"],
+                cons: ["Exige jogar com microfone ou amigos para coordenação tática máxima", "Requer conexão com internet constante"],
+                bottomLine: "O melhor jogo cooperativo de tiro da década. Pura diversão garantida.",
+                author: "Redação GameLens",
+                readTime: "3 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/553850/header.jpg",
+                bestDeal: { store: "Nuuvem", price: "R$ 179,50 (-10%)" }
+            },
+            '1145360': {
+                id: '1145360',
+                name: "Hades",
+                badge: 'Obra-Prima',
+                badgeColor: '#e11d48',
+                score: 9.8,
+                genre: 'Indie',
+                scores: { gameplay: 10, graphics: 10, narrative: 9.8, replayability: 10, valueForMoney: 10 },
+                headline: "O roguelike que transformou cada morte em avanço narrativo apaixonante",
+                verdictLead: "A Supergiant Games alcançou a perfeição do ciclo de jogabilidade, arte e mitologia grega.",
+                fullAnalysis: "Zagreus tentando escapar dos domínios de seu pai Hades é uma aula de ritmo. A combinação de bênçãos dos deuses do Olimpo cria sinergias explosivas e viciantes.\n\nAo contrário de roguelikes tradicionais que parecem punitivos, morrer em Hades é apenas o começo de novos diálogos envolventes com Aquiles, Nyx, Cérbero e Megaira.",
+                pros: ["Combate responsivo e satisfatório na taxa máxima de quadros", "Direção de arte ilustrada e trilha sonora de Darren Korb de tirar o fôlego", "Narrativa que avança mesmo na derrota", "Tradução primorosa para português do Brasil"],
+                cons: ["Pode causar dores nos dedos após sessões muito intensas em controles", "Poucos ambientes principais de bioma"],
+                bottomLine: "Um dos melhores jogos da década. Se você ainda não tem na sua conta, pegue já.",
+                author: "Redação GameLens",
+                readTime: "3 min de leitura",
+                banner: "https://cdn.akamai.steamstatic.com/steam/apps/1145360/header.jpg",
+                bestDeal: { store: "Hype Games", price: "R$ 29,59 (-60%)" }
+            }
+        };
+
+        function filterReviews(category) {
+            currentReviewFilter = category;
+            document.querySelectorAll('.review-filter-btn').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                const isMatch = (category === 'all' && text.includes('todas')) ||
+                                (category === 'masterpiece' && text.includes('obra')) ||
+                                (text.includes(category.toLowerCase()));
+                if (isMatch) {
+                    btn.className = 'review-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition';
+                } else {
+                    btn.className = 'review-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition';
+                }
+            });
+            renderReviewsGrid();
+        }
+
+        function renderReviewsGrid() {
+            const grid = document.getElementById('reviews-cards-grid');
+            if (!grid) return;
+
+            const reviewsList = Object.values(REVIEWS_DATABASE).filter(r => {
+                if (currentReviewFilter === 'all') return true;
+                if (currentReviewFilter === 'masterpiece') return r.score >= 9.8;
+                return r.genre === currentReviewFilter;
+            });
+
+            if (reviewsList.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8">
+                        <p class="text-sm font-semibold text-white mb-1">Nenhuma crítica encontrada nesta categoria.</p>
+                        <p class="text-xs">Clique em "Todas" para ver o catálogo completo de análises.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = reviewsList.map(r => {
+                const nuuvemUrl = getAffiliateNuuvemUrl({ id: r.id, name: r.name });
+                const hypeUrl = getAffiliateHypeUrl(r.name);
+
+                return `
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="${r.banner}" alt="${r.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                                <span class="px-2.5 py-0.5 rounded text-[11px] font-black text-black shadow-md" style="background-color: ${r.badgeColor}">
+                                    ${r.badge}
+                                </span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-200 border border-white/10">
+                                    ${r.genre}
+                                </span>
+                            </div>
+                            <div class="absolute top-2.5 right-2.5">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-black/80 text-amber-300 border border-amber-500/40">
+                                    ★ ${r.score}
+                                </span>
+                            </div>
+                            <div class="absolute bottom-2 left-3 right-3">
+                                <span class="text-[10px] text-slate-400 block">${r.author} · ${r.readTime}</span>
+                                <h3 class="text-base font-extrabold text-white truncate">${r.name}</h3>
+                            </div>
+                        </div>
+
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200 line-clamp-1 mb-1">${r.headline}</h4>
+                                <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                                    ${r.verdictLead}
+                                </p>
+                            </div>
+
+                            <!-- Prós rápidos -->
+                            <div class="space-y-1 bg-[#171a21] p-2.5 rounded-lg border border-[#2a475e]/60 text-[11px]">
+                                <div class="text-emerald-400 flex items-center gap-1 font-semibold truncate">
+                                    <span>✔</span>
+                                    <span>${r.pros[0]}</span>
+                                </div>
+                                <div class="text-emerald-400 flex items-center gap-1 font-semibold truncate">
+                                    <span>✔</span>
+                                    <span>${r.pros[1]}</span>
+                                </div>
+                            </div>
+
+                            <!-- Onde Comprar Mais Barato -->
+                            <div class="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Menor Preço Ativo</span>
+                                    <span class="text-sm font-extrabold text-emerald-400 font-mono">${r.bestDeal.price}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-400 block">Loja Parceira</span>
+                                    <span class="text-xs font-bold text-slate-200">${r.bestDeal.store}</span>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button onclick="openReviewModal('${r.id}')" class="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1">
+                                    <span>📖 Ler Análise</span>
+                                </button>
+                                <a href="${nuuvemUrl}" target="_blank" rel="noreferrer" class="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1">
+                                    <span>🛒 Ver Oferta</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openReviewModal(gameId) {
+            const r = REVIEWS_DATABASE[gameId] || REVIEWS_DATABASE['1086940'];
+            if (!r) return;
+
+            document.getElementById('review-modal-banner').src = r.banner;
+            document.getElementById('review-modal-title').textContent = r.name;
+            document.getElementById('review-modal-badge').textContent = r.badge;
+            document.getElementById('review-modal-badge').style.backgroundColor = r.badgeColor;
+            document.getElementById('review-modal-meta').textContent = `${r.author} · ${r.readTime}`;
+            document.getElementById('review-modal-score').textContent = `★ ${r.score}`;
+
+            document.getElementById('review-modal-headline').textContent = r.headline;
+            document.getElementById('review-modal-lead').textContent = `"${r.verdictLead}"`;
+
+            // Parágrafos da análise
+            const paragraphs = r.fullAnalysis.split('\n\n').map(p => `<p>${p}</p>`).join('');
+            document.getElementById('review-modal-body').innerHTML = paragraphs;
+
+            // Pilares de notas
+            const scoresGrid = document.getElementById('review-modal-scores-grid');
+            if (scoresGrid) {
+                scoresGrid.innerHTML = `
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
+                        <span class="text-[10px] text-slate-400 block uppercase">Gameplay</span>
+                        <span class="text-base font-bold text-white font-mono">${r.scores.gameplay}/10</span>
+                    </div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
+                        <span class="text-[10px] text-slate-400 block uppercase">Gráficos</span>
+                        <span class="text-base font-bold text-white font-mono">${r.scores.graphics}/10</span>
+                    </div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
+                        <span class="text-[10px] text-slate-400 block uppercase">Narrativa</span>
+                        <span class="text-base font-bold text-white font-mono">${r.scores.narrative}/10</span>
+                    </div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
+                        <span class="text-[10px] text-slate-400 block uppercase">Rejogabilidade</span>
+                        <span class="text-base font-bold text-white font-mono">${r.scores.replayability}/10</span>
+                    </div>
+                    <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]">
+                        <span class="text-[10px] text-slate-400 block uppercase">Custo-Benefício</span>
+                        <span class="text-base font-bold text-emerald-400 font-mono">${r.scores.valueForMoney}/10</span>
+                    </div>
+                `;
+            }
+
+            // Prós e Contras
+            document.getElementById('review-modal-pros').innerHTML = r.pros.map(p => `<li class="flex items-start gap-1.5"><span class="text-emerald-400">✔</span><span>${p}</span></li>`).join('');
+            document.getElementById('review-modal-cons').innerHTML = r.cons.map(c => `<li class="flex items-start gap-1.5"><span class="text-rose-400">✖</span><span>${c}</span></li>`).join('');
+
+            // Deal box
+            document.getElementById('review-modal-deal-title').textContent = `${r.name} - ${r.bestDeal.price}`;
+            document.getElementById('review-modal-deal-sub').textContent = `Menor preço recomendado na loja parceira oficial ${r.bestDeal.store} com ativação imediata.`;
+
+            const nuuvemBtn = document.getElementById('review-modal-nuuvem-btn');
+            if (nuuvemBtn) nuuvemBtn.href = getAffiliateNuuvemUrl({ id: r.id, name: r.name });
+
+            const hypeBtn = document.getElementById('review-modal-hype-btn');
+            if (hypeBtn) hypeBtn.href = getAffiliateHypeUrl(r.name);
+
+            document.getElementById('review-detail-modal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-detail-modal').classList.add('hidden');
+        }
+
+        // Fechar ao clicar fora
+        document.getElementById('review-detail-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'review-detail-modal') closeReviewModal();
+        });
 
         // ==============================================================================
         // RADAR DE PROMOÇÕES E OFERTAS
