@@ -2719,159 +2719,292 @@ requests>=2.31.0`,
 
       </main>
 
-      {/* GAME DETAIL MODAL (/api/game/{game_id}) - com cor de destaque do jogo */}
-      {selectedGame && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
-            
-            {/* Botão fechar */}
-            <button
-              onClick={() => setSelectedGameId(null)}
-              className="absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white rounded-full p-2 transition z-10"
-              title="Fechar"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            {/* Banner da Steam com linha de cor tema */}
-            <div className="relative h-48 sm:h-56 w-full bg-[#171a21] overflow-hidden">
+      {/* MODAL UNIFICADO DE DADOS DO JOGO, CRÍTICA, REQUISITOS & AFILIADOS */}
+      {modalGame && (
+        <div
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setModalGame(null)}
+        >
+          <div
+            className="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl relative my-8 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header Banner com Capa */}
+            <div className="relative h-56 sm:h-64 w-full bg-[#101822] shrink-0 overflow-hidden">
               <img
-                src={selectedGame.header_image}
-                alt={selectedGame.name}
+                src={modalGame.image}
+                alt={modalGame.name}
+                onError={handleImageError}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-[#1b2838]/60 to-transparent"></div>
               
-              {/* Faixa com a cor tema do jogo */}
+              {/* Linha com cor tema do jogo se disponível */}
               <div
-                className="absolute top-0 left-0 right-0 h-1"
-                style={{ backgroundColor: selectedGame.color }}
+                className="absolute top-0 left-0 right-0 h-1.5"
+                style={{ backgroundColor: modalGame.color || '#66c0f4' }}
               ></div>
 
-              <div className="absolute bottom-4 left-6 right-6">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: selectedGame.color }}
-                  ></span>
-                  <h3 className="text-2xl font-extrabold text-white">{selectedGame.name}</h3>
+              {/* Botão Fechar */}
+              <button
+                onClick={() => setModalGame(null)}
+                className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white rounded-full p-2.5 transition z-20 shadow-md border border-white/10"
+                title="Fechar (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    {modalGame.discount_percent !== undefined && modalGame.discount_percent > 0 && (
+                      <span className="px-2.5 py-0.5 rounded text-xs font-black bg-red-600 text-white shadow-md">
+                        -{modalGame.discount_percent}% OFF
+                      </span>
+                    )}
+                    <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-black/80 text-cyan-300 border border-cyan-500/30">
+                      {modalGame.platform_label || 'Multiplataforma'}
+                    </span>
+                    {modalGame.store && (
+                      <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-black/60 text-slate-300 border border-white/10">
+                        Loja: {modalGame.store}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{modalGame.name}</h2>
+                  <p className="text-xs text-slate-300 mt-1">
+                    {modalGame.developer || 'Desenvolvedora Oficial'} {modalGame.release_year ? `· ${modalGame.release_year}` : ''}
+                  </p>
                 </div>
-                <p className="text-xs text-slate-300 mt-1">
-                  {selectedGame.developer} · Lançamento {selectedGame.release_year}
-                </p>
+
+                <div className="text-right shrink-0 bg-black/70 backdrop-blur-sm border border-amber-500/40 px-4 py-2 rounded-xl">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Nota / Aclamação</span>
+                  <span className="text-2xl sm:text-3xl font-black text-amber-300 font-mono">
+                    ★ {modalGame.user_rating}%
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Conteúdo */}
-            <div className="p-6 space-y-6">
+            {/* Conteúdo com Scroll */}
+            <div className="p-6 sm:p-8 space-y-6 overflow-y-auto flex-1 text-slate-200">
               
-              <p className="text-sm text-slate-300 leading-relaxed">
-                {selectedGame.short_description}
-              </p>
+              {/* Card Destaque / Headline */}
+              {modalGame.headline && (
+                <div className="bg-[#171a21] border-l-4 border-[#66c0f4] p-4 rounded-r-xl">
+                  <h3 className="text-sm sm:text-base font-bold text-white mb-1">
+                    {modalGame.headline}
+                  </h3>
+                  {modalGame.review_verdict && (
+                    <p className="text-xs sm:text-sm text-slate-300 italic leading-relaxed">
+                      "{modalGame.review_verdict}"
+                    </p>
+                  )}
+                </div>
+              )}
 
-              {/* 4 Cards de Métricas do Jogo */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#171a21] p-4 rounded-lg border border-[#2a475e]">
+              {/* Descrição */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Sobre o Jogo</h4>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  {modalGame.short_description}
+                </p>
+              </div>
+
+              {/* Grid 4 Cards de Métricas */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#171a21] p-4 rounded-xl border border-[#2a475e]">
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Horas Jogadas</span>
-                  <span
-                    className="text-lg font-bold font-mono tabular-nums"
-                    style={{ color: selectedGame.color }}
-                  >
-                    {selectedGame.hours_played}h
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                    {modalGame.hours_played ? 'Horas Jogadas' : 'Preço Regular'}
+                  </span>
+                  <span className="text-base font-bold text-slate-300 font-mono tabular-nums">
+                    {modalGame.hours_played ? `${modalGame.hours_played}h` : modalGame.regular_price ? `R$ ${modalGame.regular_price.toFixed(2).replace('.', ',')}` : '--'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Avaliação</span>
-                  <span className="text-lg font-bold text-emerald-400 font-mono tabular-nums">
-                    {selectedGame.user_rating}%
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                    {modalGame.discount_percent ? 'Desconto Ativo' : 'Avaliação'}
+                  </span>
+                  <span className="text-base font-bold text-emerald-400 font-mono tabular-nums">
+                    {modalGame.discount_percent ? `-${modalGame.discount_percent}%` : `${modalGame.user_rating}%`}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Pico 24h</span>
-                  <span className="text-lg font-bold text-white font-mono tabular-nums">
-                    {selectedGame.peak_24h_players.toLocaleString('pt-BR')}
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Plataforma</span>
+                  <span className="text-xs font-bold text-cyan-300 truncate block">
+                    {modalGame.platform_label || 'PC & Consoles'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Preço</span>
-                  <span className="text-lg font-bold text-white font-mono tabular-nums">
-                    {selectedGame.price_formatted}
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Menor Preço</span>
+                  <span className="text-base font-extrabold text-emerald-400 font-mono tabular-nums">
+                    {modalGame.price_formatted}
                   </span>
                 </div>
               </div>
 
-              {/* Conquistas e Gêneros */}
-              <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 pt-2 border-t border-[#2a475e]">
-                <div className="flex items-center gap-1.5">
-                  <span>Gêneros:</span>
-                  <div className="flex items-center gap-1">
-                    {selectedGame.genres.map((g) => (
-                      <span
-                        key={g}
-                        className="px-2 py-0.5 rounded text-[11px] font-medium"
-                        style={{
-                          backgroundColor: `${getGenreColor(g)}20`,
-                          color: getGenreColor(g)
-                        }}
-                      >
-                        {g}
-                      </span>
-                    ))}
+              {/* Prós e Contras se disponível */}
+              {((modalGame.pros && modalGame.pros.length > 0) || (modalGame.cons && modalGame.cons.length > 0)) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {modalGame.pros && modalGame.pros.length > 0 && (
+                    <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-4 space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-emerald-400 flex items-center gap-1.5">
+                        <ThumbsUp className="w-4 h-4 text-emerald-400" />
+                        <span>Pontos Fortes (Prós)</span>
+                      </h4>
+                      <ul className="space-y-1.5 text-xs text-slate-300">
+                        {modalGame.pros.map((p, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-emerald-400 font-bold">✔</span>
+                            <span>{p}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {modalGame.cons && modalGame.cons.length > 0 && (
+                    <div className="bg-rose-950/40 border border-rose-500/30 rounded-xl p-4 space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-rose-400 flex items-center gap-1.5">
+                        <ThumbsDown className="w-4 h-4 text-rose-400" />
+                        <span>Ressalvas (Contras)</span>
+                      </h4>
+                      <ul className="space-y-1.5 text-xs text-slate-300">
+                        {modalGame.cons.map((c, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-rose-400 font-bold">✖</span>
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Especificações Técnicas e Requisitos de Sistema */}
+              {modalGame.specs && (
+                <div className="bg-[#171a21] border border-[#2a475e] rounded-xl p-4 space-y-2.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <Monitor className="w-4 h-4 text-[#66c0f4]" />
+                    <span>Requisitos Mínimos & Configuração Recomendada</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
+                      <span className="text-[10px] text-slate-400 block">Sistema Operacional</span>
+                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.os}</strong>
+                    </div>
+                    <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
+                      <span className="text-[10px] text-slate-400 block">Processador (CPU)</span>
+                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.processor}</strong>
+                    </div>
+                    <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
+                      <span className="text-[10px] text-slate-400 block">Memória RAM</span>
+                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.memory}</strong>
+                    </div>
+                    <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
+                      <span className="text-[10px] text-slate-400 block">Placa de Vídeo (GPU)</span>
+                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.graphics}</strong>
+                    </div>
+                    <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60 sm:col-span-2 lg:col-span-2">
+                      <span className="text-[10px] text-slate-400 block">Armazenamento Livre</span>
+                      <strong className="text-emerald-400 font-mono text-[11px] truncate block">{modalGame.specs.storage}</strong>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <span>Conquistas: <strong className="text-[#66c0f4] font-mono">{selectedGame.achievements_unlocked} / {selectedGame.total_achievements}</strong></span>
+              )}
+
+              {/* Seção de Links Oficiais de Compra com Afiliados Rastreáveis */}
+              <div className="bg-gradient-to-r from-[#171a21] via-[#121c27] to-[#171a21] border border-[#2a475e] rounded-xl p-5 space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-extrabold text-white flex items-center gap-1.5">
+                    <Zap className="w-4 h-4 text-emerald-400" />
+                    <span>Lojas Parceiras Oficiais com Desconto</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">
+                    Comissão Ativa & Suporte Pix
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <a
+                    href={modalGame.buyUrls.nuuvem}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg transition flex items-center justify-between text-xs font-extrabold shadow-sm"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Nuuvem</span>
+                    </div>
+                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">MID 46796</span>
+                  </a>
+
+                  <a
+                    href={modalGame.buyUrls.hype}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition flex items-center justify-between text-xs font-extrabold shadow-sm"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Gift className="w-4 h-4" />
+                      <span>Hype Games</span>
+                    </div>
+                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">MID 53304</span>
+                  </a>
+
+                  {modalGame.buyUrls.amazon ? (
+                    <a
+                      href={modalGame.buyUrls.amazon}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3.5 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-black rounded-lg transition flex items-center justify-between text-xs font-extrabold shadow-sm"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-4 h-4" />
+                        <span>Amazon BR</span>
+                      </div>
+                      <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Associados</span>
+                    </a>
+                  ) : modalGame.buyUrls.steam ? (
+                    <a
+                      href={modalGame.buyUrls.steam}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3.5 py-2.5 bg-[#2a475e] hover:bg-[#38bdf8] hover:text-[#101822] text-white rounded-lg transition flex items-center justify-between text-xs font-bold"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <ExternalLink className="w-4 h-4" />
+                        <span>Steam Store</span>
+                      </div>
+                      <span className="text-[10px] bg-black/30 px-1.5 py-0.5 rounded">Oficial</span>
+                    </a>
+                  ) : null}
                 </div>
               </div>
 
-              {/* Botões de Ação & Compra com Afiliados */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#2a475e]">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => {
-                      setSelectedReviewGameId(selectedGame.id);
-                      setSelectedGameId(null);
-                      setActiveTab('reviews');
-                    }}
-                    className="px-3.5 py-2 text-xs font-bold text-purple-300 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 rounded-lg transition flex items-center gap-1.5 w-full sm:w-auto justify-center"
-                  >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>Ler Crítica Editorial (IA)</span>
-                  </button>
-                  <a
-                    href={getAffiliateUrls(selectedGame, monetizationSettings).nuuvem}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg transition flex items-center gap-1.5 shadow-sm w-full sm:w-auto justify-center"
-                    title={`Comprar ${selectedGame.name} com desconto parceiro`}
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                    <span>Comprar na Nuuvem</span>
-                  </a>
-                </div>
+            </div>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                  <button
-                    onClick={() => setSelectedGameId(null)}
-                    className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition"
-                  >
-                    Fechar
-                  </button>
-                  <a
-                    href={`https://store.steampowered.com/app/${selectedGame.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3.5 py-2 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5 shadow-sm"
-                  >
-                    <span>Loja Steam</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
+            {/* Footer Modal */}
+            <div className="p-4 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between gap-3">
+              <button
+                onClick={() => {
+                  if (modalGame.id) setSelectedReviewGameId(modalGame.id);
+                  setModalGame(null);
+                  setActiveTab('reviews');
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-amber-300 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-500/40 rounded-lg transition flex items-center gap-1.5"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Ver Análise Editorial Completa</span>
+              </button>
 
+              <button
+                onClick={() => setModalGame(null)}
+                className="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#1b2838] hover:bg-[#233446] rounded-lg border border-[#2a475e] transition"
+              >
+                Fechar Ficha
+              </button>
             </div>
 
           </div>

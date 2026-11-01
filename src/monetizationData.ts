@@ -244,7 +244,7 @@ export const DEALS_DATABASE: DealItem[] = [
     discount_percent: 4,
     rating: 99,
     deal_url: "https://hype.games/br",
-    image: "https://images.unsplash.com/photo-1578301978018-3005759f48f7?w=600&auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=600&auto=format&fit=crop&q=80",
     badge: "Crédito Oficial Nintendo",
     review_verdict: "Compre jogos digitais e DLCs na eShop brasileira com facilidade e segurança."
   }
@@ -757,7 +757,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     discount_percent: 4,
     rating: 99,
     rating_label: "Crédito Oficial",
-    image: "https://images.unsplash.com/photo-1578301978018-3005759f48f7?w=600&auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=600&auto=format&fit=crop&q=80",
     developer: "Nintendo of America",
     release_year: 2026,
     store: "Hype Games",
