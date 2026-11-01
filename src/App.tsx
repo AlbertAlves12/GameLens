@@ -388,7 +388,20 @@ const PRESETS: Record<string, { label: string; filter: (g: SteamGame) => boolean
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'deals' | 'search' | 'platforms' | 'reviews' | 'monetization' | 'code' | 'api'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'deals' | 'search' | 'platforms' | 'reviews' | 'monetization' | 'code' | 'api'>(() => {
+    try {
+      const saved = localStorage.getItem('gamelens_active_tab');
+      if (['dashboard', 'deals', 'search', 'platforms', 'reviews', 'monetization', 'code', 'api'].includes(saved || '')) {
+        return saved as any;
+      }
+    } catch {}
+    return 'dashboard';
+  });
+
+  const changeTab = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    localStorage.setItem('gamelens_active_tab', tab);
+  };
   const [dealsPlatform, setDealsPlatform] = useState<string>('all');
   const [universalSearchQuery, setUniversalSearchQuery] = useState('');
   const [isSearchingUniversal, setIsSearchingUniversal] = useState(false);
@@ -1993,7 +2006,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
           {/* Zone 2: Navigation Links Principais & Administração */}
           <nav className={`flex items-center gap-2 sm:gap-3 overflow-x-auto py-2 text-xs font-medium no-scrollbar ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => changeTab('dashboard')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
                 activeTab === 'dashboard' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
@@ -2002,7 +2015,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               <span>Dashboard</span>
             </button>
             <button
-              onClick={() => setActiveTab('deals')}
+              onClick={() => changeTab('deals')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
                 activeTab === 'deals' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
@@ -2012,7 +2025,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               <span className="text-[10px] bg-red-600 text-white font-extrabold px-1.5 py-0.2 rounded font-mono">-75%</span>
             </button>
             <button
-              onClick={() => setActiveTab('search')}
+              onClick={() => changeTab('search')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
                 activeTab === 'search' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
@@ -2021,7 +2034,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               <span>Buscar Qualquer Jogo</span>
             </button>
             <button
-              onClick={() => setActiveTab('platforms')}
+              onClick={() => changeTab('platforms')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
                 activeTab === 'platforms' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
@@ -2030,7 +2043,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               <span>Consoles & PC</span>
             </button>
             <button
-              onClick={() => setActiveTab('reviews')}
+              onClick={() => changeTab('reviews')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
                 activeTab === 'reviews' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
@@ -2041,7 +2054,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
 
             {/* Abas Administrativas / Pessoais (Meus Afiliados & Código) */}
             <button
-              onClick={() => setActiveTab('monetization')}
+              onClick={() => changeTab('monetization')}
               className={`hover:text-amber-600 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${
                 isLight ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-amber-500/30 bg-amber-950/40 text-amber-300'
               } ${activeTab === 'monetization' ? 'font-bold' : ''}`}
@@ -2051,7 +2064,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               <span>Meus Afiliados</span>
             </button>
             <button
-              onClick={() => setActiveTab('code')}
+              onClick={() => changeTab('code')}
               className={`hover:text-cyan-600 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${
                 isLight ? 'border-cyan-300 bg-cyan-50 text-cyan-800' : 'border-cyan-500/30 bg-cyan-950/40 text-cyan-300'
               } ${activeTab === 'code' ? 'font-bold' : ''}`}
