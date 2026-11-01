@@ -65,7 +65,13 @@ export interface DealItem {
   review_verdict: string;
 }
 
-export const FALLBACK_GAME_COVER = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80";
+export const NINTENDO_GIFTCARD_SVG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='350' viewBox='0 0 600 350'><rect width='600' height='350' fill='%23e60012'/><circle cx='120' cy='175' r='70' fill='white' opacity='0.15'/><text x='300' y='140' font-family='sans-serif' font-size='32' font-weight='900' fill='white' text-anchor='middle'>NINTENDO eSHOP</text><text x='300' y='190' font-family='sans-serif' font-size='44' font-weight='900' fill='%23ffeb3b' text-anchor='middle'>R%24 100,00</text><text x='300' y='240' font-family='sans-serif' font-size='16' font-weight='700' fill='white' text-anchor='middle'>CR%C3%89DITO DIGITAL OFICIAL · NINTENDO SWITCH</text></svg>";
+
+export const PSN_GIFTCARD_SVG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='350' viewBox='0 0 600 350'><rect width='600' height='350' fill='%2300439c'/><circle cx='480' cy='175' r='100' fill='white' opacity='0.1'/><text x='300' y='140' font-family='sans-serif' font-size='32' font-weight='900' fill='white' text-anchor='middle'>PLAYSTATION STORE</text><text x='300' y='190' font-family='sans-serif' font-size='44' font-weight='900' fill='%2366c0f4' text-anchor='middle'>R%24 100,00</text><text x='300' y='240' font-family='sans-serif' font-size='16' font-weight='700' fill='white' text-anchor='middle'>CART%C3%83O PRESENTE PS5 %26 PS4</text></svg>";
+
+export const XBOX_GAMEPASS_SVG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='350' viewBox='0 0 600 350'><rect width='600' height='350' fill='%23107c41'/><rect x='20' y='20' width='560' height='310' rx='16' fill='none' stroke='white' stroke-width='2' stroke-opacity='0.2'/><text x='300' y='130' font-family='sans-serif' font-size='30' font-weight='900' fill='white' text-anchor='middle'>XBOX GAME PASS ULTIMATE</text><text x='300' y='185' font-family='sans-serif' font-size='38' font-weight='900' fill='%239bf00b' text-anchor='middle'>3 MESES</text><text x='300' y='235' font-family='sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'>CENTENAS DE JOGOS NO PC, CONSOLE E CLOUD</text></svg>";
+
+export const FALLBACK_GAME_COVER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='350' viewBox='0 0 600 350'><rect width='600' height='350' fill='%23171a21'/><rect x='0' y='0' width='600' height='350' fill='%231b2838' opacity='0.7'/><circle cx='300' cy='150' r='60' fill='%2366c0f4' opacity='0.2'/><text x='300' y='160' font-family='sans-serif' font-size='48' text-anchor='middle'>🎮</text><text x='300' y='220' font-family='sans-serif' font-size='18' font-weight='800' fill='%2366c0f4' text-anchor='middle'>GAMELENS PORTAL GAMER</text><text x='300' y='250' font-family='sans-serif' font-size='12' fill='%2394a3b8' text-anchor='middle'>Imagem Oficial do Título</text></svg>";
 
 export const DEALS_DATABASE: DealItem[] = [
   {
@@ -169,7 +175,7 @@ export const DEALS_DATABASE: DealItem[] = [
     discount_percent: 31,
     rating: 90,
     deal_url: "https://www.amazon.com.br",
-    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg",
     badge: "Exclusivo PS5",
     review_verdict: "Gráficos de tirar o fôlego, exploração ágil por Nova York e combate refinado de Peter e Miles."
   },
@@ -184,7 +190,7 @@ export const DEALS_DATABASE: DealItem[] = [
     discount_percent: 5,
     rating: 99,
     deal_url: "https://hype.games/br",
-    image: "https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600&auto=format&fit=crop&q=80",
+    image: PSN_GIFTCARD_SVG,
     badge: "Crédito Digital Instantâneo",
     review_verdict: "Ativação oficial de créditos na PSN brasileira com entrega imediata e Pix."
   },
@@ -199,7 +205,7 @@ export const DEALS_DATABASE: DealItem[] = [
     discount_percent: 17,
     rating: 98,
     deal_url: "https://hype.games/br",
-    image: "https://images.unsplash.com/photo-1605901309584-818e25960a8f?w=600&auto=format&fit=crop&q=80",
+    image: XBOX_GAMEPASS_SVG,
     badge: "O Melhor Custo-Benefício Gamer",
     review_verdict: "Centenas de jogos no catálogo, lançamentos Day One, EA Play e nuvem no celular e PC."
   },
@@ -229,7 +235,7 @@ export const DEALS_DATABASE: DealItem[] = [
     discount_percent: 28,
     rating: 96,
     deal_url: "https://www.amazon.com.br",
-    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
     badge: "Jogo do Ano Switch",
     review_verdict: "Criatividade sem limites com a mecânica de fusão e exploração vertical fantástica."
   },
@@ -244,7 +250,7 @@ export const DEALS_DATABASE: DealItem[] = [
     discount_percent: 4,
     rating: 99,
     deal_url: "https://hype.games/br",
-    image: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=600&auto=format&fit=crop&q=80",
+    image: NINTENDO_GIFTCARD_SVG,
     badge: "Crédito Oficial Nintendo",
     review_verdict: "Compre jogos digitais e DLCs na eShop brasileira com facilidade e segurança."
   }
@@ -1020,8 +1026,12 @@ export function getAffiliateUrls(game: { id: string; name: string }, config: Mon
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
+  const sid = config.rakutenSid || '4770537';
+  const mid = config.hypeMid || '53304';
+
   return {
     nuuvem: `https://www.nuuvem.com/br-pt/item/${slug}?partner=${encodeURIComponent(config.nuuvemPartnerId || 'steamgamer')}`,
+    hypeGames: `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${query}`)}`,
     amazon: `https://www.amazon.com.br/s?k=${query}+jogo+pc&tag=${encodeURIComponent(config.amazonAssociateId || 'gamerlens-20')}`,
     gmg: `https://www.greenmangaming.com/search?query=${query}&tap_a=${encodeURIComponent(config.gmgAffiliateId || 'gmgpartner')}`,
     steam: `https://store.steampowered.com/app/${game.id}/`

@@ -998,52 +998,173 @@ export default function App() {
 
   // Conteúdo dos arquivos para visualização/download
   const codeFiles: Record<string, string> = {
-    'main.py': `# Dashboard de Análise de Biblioteca e Mercado de Jogos (Steam API & Dados)
-# Back-end em Python com FastAPI e Cores Distintas por Jogo e Nicho
+    'main.py': `# GameLens Portal Gamer & Steam Analytics (Python FastAPI Server)
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+import os
 
-# Cada jogo possui sua cor temática única e cada gênero/nicho possui sua cor identificadora!
-GENRE_COLORS = {
-    "Ação": "#ef4444",       # Vermelho
-    "RPG": "#a855f7",        # Púrpura
-    "Estratégia": "#f59e0b", # Dourado Âmbar
-    "Indie": "#10b981",      # Verde Esmeralda
-    "Simulação": "#06b6d4",  # Ciano
-    "Aventura": "#3b82f6"    # Azul
-}
+app = FastAPI(title="GameLens Portal Gamer API", version="2.4.0")
 
-GAMES_DATABASE = {
-    "730": { "name": "Counter-Strike 2", "color": "#f97316", "genres": ["Ação", "Tiro"], ... },
-    "570": { "name": "Dota 2", "color": "#dc2626", "genres": ["Estratégia", "MOBA"], ... },
-    "1086940": { "name": "Baldur's Gate 3", "color": "#a855f7", "genres": ["RPG"], ... },
-    "1245620": { "name": "Elden Ring", "color": "#eab308", "genres": ["RPG", "Soulslike"], ... },
-    ...
-}`,
-    'templates/index.html': `<!-- templates/index.html com Cores Distintas para cada Jogo e Nicho -->
-<script>
-    // Cores específicas por Jogo e por Gênero para evitar monotonia visual:
-    const GAME_COLORS = {
-        '730': '#f97316',      // CS2 (Laranja)
-        '570': '#dc2626',      // Dota 2 (Vermelho)
-        '1086940': '#a855f7',  // Baldur's Gate 3 (Púrpura)
-        '1245620': '#eab308',  // Elden Ring (Dourado)
-        '105600': '#22c55e',   // Terraria (Verde)
-        '292030': '#f43f5e'    // The Witcher 3 (Carmesim)
-    };
-    const GENRE_COLORS = {
-        'Ação': '#ef4444',
-        'RPG': '#a855f7',
-        'Estratégia': '#f59e0b',
-        'Indie': '#10b981'
-    };
-</script>`,
+# Render templates Jinja2
+templates = Jinja2Templates(directory="templates")
+
+# Banco de Dados de Jogos & Nichos
+GAMES_DATABASE = [
+    {
+        "id": "730", "name": "Counter-Strike 2", "color": "#f97316", "hours_played": 845.2,
+        "genres": ["Ação", "Tiro", "Competitivo"], "user_rating": 88, "rating_label": "Muito Positivas",
+        "peak_24h_players": 1420850, "current_price_brl": 0.0, "price_formatted": "Gratuito",
+        "developer": "Valve", "release_year": 2023, "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg"
+    },
+    {
+        "id": "570", "name": "Dota 2", "color": "#dc2626", "hours_played": 430.7,
+        "genres": ["Estratégia", "MOBA", "Competitivo"], "user_rating": 82, "rating_label": "Muito Positivas",
+        "peak_24h_players": 710500, "current_price_brl": 0.0, "price_formatted": "Gratuito",
+        "developer": "Valve", "release_year": 2013, "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg"
+    },
+    {
+        "id": "1086940", "name": "Baldur's Gate 3", "color": "#a855f7", "hours_played": 312.4,
+        "genres": ["RPG", "Estratégia", "Aventura"], "user_rating": 96, "rating_label": "Extremamente Positivas",
+        "peak_24h_players": 98120, "current_price_brl": 199.99, "price_formatted": "R$ 199,99",
+        "developer": "Larian Studios", "release_year": 2023, "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg"
+    },
+    {
+        "id": "1245620", "name": "Elden Ring", "color": "#eab308", "hours_played": 264.8,
+        "genres": ["RPG", "Ação", "Soulslike"], "user_rating": 93, "rating_label": "Extremamente Positivas",
+        "peak_24h_players": 85400, "current_price_brl": 229.90, "price_formatted": "R$ 229,90",
+        "developer": "FromSoftware Inc.", "release_year": 2022, "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg"
+    }
+]
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_portal(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/api/stats")
+async def get_stats():
+    total_hours = sum(g["hours_played"] for g in GAMES_DATABASE)
+    return {
+        "total_games": len(GAMES_DATABASE),
+        "total_hours": round(total_hours, 1),
+        "most_played": GAMES_DATABASE[0]
+    }
+
+@app.get("/api/games")
+async def get_games():
+    return {"games": GAMES_DATABASE}
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok", "service": "gamelens-portal", "version": "2.4.0"}
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)`,
+    'templates/index.html': `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameLens - Portal Gamer, Críticas & Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0e141b; color: #f8fafc; }
+    .tab-active { color: #66c0f4; font-weight: 700; border-bottom: 2px solid #66c0f4; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0e141b] text-slate-100">
+
+  <!-- HEADER NAVEGAÇÃO COMPLETA -->
+  <header class="bg-[#171a21] border-b border-[#2a475e] sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-[#1b2838] to-[#2a475e] border border-[#66c0f4]/50 flex items-center justify-center text-[#66c0f4] font-black text-xl">🎮</div>
+        <span class="text-white font-extrabold text-lg tracking-tight">Game<span class="text-[#66c0f4]">Lens</span></span>
+      </div>
+
+      <!-- NAV TABS -->
+      <nav class="hidden md:flex items-center gap-4 text-xs font-semibold text-slate-300">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-active py-2">📊 Dashboard</button>
+        <button onclick="switchTab('deals')" id="nav-deals" class="hover:text-[#66c0f4] py-2">⚡ Radar de Ofertas <span class="bg-red-600 text-white px-1.5 py-0.5 rounded text-[10px]">-75%</span></button>
+        <button onclick="switchTab('search')" id="nav-search" class="hover:text-[#66c0f4] py-2">🔍 Buscar Qualquer Jogo</button>
+        <button onclick="switchTab('platforms')" id="nav-platforms" class="hover:text-[#66c0f4] py-2">📺 Consoles & PC</button>
+        <button onclick="switchTab('reviews')" id="nav-reviews" class="hover:text-[#66c0f4] py-2">⭐ Críticas & Reviews</button>
+      </nav>
+
+      <button onclick="alert('Pix: albertgamer@pix.com.br')" class="px-3.5 py-1.5 text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 rounded-lg">☕ Apoiar via Pix</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-1">
+    <!-- SEÇÃO DASHBOARD -->
+    <section id="sec-dashboard" class="space-y-6">
+      <h1 class="text-2xl font-extrabold text-white">Estatísticas da Biblioteca Gamer</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6">
+          <span class="text-xs text-slate-400 font-bold">TOTAL DE HORAS</span>
+          <div class="text-3xl font-black text-white mt-1">3.123,5h</div>
+        </div>
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6">
+          <span class="text-xs text-slate-400 font-bold">JOGO MAIS JOGADO</span>
+          <div class="text-xl font-bold text-orange-400 mt-1">Counter-Strike 2 (845h)</div>
+        </div>
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6">
+          <span class="text-xs text-slate-400 font-bold">AVALIAÇÃO MÉDIA</span>
+          <div class="text-3xl font-black text-emerald-400 mt-1">92.1% Positivas</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO RADAR DE OFERTAS -->
+    <section id="sec-deals" class="hidden space-y-6">
+      <h2 class="text-2xl font-bold text-white">⚡ Radar de Ofertas Verificadas</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-4">
+          <h3 class="font-bold text-white">Elden Ring</h3>
+          <p class="text-xs text-emerald-400 font-black mt-1">R$ 151,73 (-34% OFF)</p>
+          <a href="https://www.nuuvem.com/item/elden-ring?partner=albertgamer" target="_blank" class="mt-3 block text-center py-2 bg-[#66c0f4] text-[#101822] text-xs font-bold rounded-lg">Pegar Oferta Nuuvem</a>
+        </div>
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-4">
+          <h3 class="font-bold text-white">Cyberpunk 2077</h3>
+          <p class="text-xs text-emerald-400 font-black mt-1">R$ 99,95 (-50% OFF)</p>
+          <a href="https://www.nuuvem.com/item/cyberpunk-2077?partner=albertgamer" target="_blank" class="mt-3 block text-center py-2 bg-[#66c0f4] text-[#101822] text-xs font-bold rounded-lg">Pegar Oferta Nuuvem</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function switchTab(tabId) {
+      ['dashboard', 'deals', 'search', 'platforms', 'reviews'].forEach(t => {
+        const sec = document.getElementById('sec-' + t);
+        const btn = document.getElementById('nav-' + t);
+        if (sec) sec.classList.add('hidden');
+        if (btn) btn.classList.remove('tab-active');
+      });
+      const activeSec = document.getElementById('sec-' + tabId);
+      const activeBtn = document.getElementById('nav-' + tabId);
+      if (activeSec) activeSec.classList.remove('hidden');
+      if (activeBtn) activeBtn.classList.add('tab-active');
+    }
+  </script>
+</body>
+</html>`,
     'requirements.txt': `fastapi>=0.110.0
 uvicorn[standard]>=0.28.0
 jinja2>=3.1.3
 requests>=2.31.0`,
-    'README.md': `# Steam Analytics Dashboard - Cores por Jogo e Nicho
+    'README.md': `# GameLens - Portal Gamer, Críticas & Analytics
 
-- Paleta cromática distinta para cada jogo no Gráfico de Barras.
-- Paleta semântica por nicho de gênero (Ação: Vermelho, RPG: Púrpura, Estratégia: Âmbar, Indie: Verde) no Gráfico de Rosca.`,
+Deploy no Render:
+1. Faça o commit e push destes arquivos no seu GitHub.
+2. No Render.com, conecte seu repositório.
+3. Build Command: pip install -r requirements.txt
+4. Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT`,
     'vercel.json': `{
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
@@ -1060,7 +1181,7 @@ requests>=2.31.0`,
     <div className="min-h-screen bg-[#0e141b] text-slate-100 flex flex-col font-sans">
       {/* TOP HEADER STEAM NAVIGATION */}
       <header className="bg-[#171a21] border-b border-[#2a475e] sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* Zone 1: Brand wordmark */}
           <div className="flex items-center gap-3 shrink-0">
@@ -1077,12 +1198,12 @@ requests>=2.31.0`,
             </div>
           </div>
 
-          {/* Zone 2: Navigation Links Públicos */}
-          <nav className="hidden lg:flex items-center gap-4 text-xs font-medium text-slate-300">
+          {/* Zone 2: Navigation Links Principais & Administração */}
+          <nav className="flex items-center gap-2 sm:gap-3 overflow-x-auto py-2 text-xs font-medium text-slate-300 no-scrollbar">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'dashboard' ? 'text-[#66c0f4] font-bold' : ''
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
+                activeTab === 'dashboard' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
               }`}
             >
               <BarChart3 className="w-4 h-4" />
@@ -1090,8 +1211,8 @@ requests>=2.31.0`,
             </button>
             <button
               onClick={() => setActiveTab('deals')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'deals' ? 'text-[#66c0f4] font-bold' : ''
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
+                activeTab === 'deals' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
               }`}
             >
               <Zap className="w-4 h-4 text-emerald-400 animate-pulse" />
@@ -1100,8 +1221,8 @@ requests>=2.31.0`,
             </button>
             <button
               onClick={() => setActiveTab('search')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'search' ? 'text-[#66c0f4] font-bold' : ''
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
+                activeTab === 'search' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
               }`}
             >
               <Search className="w-4 h-4 text-cyan-400" />
@@ -1109,8 +1230,8 @@ requests>=2.31.0`,
             </button>
             <button
               onClick={() => setActiveTab('platforms')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'platforms' ? 'text-[#66c0f4] font-bold' : ''
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
+                activeTab === 'platforms' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
               }`}
             >
               <Tv className="w-4 h-4 text-purple-400" />
@@ -1118,17 +1239,39 @@ requests>=2.31.0`,
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'reviews' ? 'text-[#66c0f4] font-bold' : ''
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
+                activeTab === 'reviews' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
               }`}
             >
               <Newspaper className="w-4 h-4" />
               <span>Críticas & Análises</span>
             </button>
+
+            {/* Abas Administrativas / Pessoais (Meus Afiliados & Código) */}
+            <button
+              onClick={() => setActiveTab('monetization')}
+              className={`hover:text-amber-300 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-amber-500/30 bg-amber-950/40 text-amber-300 ${
+                activeTab === 'monetization' ? 'bg-amber-900/60 font-bold text-white' : ''
+              }`}
+              title="Acessar painel de comissões e monetização"
+            >
+              <DollarSign className="w-4 h-4 text-amber-400" />
+              <span>Meus Afiliados</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('code')}
+              className={`hover:text-cyan-300 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 ${
+                activeTab === 'code' ? 'bg-cyan-900/60 font-bold text-white' : ''
+              }`}
+              title="Ver e copiar os arquivos Python/HTML para subir no Render"
+            >
+              <Code2 className="w-4 h-4 text-cyan-400" />
+              <span>Código & Deploy</span>
+            </button>
           </nav>
 
           {/* Zone 3: Ação Pública (Apoio via Pix) */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setIsPixModalOpen(true)}
               className="px-3.5 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm"
