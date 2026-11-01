@@ -30,14 +30,21 @@ interface MonetizationHubViewProps {
   settings: MonetizationSettings;
   onOpenSettings: () => void;
   onOpenPixModal: () => void;
+  theme?: 'dark' | 'light';
 }
 
 export const MonetizationHubView: React.FC<MonetizationHubViewProps> = ({
   games,
   settings,
   onOpenSettings,
-  onOpenPixModal
+  onOpenPixModal,
+  theme = 'dark'
 }) => {
+  const isLight = theme === 'light';
+  const bgCard = isLight ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-[#1b2838] border-[#2a475e] text-white';
+  const bgSubcard = isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#171a21] border-[#2a475e] text-white';
+  const textMuted = isLight ? 'text-slate-600' : 'text-slate-400';
+  const headingColor = isLight ? 'text-slate-900' : 'text-white';
   const [visitorsMonthly, setVisitorsMonthly] = useState<number>(3000);
   const [testGameId, setTestGameId] = useState<string>(games[0]?.id || '1086940');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);

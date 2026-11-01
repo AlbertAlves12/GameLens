@@ -20,7 +20,7 @@ import {
   TrendingUp,
   BookOpen
 } from 'lucide-react';
-import { GameReview, MonetizationSettings, getAffiliateUrls } from '../monetizationData.ts';
+import { GameReview, MonetizationSettings, getAffiliateUrls, generateProceduralAiReview, FALLBACK_GAME_COVER } from '../monetizationData.ts';
 
 interface ReviewsViewProps {
   games: any[];
@@ -31,6 +31,7 @@ interface ReviewsViewProps {
   isGeneratingAi: boolean;
   monetizationSettings: MonetizationSettings;
   onOpenPixModal: () => void;
+  theme?: 'dark' | 'light';
 }
 
 export const ReviewsView: React.FC<ReviewsViewProps> = ({
@@ -41,10 +42,36 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({
   onTriggerAiReview,
   isGeneratingAi,
   monetizationSettings,
-  onOpenPixModal
+  onOpenPixModal,
+  theme = 'dark'
 }) => {
-  const activeGame = games.find((g) => g.id === selectedGameId) || games[0];
-  const activeReview = reviews[selectedGameId] || reviews['1086940'];
+  const isLight = theme === 'light';
+  const bgCard = isLight ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-[#1b2838] border-[#2a475e] text-white';
+  const bgSubcard = isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#171a21] border-[#2a475e] text-white';
+  const textMuted = isLight ? 'text-slate-600' : 'text-slate-400';
+  const headingColor = isLight ? 'text-slate-900' : 'text-white';
+  const foundGame = games.find((g) => g.id === selectedGameId || g.name?.toLowerCase() === selectedGameId?.toLowerCase());
+  const activeGame = foundGame || {
+    id: selectedGameId,
+    name: selectedGameId.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
+    color: '#66c0f4',
+    hover_color: '#38bdf8',
+    hours_played: 140,
+    genres: ['Ação', 'RPG'],
+    user_rating: 92,
+    rating_label: 'Extremamente Positivas',
+    peak_24h_players: 45000,
+    current_price_brl: 99.99,
+    price_formatted: 'R$ 99,99',
+    discount_percent: 25,
+    developer: 'Estúdio Desenvolvedor',
+    release_year: 2024,
+    achievements_unlocked: 30,
+    total_achievements: 40,
+    header_image: FALLBACK_GAME_COVER,
+    short_description: 'Análise detalhada e dados editoriais completos para este título.'
+  };
+  const activeReview = reviews[selectedGameId] || generateProceduralAiReview(activeGame, monetizationSettings.editorialName || 'Redação');
   const affiliateUrls = getAffiliateUrls(activeGame, monetizationSettings);
 
   return (
@@ -169,7 +196,7 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({
             {/* Imagem de Capa do Jogo com Badges */}
             <div className="relative rounded-xl overflow-hidden mb-6 border border-[#2a475e] max-h-72">
               <img
-                src={activeGame.header_image}
+                src={activeGame.header_image || activeGame.image || FALLBACK_GAME_COVER}
                 alt={activeGame.name}
                 className="w-full h-full object-cover"
               />

@@ -42,7 +42,11 @@ import {
   Tag,
   Zap,
   Tv,
-  Monitor
+  Monitor,
+  Sun,
+  Moon,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -445,6 +449,126 @@ export default function App() {
   const [sortBy, setSortBy] = useState<'hours' | 'rating' | 'players' | 'price' | 'name'>('hours');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+
+  // Filtro de Período do Dashboard Analytics (1m, 3m, 6m, 1y, all)
+  const [periodFilter, setPeriodFilter] = useState<'1m' | '3m' | '6m' | '1y' | 'all'>('6m');
+  // Filtro dos Games Indicados do Dia (all, top, deals, free)
+  const [recommendedCategory, setRecommendedCategory] = useState<'all' | 'top' | 'deals' | 'free'>('all');
+
+  // Catálogo de Games Indicados do Dia com Resumos de Críticas para a Tela Principal
+  const RECOMMENDED_GAMES_OF_THE_DAY = [
+    {
+      id: "1245620",
+      name: "Elden Ring",
+      developer: "FromSoftware Inc.",
+      release_year: 2022,
+      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+      user_rating: 93,
+      rating_label: "Extremamente Positivas",
+      badge: "🔥 Indicado do Dia",
+      price_formatted: "R$ 151,73",
+      regular_price: 229.90,
+      discount_percent: 34,
+      genres: ["RPG", "Soulslike", "Mundo Aberto"],
+      review_summary: "Uma obra-prima revolucionária de RPG de ação. Exploração orgânica monumental, chefes inesquecíveis e combate desafiador.",
+      source_deal: "Nuuvem / Steam"
+    },
+    {
+      id: "1086940",
+      name: "Baldur's Gate 3",
+      developer: "Larian Studios",
+      release_year: 2023,
+      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
+      user_rating: 96,
+      rating_label: "Extremamente Positivas",
+      badge: "🏆 Jogo do Ano GOTY",
+      price_formatted: "R$ 199,99",
+      regular_price: 199.99,
+      discount_percent: 0,
+      genres: ["RPG", "Estratégia", "Fantasia"],
+      review_summary: "Narrativa ramificada brilhante com escolhas que moldam verdadeiramente o mundo e companheiros com atuações de voz impecáveis.",
+      source_deal: "Steam Store Oficial"
+    },
+    {
+      id: "1091500",
+      name: "Cyberpunk 2077: Ultimate Edition",
+      developer: "CD PROJEKT RED",
+      release_year: 2020,
+      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+      user_rating: 89,
+      rating_label: "Muito Positivas",
+      badge: "⚡ 50% OFF Destaque",
+      price_formatted: "R$ 99,95",
+      regular_price: 199.90,
+      discount_percent: 50,
+      genres: ["RPG", "Ação", "Cyberpunk"],
+      review_summary: "Night City ganha vida com gráficos espetaculares, jogabilidade madura e a aclamada expansão Phantom Liberty inclusa.",
+      source_deal: "Nuuvem / Hype Games"
+    },
+    {
+      id: "730",
+      name: "Counter-Strike 2",
+      developer: "Valve",
+      release_year: 2023,
+      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
+      user_rating: 88,
+      rating_label: "Muito Positivas",
+      badge: "🎯 eSports nº 1",
+      price_formatted: "Gratuito",
+      regular_price: 0,
+      discount_percent: 0,
+      genres: ["Ação", "Tiro", "Competitivo"],
+      review_summary: "A evolução máxima do tiro tático competitivo no motor Source 2, com fumaças volumétricas reativas e simulação física precisa.",
+      source_deal: "Steam Store"
+    }
+  ];
+
+  // Estado do Histórico de Buscas do Dashboard (Armazena até 5 pesquisas recentes no localStorage)
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('steam_lens_search_history');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return ['Elden Ring', 'Counter-Strike 2', 'Cyberpunk 2077', 'Baldur\'s Gate 3', 'The Witcher 3'];
+  });
+
+  const addToSearchHistory = (query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setSearchHistory((prev) => {
+      const filtered = prev.filter((item) => item.toLowerCase() !== trimmed.toLowerCase());
+      const updated = [trimmed, ...filtered].slice(0, 5);
+      try {
+        localStorage.setItem('steam_lens_search_history', JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    try {
+      localStorage.removeItem('steam_lens_search_history');
+    } catch {
+      // ignore
+    }
+  };
+
+  const removeFromSearchHistory = (termToRemove: string) => {
+    setSearchHistory((prev) => {
+      const updated = prev.filter((item) => item.toLowerCase() !== termToRemove.toLowerCase());
+      try {
+        localStorage.setItem('steam_lens_search_history', JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
+  };
   
   // Estado de Catalog Multiplataforma & Paginação (Consoles & PC)
   const [catalogPlatform, setCatalogPlatform] = useState<'all' | 'PC' | 'PlayStation' | 'Xbox' | 'Nintendo'>('all');
@@ -498,6 +622,81 @@ export default function App() {
   const [activeCodeFile, setActiveCodeFile] = useState<'main.py' | 'templates/index.html' | 'requirements.txt' | 'README.md' | 'vercel.json'>('main.py');
   const [apiEndpoint, setApiEndpoint] = useState<string>('/api/stats');
   const [apiResponse, setApiResponse] = useState<string>('');
+
+  // Tema Claro/Escuro Global com Persistência no localStorage
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('gamelens_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {
+      // fallback
+    }
+    return 'dark';
+  });
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('gamelens_theme', next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const isLight = theme === 'light';
+  const bgMain = isLight ? 'bg-slate-100 text-slate-900' : 'bg-[#0e141b] text-slate-100';
+  const bgHeader = isLight ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-[#171a21] border-[#2a475e] text-white';
+  const bgCard = isLight ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-[#1b2838] border-[#2a475e] text-white';
+  const bgSubcard = isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#171a21] border-[#2a475e] text-white';
+  const textMuted = isLight ? 'text-slate-600' : 'text-slate-400';
+  const headingColor = isLight ? 'text-slate-900' : 'text-white';
+  const subBarBg = isLight ? 'bg-slate-200/90 border-slate-300 text-slate-700' : 'bg-[#121c27] border-[#2a475e]/60 text-slate-300';
+
+  const [isListeningVoice, setIsListeningVoice] = useState(false);
+
+  const handleStartVoiceSearch = () => {
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
+      alert('O reconhecimento de voz não é suportado neste navegador. Tente usar o Google Chrome ou Microsoft Edge.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognitionAPI();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListeningVoice(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setUniversalSearchQuery(transcript);
+          addToSearchHistory(transcript);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        setIsListeningVoice(false);
+      };
+
+      recognition.onend = () => {
+        setIsListeningVoice(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error(err);
+      setIsListeningVoice(false);
+    }
+  };
 
   // Sistema de Monetização, Afiliados e Pix
   const [monetizationSettings, setMonetizationSettings] = useState<MonetizationSettings>(() => {
@@ -645,29 +844,37 @@ export default function App() {
       return;
     }
 
-    // 4. Se for resultado de busca genérico (Universal Search)
+    // 4. Se for item dos Destaques do Dia ou Busca Universal
     const sid = monetizationSettings.rakutenSid || '4770537';
     const mid = monetizationSettings.hypeMid || '53304';
     const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(item.name)}`)}`;
     const nuuvemUrl = `https://www.nuuvem.com/item/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
     const amazonUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(item.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
 
+    // Puxa do catálogo da biblioteca se existir para enriquecer os dados
+    const foundInLibrary = INITIAL_GAMES.find((g) => g.id === item.id || g.name.toLowerCase() === item.name.toLowerCase());
+    const existingReview = item.id ? reviews[item.id] : null;
+    const resolvedImage = item.header_image || item.image || item.banner || foundInLibrary?.header_image || FALLBACK_GAME_COVER;
+
     setModalGame({
       id: item.id || `search-${Date.now()}`,
       name: item.name,
-      developer: "Produtora Oficial",
-      release_year: 2024,
-      image: item.image,
-      user_rating: 92,
-      price_formatted: item.price || "Consulte na Loja",
-      discount_percent: item.discount || 0,
-      genres: ["Ação / Aventura", "Multiplataforma"],
-      platform_label: item.source || "Steam & Lojas Parceiras",
-      short_description: `Título consagrado no mercado gamer. Consulte disponibilidade em tempo real, análises da crítica especializada e ative sua chave nas lojas oficiais parceiras com menores taxas e entrega rápida.`,
-      review_verdict: "Excelente recepção crítica e forte engajamento da comunidade de jogadores.",
-      headline: `Análise & Dados de Mercado: ${item.name}`,
-      pros: ["Gráficos e jogabilidade de alto nível", "Disponível nas principais lojas digitais parceiras", "Suporte a múltiplos idiomas e controles"],
-      cons: ["Verifique os requisitos mínimos do seu sistema antes da instalação"],
+      developer: item.developer || foundInLibrary?.developer || "Produtora Oficial",
+      release_year: item.release_year || foundInLibrary?.release_year || 2024,
+      image: resolvedImage,
+      color: item.color || foundInLibrary?.color || "#66c0f4",
+      user_rating: item.user_rating || item.rating || foundInLibrary?.user_rating || 92,
+      price_formatted: item.price_formatted || item.price || (foundInLibrary ? foundInLibrary.price_formatted : "Consulte na Loja"),
+      regular_price: item.regular_price || foundInLibrary?.current_price_brl || 0,
+      deal_price: item.deal_price || (item.discount_percent ? Math.round((item.regular_price || 200) * (1 - item.discount_percent / 100)) : 0),
+      discount_percent: item.discount_percent || item.discount || 0,
+      genres: item.genres || foundInLibrary?.genres || ["Ação / Aventura", "Multiplataforma"],
+      platform_label: item.platform_label || item.source || "Steam & Lojas Parceiras",
+      short_description: item.review_summary || item.short_description || foundInLibrary?.short_description || `Título consagrado no mercado gamer. Consulte disponibilidade em tempo real, análises da crítica especializada e ative sua chave nas lojas oficiais parceiras com menores taxas e entrega rápida.`,
+      review_verdict: item.review_summary || existingReview?.verdictLead || "Excelente recepção crítica e forte engajamento da comunidade de jogadores.",
+      headline: existingReview?.headline || `Análise & Dados de Mercado: ${item.name}`,
+      pros: existingReview?.pros || ["Gráficos e jogabilidade de alto nível", "Disponível nas principais lojas digitais parceiras", "Suporte a múltiplos idiomas e controles"],
+      cons: existingReview?.cons || ["Verifique os requisitos mínimos do seu sistema antes da instalação"],
       specs: {
         os: "Windows 10/11 64-bit",
         processor: "Intel Core i5 / AMD Ryzen 5",
@@ -679,7 +886,7 @@ export default function App() {
         nuuvem: nuuvemUrl,
         hype: hypeUrl,
         amazon: amazonUrl,
-        steam: item.id ? `https://store.steampowered.com/app/${item.id}` : undefined
+        steam: item.id ? `https://store.steampowered.com/app/${item.id}` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.name)}`
       }
     });
   };
@@ -848,15 +1055,11 @@ export default function App() {
     };
   }, [stats]);
 
-  // Tendência dos últimos 6 meses (Maio a Outubro 2026)
+  // Tendência calculada de acordo com o filtro de período selecionado (1m, 3m, 6m, 1y, all)
   const monthlyTrend = useMemo(() => {
-    const months = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'];
-    const shortMonths = ['Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out'];
-    
-    // Proporções ponderadas de sazonalidade (férias em julho, pico recente em outubro)
-    const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
-    
-    const monthlyTopGames = [
+    const fullMonths = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'];
+    const fullWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
+    const fullTopGames = [
       top6[0]?.name || 'Counter-Strike 2',
       top6[1]?.name || 'Dota 2',
       top6[3]?.name || 'Elden Ring',
@@ -865,24 +1068,38 @@ export default function App() {
       top6[0]?.name || 'Counter-Strike 2'
     ];
 
-    const totalSemesterHours = stats.total_hours;
-    const hours = monthlyWeights.map((w) => Math.round(totalSemesterHours * w * 10) / 10);
-    
+    let sliceIndex = 0;
+    if (periodFilter === '1m') sliceIndex = 5;
+    else if (periodFilter === '3m') sliceIndex = 3;
+    else sliceIndex = 0;
+
+    const months = fullMonths.slice(sliceIndex);
+    const weights = fullWeights.slice(sliceIndex);
+    const monthlyTopGames = fullTopGames.slice(sliceIndex);
+
+    const totalBaseHours = stats.total_hours;
+    const hours = weights.map((w) => Math.round(totalBaseHours * w * 10) / 10);
+
     let sum = 0;
     const cumulative = hours.map((h) => {
       sum += h;
       return Math.round(sum * 10) / 10;
     });
 
-    const growthRate = hours[0] > 0 ? (((hours[hours.length - 1] - hours[0]) / hours[0]) * 100).toFixed(1) : '0';
-    const semesterAverage = Math.round((hours.reduce((a, b) => a + b, 0) / hours.length) * 10) / 10;
-    const peakIndex = hours.indexOf(Math.max(...hours));
-    const peakMonth = months[peakIndex];
-    const peakHours = hours[peakIndex];
+    const growthRate = hours.length > 1 && hours[0] > 0
+      ? (((hours[hours.length - 1] - hours[0]) / hours[0]) * 100).toFixed(1)
+      : '0.0';
+
+    const semesterAverage = hours.length > 0
+      ? Math.round((hours.reduce((a, b) => a + b, 0) / hours.length) * 10) / 10
+      : 0;
+
+    const peakIndex = hours.length > 0 ? hours.indexOf(Math.max(...hours)) : 0;
+    const peakMonth = months[peakIndex] || 'Outubro';
+    const peakHours = hours[peakIndex] || 0;
 
     return {
       months,
-      shortMonths,
       hours,
       cumulative,
       monthlyTopGames,
@@ -892,7 +1109,7 @@ export default function App() {
       peakHours,
       totalSemesterHours: Math.round(hours.reduce((a, b) => a + b, 0) * 10) / 10
     };
-  }, [stats.total_hours, top6]);
+  }, [stats.total_hours, top6, periodFilter]);
 
   // Dados do gráfico de linha
   const lineChartData = useMemo(() => {
@@ -1752,32 +1969,32 @@ Como rodar e fazer o Deploy no Render em 3 passos:
   };
 
   return (
-    <div className="min-h-screen bg-[#0e141b] text-slate-100 flex flex-col font-sans">
+    <div className={`min-h-screen ${bgMain} flex flex-col font-sans transition-colors duration-200`}>
       {/* TOP HEADER STEAM NAVIGATION */}
-      <header className="bg-[#171a21] border-b border-[#2a475e] sticky top-0 z-40">
+      <header className={`${bgHeader} border-b sticky top-0 z-40 transition-colors duration-200`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* Zone 1: Brand wordmark */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-[#1b2838] to-[#2a475e] border border-[#66c0f4]/50 flex items-center justify-center text-[#66c0f4] shadow-inner shadow-[#66c0f4]/20">
+            <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${isLight ? 'from-slate-100 to-slate-200 border-slate-300 text-sky-600' : 'from-[#1b2838] to-[#2a475e] border-[#66c0f4]/50 text-[#66c0f4]'} border flex items-center justify-center font-black shadow-inner`}>
               <Gamepad2 className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-white font-extrabold text-base sm:text-lg tracking-tight whitespace-nowrap flex items-center">
+              <span className={`font-extrabold text-base sm:text-lg tracking-tight whitespace-nowrap flex items-center ${isLight ? 'text-slate-900' : 'text-white'}`}>
                 Game<span className="text-[#66c0f4]">Lens</span>
               </span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold whitespace-nowrap">
+              <span className={`text-[10px] uppercase tracking-wider font-semibold whitespace-nowrap ${textMuted}`}>
                 Portal & Analytics Gamer
               </span>
             </div>
           </div>
 
           {/* Zone 2: Navigation Links Principais & Administração */}
-          <nav className="flex items-center gap-2 sm:gap-3 overflow-x-auto py-2 text-xs font-medium text-slate-300 no-scrollbar">
+          <nav className={`flex items-center gap-2 sm:gap-3 overflow-x-auto py-2 text-xs font-medium no-scrollbar ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
             <button
               onClick={() => setActiveTab('dashboard')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
-                activeTab === 'dashboard' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
+                activeTab === 'dashboard' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
             >
               <BarChart3 className="w-4 h-4" />
@@ -1786,35 +2003,35 @@ Como rodar e fazer o Deploy no Render em 3 passos:
             <button
               onClick={() => setActiveTab('deals')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
-                activeTab === 'deals' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
+                activeTab === 'deals' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
             >
-              <Zap className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
               <span>Radar de Ofertas</span>
-              <span className="text-[10px] bg-red-600/90 text-white font-extrabold px-1.5 py-0.2 rounded font-mono">-75%</span>
+              <span className="text-[10px] bg-red-600 text-white font-extrabold px-1.5 py-0.2 rounded font-mono">-75%</span>
             </button>
             <button
               onClick={() => setActiveTab('search')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
-                activeTab === 'search' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
+                activeTab === 'search' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
             >
-              <Search className="w-4 h-4 text-cyan-400" />
+              <Search className="w-4 h-4 text-cyan-500" />
               <span>Buscar Qualquer Jogo</span>
             </button>
             <button
               onClick={() => setActiveTab('platforms')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
-                activeTab === 'platforms' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
+                activeTab === 'platforms' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
             >
-              <Tv className="w-4 h-4 text-purple-400" />
+              <Tv className="w-4 h-4 text-purple-500" />
               <span>Consoles & PC</span>
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
               className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
-                activeTab === 'reviews' ? 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]' : ''
+                activeTab === 'reviews' ? (isLight ? 'bg-slate-200 text-sky-700 font-bold border border-slate-300' : 'bg-[#1b2838] text-[#66c0f4] font-bold border border-[#2a475e]') : ''
               }`}
             >
               <Newspaper className="w-4 h-4" />
@@ -1824,34 +2041,47 @@ Como rodar e fazer o Deploy no Render em 3 passos:
             {/* Abas Administrativas / Pessoais (Meus Afiliados & Código) */}
             <button
               onClick={() => setActiveTab('monetization')}
-              className={`hover:text-amber-300 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-amber-500/30 bg-amber-950/40 text-amber-300 ${
-                activeTab === 'monetization' ? 'bg-amber-900/60 font-bold text-white' : ''
-              }`}
+              className={`hover:text-amber-600 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${
+                isLight ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-amber-500/30 bg-amber-950/40 text-amber-300'
+              } ${activeTab === 'monetization' ? 'font-bold' : ''}`}
               title="Acessar painel de comissões e monetização"
             >
-              <DollarSign className="w-4 h-4 text-amber-400" />
+              <DollarSign className="w-4 h-4 text-amber-500" />
               <span>Meus Afiliados</span>
             </button>
             <button
               onClick={() => setActiveTab('code')}
-              className={`hover:text-cyan-300 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 ${
-                activeTab === 'code' ? 'bg-cyan-900/60 font-bold text-white' : ''
-              }`}
+              className={`hover:text-cyan-600 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${
+                isLight ? 'border-cyan-300 bg-cyan-50 text-cyan-800' : 'border-cyan-500/30 bg-cyan-950/40 text-cyan-300'
+              } ${activeTab === 'code' ? 'font-bold' : ''}`}
               title="Ver e copiar os arquivos Python/HTML para subir no Render"
             >
-              <Code2 className="w-4 h-4 text-cyan-400" />
+              <Code2 className="w-4 h-4 text-cyan-500" />
               <span>Código & Deploy</span>
             </button>
           </nav>
 
-          {/* Zone 3: Ação Pública (Apoio via Pix) */}
+          {/* Zone 3: Ação Pública (Tema & Apoio via Pix) */}
           <div className="flex items-center gap-2 shrink-0">
             <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg border text-xs font-semibold transition flex items-center gap-1.5 ${
+                isLight ? 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200' : 'bg-[#171a21] border-[#2a475e] text-slate-300 hover:text-white'
+              }`}
+              title={isLight ? 'Alternar para Modo Escuro' : 'Alternar para Modo Claro'}
+            >
+              {isLight ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+              <span className="hidden sm:inline">{isLight ? 'Escuro' : 'Claro'}</span>
+            </button>
+
+            <button
               onClick={() => setIsPixModalOpen(true)}
-              className="px-3.5 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm"
+              className={`px-3.5 py-1.5 text-xs font-semibold border rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm ${
+                isLight ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-300' : 'text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border-emerald-500/40'
+              }`}
               title="Apoiar este projeto com Pix direto"
             >
-              <Coffee className="w-3.5 h-3.5 text-emerald-400" />
+              <Coffee className="w-3.5 h-3.5 text-emerald-500" />
               <span>Apoiar via Pix</span>
             </button>
           </div>
@@ -1860,7 +2090,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
       </header>
 
       {/* SUB-BAR / PRESET & NICHOS BAR */}
-      <div className="bg-[#121c27] border-b border-[#2a475e]/60 py-2.5 px-4 sm:px-8">
+      <div className={`${subBarBg} border-b py-2.5 px-4 sm:px-8 transition-colors duration-200`}>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3 text-xs">
           
           <div className="flex items-center gap-2 text-slate-300 flex-wrap">
@@ -1917,50 +2147,224 @@ Como rodar e fazer o Deploy no Render em 3 passos:
         
         {/* TAB 1: DASHBOARD INTERATIVO */}
         {activeTab === 'dashboard' && (
-          <div>
+          <div className="space-y-10">
             
-            {/* Header intro & Quick Filters */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  Estatísticas da Biblioteca Steam
-                </h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  Métricas em tempo real com cromatografia distinta por jogo e por nicho de mercado.
-                </p>
-              </div>
+            {/* SEÇÃO PRINCIPAL SUPERIOR: GAMES INDICADOS E DESTAQUES DO DIA COM RESUMO DE CRÍTICAS */}
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#171a21] via-[#1b2838] to-[#171a21] p-6 sm:p-8 rounded-2xl border border-[#2a475e] shadow-xl relative overflow-hidden">
+                <div className="space-y-2 relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>SELEÇÃO DIÁRIA DA IMPRENSA & COMUNIDADE</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Games Indicados do Dia & Resumos de Críticas
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Confira as análises em destaque, vereditos da crítica especializada e menores preços verificados com links diretos de aquisição oficial.
+                  </p>
+                </div>
 
-              {/* Genre Filter Buttons with custom colored indicators */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0">
-                {['Todos', 'RPG', 'Ação', 'Estratégia', 'Indie', 'Soulslike'].map((genre) => {
-                  const isSelected = selectedGenre === genre;
-                  const genreColor = GENRE_COLORS[genre]?.bg;
-
-                  return (
+                {/* Filtro de Categorias dos Indicados */}
+                <div className="flex flex-wrap items-center gap-2 shrink-0 relative z-10">
+                  {[
+                    { id: 'all', label: '🔥 Todos os Indicados' },
+                    { id: 'top', label: '⭐ Maiores Notas (90%+)' },
+                    { id: 'deals', label: '⚡ Em Promoção' },
+                    { id: 'free', label: '🎮 Apenas Grátis' }
+                  ].map((cat) => (
                     <button
-                      key={genre}
-                      onClick={() => setSelectedGenre((prev) => (genre !== 'Todos' && prev === genre ? 'Todos' : genre))}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-md transition whitespace-nowrap flex items-center gap-1.5 ${
-                        isSelected
-                          ? 'bg-[#66c0f4] text-[#101822] font-semibold shadow-sm'
-                          : 'bg-[#1b2838] hover:bg-[#233446] text-slate-300 border border-[#2a475e]'
+                      key={cat.id}
+                      onClick={() => setRecommendedCategory(cat.id as any)}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition ${
+                        recommendedCategory === cat.id
+                          ? 'bg-[#66c0f4] text-[#101822] shadow-md'
+                          : 'bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e]'
                       }`}
                     >
-                      {genreColor && (
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: genreColor }}
-                        ></span>
-                      )}
-                      <span>{genre}</span>
+                      {cat.label}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
+              </div>
+
+              {/* Grade de Games Indicados do Dia */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {RECOMMENDED_GAMES_OF_THE_DAY
+                  .filter((item) => {
+                    if (recommendedCategory === 'top') return item.user_rating >= 90;
+                    if (recommendedCategory === 'deals') return item.discount_percent > 0;
+                    if (recommendedCategory === 'free') return item.price_formatted === 'Gratuito';
+                    return true;
+                  })
+                  .map((game) => {
+                    const sid = monetizationSettings.rakutenSid || '4770537';
+                    const mid = monetizationSettings.hypeMid || '53304';
+                    const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(game.name)}`)}`;
+                    const nuuvemUrl = `https://www.nuuvem.com/item/${game.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+
+                    return (
+                      <div
+                        key={game.id}
+                        onClick={() => handleOpenGameModal(game)}
+                        className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer transform hover:-translate-y-1"
+                      >
+                        <div className="relative h-48 w-full bg-[#101822] overflow-hidden">
+                          <img
+                            src={game.header_image}
+                            alt={game.name}
+                            onError={handleImageError}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                          
+                          {/* Badges de destaque */}
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                            <span className="px-2.5 py-0.5 rounded text-[10px] font-black bg-amber-500 text-black shadow-md">
+                              {game.badge}
+                            </span>
+                            {game.discount_percent > 0 && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white shadow-md animate-pulse">
+                                -{game.discount_percent}%
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="absolute top-2.5 right-2.5">
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-black/80 text-amber-300 backdrop-blur-sm border border-amber-500/30">
+                              ★ {game.user_rating}%
+                            </span>
+                          </div>
+
+                          <div className="absolute bottom-2 left-3 right-3">
+                            <span className="text-[10px] text-slate-300 font-semibold block">{game.developer}</span>
+                            <h3 className="text-base font-extrabold text-white truncate">{game.name}</h3>
+                          </div>
+                        </div>
+
+                        {/* Conteúdo do Card com Resumo da Crítica */}
+                        <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                          <div className="bg-[#171a21] border-l-2 border-[#66c0f4] p-2.5 rounded-r-lg">
+                            <span className="text-[10px] text-[#66c0f4] font-bold block uppercase tracking-wider mb-0.5">Resumo da Crítica</span>
+                            <p className="text-xs text-slate-300 italic line-clamp-3 leading-relaxed">
+                              "{game.review_summary}"
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
+                            <div>
+                              {game.discount_percent > 0 && (
+                                <span className="text-[10px] text-slate-400 line-through block">
+                                  R$ {game.regular_price.toFixed(2).replace('.', ',')}
+                                </span>
+                              )}
+                              <span className="text-base font-black text-emerald-400">
+                                {game.price_formatted}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-slate-400 font-medium">{game.source_deal}</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenGameModal(game);
+                              }}
+                              className="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1"
+                            >
+                              <BookOpen className="w-3.5 h-3.5 text-[#66c0f4]" />
+                              <span>Ver Dados</span>
+                            </button>
+                            <a
+                              href={nuuvemUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1"
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5" />
+                              <span>Oferta</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
 
-            {/* 3 CARDS DE MÉTRICAS EM DESTAQUE */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* SEÇÃO SEGUNDA: ANALYTICS & DASHBOARD DA BIBLIOTECA (COM FILTROS DE PERÍODO) */}
+            <div className="pt-6 border-t border-[#2a475e]/60">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                    <BarChart3 className="w-6 h-6 text-[#66c0f4]" />
+                    <span>Analytics & Desempenho da Biblioteca Gamer</span>
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                    Métricas dinâmicas com cromatografia dos títulos, estatísticas agregadas e histórico ajustável por período.
+                  </p>
+                </div>
+
+                {/* Filtro de Período e Filtro de Nichos */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Filtro por Período */}
+                  <div className="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e]">
+                    <span className="text-[11px] text-slate-400 px-2 font-medium">Período:</span>
+                    {[
+                      { id: '1m', label: '1 Mês' },
+                      { id: '3m', label: '3 Meses' },
+                      { id: '6m', label: '6 Meses' },
+                      { id: '1y', label: '1 Ano' },
+                      { id: 'all', label: 'Total' }
+                    ].map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setPeriodFilter(p.id as any)}
+                        className={`px-2.5 py-1 text-xs rounded transition font-bold ${
+                          periodFilter === p.id
+                            ? 'bg-[#66c0f4] text-[#101822] shadow-sm'
+                            : 'text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Filtro de Nichos */}
+                  <div className="flex items-center gap-1 overflow-x-auto">
+                    {['Todos', 'RPG', 'Ação', 'Estratégia', 'Indie', 'Soulslike'].map((genre) => {
+                      const isSelected = selectedGenre === genre;
+                      const genreColor = GENRE_COLORS[genre]?.bg;
+
+                      return (
+                        <button
+                          key={genre}
+                          onClick={() => setSelectedGenre((prev) => (genre !== 'Todos' && prev === genre ? 'Todos' : genre))}
+                          className={`px-2.5 py-1 text-xs font-medium rounded-md transition whitespace-nowrap flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-[#66c0f4] text-[#101822] font-semibold'
+                              : 'bg-[#1b2838] hover:bg-[#233446] text-slate-300 border border-[#2a475e]'
+                          }`}
+                        >
+                          {genreColor && (
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: genreColor }}
+                            ></span>
+                          )}
+                          <span>{genre}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 CARDS DE MÉTRICAS EM DESTAQUE */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               
               {/* Card 1: Total de Horas */}
               <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] shadow-md">
@@ -2446,60 +2850,114 @@ Como rodar e fazer o Deploy no Render em 3 passos:
             {/* TABELA DE DADOS DETALHADA */}
             <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
               
-              {/* Barra superior de busca e ordenação */}
-              <div className="p-5 border-b border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                
-                <div className="relative flex-1 max-w-sm">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Filtrar por nome ou desenvolvedor..."
-                    className="w-full bg-[#171a21] border border-[#2a475e] text-white text-xs rounded-lg px-3.5 py-2 pl-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
-                  />
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              {/* Barra superior de busca, histórico e ordenação */}
+              <div className="p-5 border-b border-[#2a475e] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  
+                  <div className="relative flex-1 max-w-sm">
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && searchTerm.trim()) {
+                          addToSearchHistory(searchTerm);
+                        }
+                      }}
+                      onBlur={() => {
+                        if (searchTerm.trim()) {
+                          addToSearchHistory(searchTerm);
+                        }
+                      }}
+                      placeholder="Filtrar por nome ou desenvolvedor..."
+                      className="w-full bg-[#171a21] border border-[#2a475e] text-white text-xs rounded-lg px-3.5 py-2 pl-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
+                    />
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    {selectedGenre !== 'Todos' && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#171a21] border border-[#66c0f4]/50 text-xs text-white">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: getGenreColor(selectedGenre) }}
+                        ></span>
+                        <span className="text-slate-300">Nicho:</span>
+                        <strong className="text-white">{selectedGenre}</strong>
+                        <button
+                          onClick={() => setSelectedGenre('Todos')}
+                          className="ml-1 text-slate-400 hover:text-white transition p-0.5 rounded hover:bg-[#2a475e]"
+                          title="Remover filtro e ver todos os jogos"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    <span className="text-xs text-slate-400 whitespace-nowrap">Ordenar por:</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="bg-[#171a21] border border-[#2a475e] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#66c0f4]"
+                    >
+                      <option value="hours">Mais Jogados (Horas)</option>
+                      <option value="rating">Maior Avaliação (%)</option>
+                      <option value="players">Pico 24h Jogadores</option>
+                      <option value="price">Preço</option>
+                      <option value="name">Nome (A-Z)</option>
+                    </select>
+                    <button
+                      onClick={() => setSortAsc(!sortAsc)}
+                      className="p-1.5 bg-[#171a21] hover:bg-[#2a475e] text-slate-300 rounded border border-[#2a475e] transition"
+                      title={sortAsc ? 'Ordem Ascendente' : 'Ordem Descendente'}
+                    >
+                      <ArrowUpDown className="w-4 h-4" />
+                    </button>
+                  </div>
+
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  {selectedGenre !== 'Todos' && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#171a21] border border-[#66c0f4]/50 text-xs text-white">
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: getGenreColor(selectedGenre) }}
-                      ></span>
-                      <span className="text-slate-300">Nicho:</span>
-                      <strong className="text-white">{selectedGenre}</strong>
-                      <button
-                        onClick={() => setSelectedGenre('Todos')}
-                        className="ml-1 text-slate-400 hover:text-white transition p-0.5 rounded hover:bg-[#2a475e]"
-                        title="Remover filtro e ver todos os jogos"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                {/* Componente de Histórico de Busca (Últimas 5 consultas salvas) */}
+                {searchHistory.length > 0 && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#2a475e]/40 flex-wrap text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-400 font-semibold shrink-0">
+                      <Clock className="w-3.5 h-3.5 text-[#66c0f4]" />
+                      <span>Histórico de buscas:</span>
                     </div>
-                  )}
-
-                  <span className="text-xs text-slate-400 whitespace-nowrap">Ordenar por:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="bg-[#171a21] border border-[#2a475e] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#66c0f4]"
-                  >
-                    <option value="hours">Mais Jogados (Horas)</option>
-                    <option value="rating">Maior Avaliação (%)</option>
-                    <option value="players">Pico 24h Jogadores</option>
-                    <option value="price">Preço</option>
-                    <option value="name">Nome (A-Z)</option>
-                  </select>
-                  <button
-                    onClick={() => setSortAsc(!sortAsc)}
-                    className="p-1.5 bg-[#171a21] hover:bg-[#2a475e] text-slate-300 rounded border border-[#2a475e] transition"
-                    title={sortAsc ? 'Ordem Ascendente' : 'Ordem Descendente'}
-                  >
-                    <ArrowUpDown className="w-4 h-4" />
-                  </button>
-                </div>
-
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {searchHistory.map((query, index) => (
+                        <div
+                          key={index}
+                          className="inline-flex items-center gap-1.5 bg-[#171a21] hover:bg-[#233446] border border-[#2a475e] hover:border-[#66c0f4] rounded-md px-2.5 py-1 text-slate-300 hover:text-white transition group cursor-pointer"
+                          onClick={() => {
+                            setSearchTerm(query);
+                            addToSearchHistory(query);
+                          }}
+                        >
+                          <span className="text-xs font-medium">{query}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFromSearchHistory(query);
+                            }}
+                            className="text-slate-500 hover:text-red-400 transition p-0.5 rounded"
+                            title="Remover este termo"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearSearchHistory}
+                      className="text-[11px] text-slate-500 hover:text-red-400 underline ml-auto transition font-medium"
+                    >
+                      Limpar histórico
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Tabela de Jogos com Cores Específicas */}
@@ -2640,6 +3098,8 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                 <span>Exibindo {tableGames.length} de {presetGames.length} jogos</span>
                 <span className="font-mono">Fonte: Steam Web & Dados Simulados</span>
               </div>
+
+            </div>
 
             </div>
 
@@ -2806,14 +3266,35 @@ Como rodar e fazer o Deploy no Render em 3 passos:
 
                 {/* Barra de Pesquisa Ampla */}
                 <div className="relative max-w-xl mx-auto mt-4">
-                  <input
-                    type="text"
-                    value={universalSearchQuery}
-                    onChange={(e) => setUniversalSearchQuery(e.target.value)}
-                    placeholder="Digite o nome do jogo (ex: GTA, God of War, Forza, Resident Evil, FIFA)..."
-                    className="w-full bg-[#101822] border-2 border-[#2a475e] text-white text-sm rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:border-[#66c0f4] transition shadow-inner placeholder-slate-400"
-                  />
-                  <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={universalSearchQuery}
+                      onChange={(e) => setUniversalSearchQuery(e.target.value)}
+                      placeholder={isListeningVoice ? 'Ouvindo... Fale o nome do jogo agora...' : 'Digite ou fale o nome do jogo (ex: GTA, God of War, Elden Ring)...'}
+                      className={`w-full ${bgSubcard} border-2 ${isListeningVoice ? 'border-red-500 animate-pulse' : 'border-[#2a475e]'} text-sm rounded-xl px-4 py-3.5 pl-11 pr-12 focus:outline-none focus:border-[#66c0f4] transition shadow-inner placeholder-slate-400`}
+                    />
+                    <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+                    
+                    <button
+                      type="button"
+                      onClick={handleStartVoiceSearch}
+                      className={`absolute right-2.5 p-2 rounded-lg transition flex items-center justify-center ${
+                        isListeningVoice
+                          ? 'bg-red-600 text-white animate-bounce shadow-lg'
+                          : 'bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white border border-[#2a475e]'
+                      }`}
+                      title={isListeningVoice ? 'Ouvindo... Fale agora' : 'Pesquisar por Voz'}
+                    >
+                      <Mic className={`w-4 h-4 ${isListeningVoice ? 'text-white' : 'text-[#66c0f4]'}`} />
+                    </button>
+                  </div>
+                  {isListeningVoice && (
+                    <p className="text-xs text-red-400 font-bold mt-2 animate-pulse flex items-center justify-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                      Ouvindo microfone... Fale o nome do jogo claramente.
+                    </p>
+                  )}
                 </div>
 
                 {/* Sugestões Rápidas de Jogos Populares */}
@@ -3255,7 +3736,69 @@ Como rodar e fazer o Deploy no Render em 3 passos:
         {/* TAB 2: CRÍTICAS & REVIEWS EDITORIAIS (COM IA & AFILIADOS) */}
         {activeTab === 'reviews' && (
           <ReviewsView
-            games={INITIAL_GAMES}
+            games={[
+              ...INITIAL_GAMES,
+              ...RECOMMENDED_GAMES_OF_THE_DAY.map(r => ({
+                id: r.id,
+                name: r.name,
+                color: '#66c0f4',
+                hover_color: '#38bdf8',
+                hours_played: 150,
+                genres: r.genres,
+                user_rating: r.user_rating,
+                rating_label: r.rating_label,
+                peak_24h_players: 50000,
+                current_price_brl: r.regular_price || 99.99,
+                price_formatted: r.price_formatted,
+                discount_percent: r.discount_percent || 0,
+                developer: r.developer,
+                release_year: r.release_year,
+                achievements_unlocked: 30,
+                total_achievements: 40,
+                header_image: r.header_image,
+                short_description: r.review_summary
+              })),
+              ...MULTIPLATFORM_GAMES.map(mg => ({
+                id: mg.id,
+                name: mg.name,
+                color: '#66c0f4',
+                hover_color: '#38bdf8',
+                hours_played: 140,
+                genres: mg.genres,
+                user_rating: mg.rating,
+                rating_label: mg.rating_label,
+                peak_24h_players: 40000,
+                current_price_brl: mg.deal_price,
+                price_formatted: `R$ ${mg.deal_price.toFixed(2).replace('.', ',')}`,
+                discount_percent: mg.discount_percent,
+                developer: mg.developer,
+                release_year: mg.release_year,
+                achievements_unlocked: 25,
+                total_achievements: 35,
+                header_image: mg.image,
+                short_description: mg.description
+              })),
+              ...DEALS_DATABASE.map(d => ({
+                id: d.id,
+                name: d.name,
+                color: '#66c0f4',
+                hover_color: '#38bdf8',
+                hours_played: 130,
+                genres: [d.platform, 'Destaque'],
+                user_rating: d.rating,
+                rating_label: 'Muito Positivas',
+                peak_24h_players: 30000,
+                current_price_brl: d.deal_price,
+                price_formatted: `R$ ${d.deal_price.toFixed(2).replace('.', ',')}`,
+                discount_percent: d.discount_percent,
+                developer: 'Desenvolvedora Parceira',
+                release_year: 2024,
+                achievements_unlocked: 20,
+                total_achievements: 30,
+                header_image: d.image,
+                short_description: d.review_verdict
+              }))
+            ]}
             reviews={reviews}
             selectedGameId={selectedReviewGameId}
             onSelectGame={(id) => setSelectedReviewGameId(id)}
@@ -3263,6 +3806,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
             isGeneratingAi={isGeneratingAiReview}
             monetizationSettings={monetizationSettings}
             onOpenPixModal={() => setIsPixModalOpen(true)}
+            theme={theme}
           />
         )}
 
@@ -3273,6 +3817,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
             settings={monetizationSettings}
             onOpenSettings={() => setIsSettingsModalOpen(true)}
             onOpenPixModal={() => setIsPixModalOpen(true)}
+            theme={theme}
           />
         )}
 
@@ -3449,7 +3994,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
             {/* Header Banner com Capa */}
             <div className="relative h-56 sm:h-64 w-full bg-[#101822] shrink-0 overflow-hidden">
               <img
-                src={modalGame.image}
+                src={modalGame.image || FALLBACK_GAME_COVER}
                 alt={modalGame.name}
                 onError={handleImageError}
                 className="w-full h-full object-cover"

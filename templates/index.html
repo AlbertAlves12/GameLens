@@ -196,34 +196,138 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
         
         <!-- SECTION 1: DASHBOARD & BIBLIOTECA -->
-        <div id="tab-section-dashboard" class="space-y-8">
-            <!-- INTRO HERO BANNER -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Visão Geral da Biblioteca</h1>
-                    <p class="text-sm text-slate-400 mt-1">Estatísticas consolidadas com cores representativas de cada título e nicho.</p>
+        <div id="tab-section-dashboard" class="space-y-10">
+            
+            <!-- SEÇÃO PRINCIPAL SUPERIOR: GAMES INDICADOS DO DIA E RESUMOS DE CRÍTICAS -->
+            <div class="space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#171a21] via-[#1b2838] to-[#171a21] p-6 sm:p-8 rounded-2xl border border-[#2a475e] shadow-xl relative overflow-hidden">
+                    <div class="space-y-2 relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
+                            <span>✨ SELEÇÃO DIÁRIA DA IMPRENSA & COMUNIDADE</span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Games Indicados do Dia & Resumos de Críticas
+                        </h1>
+                        <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                            Confira as análises em destaque, vereditos da crítica especializada e menores preços verificados com links diretos de aquisição oficial.
+                        </p>
+                    </div>
                 </div>
-                <!-- Quick Filter Bar -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="genre-filter-container">
-                    <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
-                    <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
-                        <span>RPG</span>
-                    </button>
-                    <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
-                        <span>Ação</span>
-                    </button>
-                    <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
-                        <span>Estratégia</span>
-                    </button>
-                    <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
-                        <span>Indie</span>
-                    </button>
+
+                <!-- Grade de Games Indicados do Dia -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer" onclick="openGameModal('1245620')">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5"><span class="px-2.5 py-0.5 rounded text-[10px] font-black bg-amber-500 text-black shadow-md">🔥 Indicado do Dia</span></div>
+                            <div class="absolute top-2.5 right-2.5"><span class="px-2 py-0.5 rounded text-xs font-extrabold bg-black/80 text-amber-300 border border-amber-500/30">★ 93%</span></div>
+                            <div class="absolute bottom-2 left-3 right-3"><h3 class="text-base font-extrabold text-white truncate">Elden Ring</h3></div>
+                        </div>
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div class="bg-[#171a21] border-l-2 border-[#66c0f4] p-2.5 rounded-r-lg">
+                                <span class="text-[10px] text-[#66c0f4] font-bold block uppercase mb-0.5">Resumo da Crítica</span>
+                                <p class="text-xs text-slate-300 italic line-clamp-3">"Uma obra-prima revolucionária de RPG de ação. Exploração orgânica monumental e chefes inesquecíveis."</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
+                                <span class="text-base font-black text-emerald-400">R$ 151,73</span>
+                                <button onclick="event.stopPropagation(); openGameModal('1245620')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer" onclick="openGameModal('1086940')">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5"><span class="px-2.5 py-0.5 rounded text-[10px] font-black bg-purple-500 text-white shadow-md">🏆 Jogo do Ano GOTY</span></div>
+                            <div class="absolute top-2.5 right-2.5"><span class="px-2 py-0.5 rounded text-xs font-extrabold bg-black/80 text-amber-300 border border-amber-500/30">★ 96%</span></div>
+                            <div class="absolute bottom-2 left-3 right-3"><h3 class="text-base font-extrabold text-white truncate">Baldur's Gate 3</h3></div>
+                        </div>
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div class="bg-[#171a21] border-l-2 border-[#66c0f4] p-2.5 rounded-r-lg">
+                                <span class="text-[10px] text-[#66c0f4] font-bold block uppercase mb-0.5">Resumo da Crítica</span>
+                                <p class="text-xs text-slate-300 italic line-clamp-3">"Narrativa ramificada brilhante com escolhas que moldam verdadeiramente o mundo e seus companheiros."</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
+                                <span class="text-base font-black text-emerald-400">R$ 199,99</span>
+                                <button onclick="event.stopPropagation(); openGameModal('1086940')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer" onclick="openGameModal('1091500')">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5"><span class="px-2.5 py-0.5 rounded text-[10px] font-black bg-red-600 text-white shadow-md">-50% OFF</span></div>
+                            <div class="absolute top-2.5 right-2.5"><span class="px-2 py-0.5 rounded text-xs font-extrabold bg-black/80 text-amber-300 border border-amber-500/30">★ 89%</span></div>
+                            <div class="absolute bottom-2 left-3 right-3"><h3 class="text-base font-extrabold text-white truncate">Cyberpunk 2077</h3></div>
+                        </div>
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div class="bg-[#171a21] border-l-2 border-[#66c0f4] p-2.5 rounded-r-lg">
+                                <span class="text-[10px] text-[#66c0f4] font-bold block uppercase mb-0.5">Resumo da Crítica</span>
+                                <p class="text-xs text-slate-300 italic line-clamp-3">"Night City ganha vida com gráficos espetaculares e a aclamada expansão Phantom Liberty inclusa."</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
+                                <span class="text-base font-black text-emerald-400">R$ 99,95</span>
+                                <button onclick="event.stopPropagation(); openGameModal('1091500')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer" onclick="openGameModal('730')">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5"><span class="px-2.5 py-0.5 rounded text-[10px] font-black bg-orange-500 text-black shadow-md">🎯 eSports nº 1</span></div>
+                            <div class="absolute top-2.5 right-2.5"><span class="px-2 py-0.5 rounded text-xs font-extrabold bg-black/80 text-amber-300 border border-amber-500/30">★ 88%</span></div>
+                            <div class="absolute bottom-2 left-3 right-3"><h3 class="text-base font-extrabold text-white truncate">Counter-Strike 2</h3></div>
+                        </div>
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div class="bg-[#171a21] border-l-2 border-[#66c0f4] p-2.5 rounded-r-lg">
+                                <span class="text-[10px] text-[#66c0f4] font-bold block uppercase mb-0.5">Resumo da Crítica</span>
+                                <p class="text-xs text-slate-300 italic line-clamp-3">"A evolução máxima do tiro tático no motor Source 2, com fumaças volumétricas reativas e tiro preciso."</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
+                                <span class="text-base font-black text-emerald-400">Gratuito</span>
+                                <button onclick="event.stopPropagation(); openGameModal('730')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- SEÇÃO SEGUNDA: ANALYTICS & DASHBOARD DA BIBLIOTECA -->
+            <div class="pt-6 border-t border-[#2a475e]/60">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                            <span>📊 Painel Analytics & Desempenho da Biblioteca</span>
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Estatísticas consolidadas com filtros de período e cromatografia por nicho.</p>
+                    </div>
+                    <!-- Quick Filter Bar -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="genre-filter-container">
+                        <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
+                        <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
+                            <span>RPG</span>
+                        </button>
+                        <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
+                            <span>Ação</span>
+                        </button>
+                        <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+                            <span>Estratégia</span>
+                        </button>
+                        <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+                            <span>Indie</span>
+                        </button>
+                    </div>
+                </div>
 
             <!-- 3 CARDS DE MÉTRICAS EM DESTAQUE -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
