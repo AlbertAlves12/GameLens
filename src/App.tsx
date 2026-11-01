@@ -1071,7 +1071,8 @@ export default function App() {
     let sliceIndex = 0;
     if (periodFilter === '1m') sliceIndex = 5;
     else if (periodFilter === '3m') sliceIndex = 3;
-    else sliceIndex = 0;
+    else if (periodFilter === '6m') sliceIndex = 0;
+    else sliceIndex = 0; // 1y and all show all available data
 
     const months = fullMonths.slice(sliceIndex);
     const weights = fullWeights.slice(sliceIndex);
