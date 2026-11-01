@@ -67,7 +67,10 @@ import {
   generateProceduralAiReview,
   AFFILIATE_PROGRAMS_GUIDE,
   DEALS_DATABASE,
-  DealItem
+  DealItem,
+  MultiplatformGame,
+  MULTIPLATFORM_GAMES,
+  FALLBACK_GAME_COVER
 } from './monetizationData.ts';
 import { ReviewsView } from './components/ReviewsView.tsx';
 import { MonetizationHubView } from './components/MonetizationHubView.tsx';
@@ -442,6 +445,55 @@ export default function App() {
   const [sortBy, setSortBy] = useState<'hours' | 'rating' | 'players' | 'price' | 'name'>('hours');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  
+  // Estado de Catalog Multiplataforma & Paginação (Consoles & PC)
+  const [catalogPlatform, setCatalogPlatform] = useState<'all' | 'PC' | 'PlayStation' | 'Xbox' | 'Nintendo'>('all');
+  const [catalogPage, setCatalogPage] = useState<number>(1);
+  const [catalogPerPage, setCatalogPerPage] = useState<number>(8);
+  const [catalogSearch, setCatalogSearch] = useState<string>('');
+
+  // Estado do Modal Unificado de Dados, Crítica & Requisitos
+  const [modalGame, setModalGame] = useState<{
+    id: string;
+    name: string;
+    developer?: string;
+    release_year?: number;
+    image: string;
+    color?: string;
+    hours_played?: number;
+    user_rating: number;
+    price_formatted: string;
+    regular_price?: number;
+    deal_price?: number;
+    discount_percent?: number;
+    genres: string[];
+    platform_label?: string;
+    store?: string;
+    short_description: string;
+    review_verdict?: string;
+    headline?: string;
+    pros?: string[];
+    cons?: string[];
+    specs?: {
+      os: string;
+      processor: string;
+      memory: string;
+      graphics: string;
+      storage: string;
+    };
+    buyUrls: {
+      nuuvem: string;
+      hype: string;
+      amazon?: string;
+      steam?: string;
+    };
+  } | null>(null);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = FALLBACK_GAME_COVER;
+  };
+
   const [copiedFile, setCopiedFile] = useState<string | null>(null);
   const [activeCodeFile, setActiveCodeFile] = useState<'main.py' | 'templates/index.html' | 'requirements.txt' | 'README.md' | 'vercel.json'>('main.py');
   const [apiEndpoint, setApiEndpoint] = useState<string>('/api/stats');
@@ -466,6 +518,171 @@ export default function App() {
   const [isGeneratingAiReview, setIsGeneratingAiReview] = useState(false);
   const [revenueSimVisitors, setRevenueSimVisitors] = useState<number>(2000);
   const [pixDonationAmount, setPixDonationAmount] = useState<number>(10);
+
+  // Manipulador Unificado para Abrir Modal com Dados, Crítica e Compra
+  const handleOpenGameModal = (item: any) => {
+    // 1. Se for MultiplatformGame
+    if (item.category && item.specs) {
+      const mg = item as MultiplatformGame;
+      const sid = monetizationSettings.rakutenSid || '4770537';
+      const mid = monetizationSettings.hypeMid || '53304';
+      const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(mg.name)}`)}`;
+      const nuuvemUrl = `https://www.nuuvem.com/item/${mg.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+      const amazonUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(mg.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
+
+      setModalGame({
+        id: mg.id,
+        name: mg.name,
+        developer: mg.developer,
+        release_year: mg.release_year,
+        image: mg.image,
+        user_rating: mg.rating,
+        price_formatted: mg.deal_price > 0 ? `R$ ${mg.deal_price.toFixed(2).replace('.', ',')}` : 'Gratuito',
+        regular_price: mg.regular_price,
+        deal_price: mg.deal_price,
+        discount_percent: mg.discount_percent,
+        genres: mg.genres,
+        platform_label: mg.platform_label,
+        store: mg.store,
+        short_description: mg.description,
+        review_verdict: mg.review_verdict,
+        headline: mg.headline,
+        pros: mg.pros,
+        cons: mg.cons,
+        specs: mg.specs,
+        buyUrls: {
+          nuuvem: nuuvemUrl,
+          hype: hypeUrl,
+          amazon: amazonUrl,
+          steam: mg.platform === 'PC' ? `https://store.steampowered.com/search/?term=${encodeURIComponent(mg.name)}` : undefined
+        }
+      });
+      return;
+    }
+
+    // 2. Se for SteamGame
+    if (item.achievements_unlocked !== undefined) {
+      const sg = item as SteamGame;
+      const affiliate = getAffiliateUrls(sg, monetizationSettings);
+      const existingReview = reviews[sg.id];
+      setModalGame({
+        id: sg.id,
+        name: sg.name,
+        developer: sg.developer,
+        release_year: sg.release_year,
+        image: sg.header_image,
+        color: sg.color,
+        hours_played: sg.hours_played,
+        user_rating: sg.user_rating,
+        price_formatted: sg.price_formatted,
+        regular_price: sg.current_price_brl,
+        deal_price: sg.current_price_brl,
+        discount_percent: sg.discount_percent,
+        genres: sg.genres,
+        platform_label: 'PC / Steam',
+        short_description: sg.short_description,
+        review_verdict: existingReview?.verdictLead || `Avaliado em ${sg.user_rating}% pela comunidade gamer global na Steam.`,
+        headline: existingReview?.headline || `Análise de Desempenho e Gameplay: ${sg.name}`,
+        pros: existingReview?.pros || ["Excelente jogabilidade e resposta", "Comunidade ativa com milhares de jogadores", "Ótima trilha sonora e imersão"],
+        cons: existingReview?.cons || ["Pode demandar PC intermediário para taxas de quadro máximas"],
+        specs: {
+          os: "Windows 10/11 64-bit",
+          processor: "Intel Core i5 / AMD Ryzen 5",
+          memory: "8 GB a 16 GB RAM",
+          graphics: "GTX 1060 / RX 580 ou superior",
+          storage: "50 GB livre"
+        },
+        buyUrls: {
+          nuuvem: affiliate.nuuvem,
+          hype: affiliate.hypeGames,
+          amazon: affiliate.amazon,
+          steam: `https://store.steampowered.com/app/${sg.id}`
+        }
+      });
+      return;
+    }
+
+    // 3. Se for DealItem
+    if (item.store && item.deal_price !== undefined) {
+      const d = item as DealItem;
+      const sid = monetizationSettings.rakutenSid || '4770537';
+      const mid = monetizationSettings.hypeMid || '53304';
+      const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(d.name)}`)}`;
+      const nuuvemUrl = `https://www.nuuvem.com/item/${d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+      const amazonUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(d.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
+
+      setModalGame({
+        id: d.id,
+        name: d.name,
+        image: d.image,
+        user_rating: d.rating,
+        price_formatted: `R$ ${d.deal_price.toFixed(2).replace('.', ',')}`,
+        regular_price: d.regular_price,
+        deal_price: d.deal_price,
+        discount_percent: d.discount_percent,
+        genres: [d.platform, "Destaque"],
+        platform_label: d.platform_label,
+        store: d.store,
+        short_description: d.review_verdict,
+        review_verdict: d.review_verdict,
+        headline: `Oferta Verificada: ${d.name} (${d.badge})`,
+        pros: ["Preço promocional verificado em loja parceira oficial", "Chave ou ativação imediata com suporte em português", "Garantia oficial e sem tarifas surpresa"],
+        cons: ["Preço promocional sujeito a estoque limitado"],
+        specs: {
+          os: d.platform === 'PC' ? "Windows 10/11 64-bit" : `${d.platform} Nativo`,
+          processor: "Requisitos recomendados da plataforma",
+          memory: "8 GB a 16 GB",
+          graphics: "Compatível com a geração atual",
+          storage: "SSD recomendado"
+        },
+        buyUrls: {
+          nuuvem: nuuvemUrl,
+          hype: hypeUrl,
+          amazon: amazonUrl,
+          steam: d.deal_url.includes('steam') ? d.deal_url : undefined
+        }
+      });
+      return;
+    }
+
+    // 4. Se for resultado de busca genérico (Universal Search)
+    const sid = monetizationSettings.rakutenSid || '4770537';
+    const mid = monetizationSettings.hypeMid || '53304';
+    const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(item.name)}`)}`;
+    const nuuvemUrl = `https://www.nuuvem.com/item/${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+    const amazonUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(item.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
+
+    setModalGame({
+      id: item.id || `search-${Date.now()}`,
+      name: item.name,
+      developer: "Produtora Oficial",
+      release_year: 2024,
+      image: item.image,
+      user_rating: 92,
+      price_formatted: item.price || "Consulte na Loja",
+      discount_percent: item.discount || 0,
+      genres: ["Ação / Aventura", "Multiplataforma"],
+      platform_label: item.source || "Steam & Lojas Parceiras",
+      short_description: `Título consagrado no mercado gamer. Consulte disponibilidade em tempo real, análises da crítica especializada e ative sua chave nas lojas oficiais parceiras com menores taxas e entrega rápida.`,
+      review_verdict: "Excelente recepção crítica e forte engajamento da comunidade de jogadores.",
+      headline: `Análise & Dados de Mercado: ${item.name}`,
+      pros: ["Gráficos e jogabilidade de alto nível", "Disponível nas principais lojas digitais parceiras", "Suporte a múltiplos idiomas e controles"],
+      cons: ["Verifique os requisitos mínimos do seu sistema antes da instalação"],
+      specs: {
+        os: "Windows 10/11 64-bit",
+        processor: "Intel Core i5 / AMD Ryzen 5",
+        memory: "8 GB a 16 GB RAM",
+        graphics: "Placa de vídeo compatível com DirectX 12",
+        storage: "50 GB livre"
+      },
+      buyUrls: {
+        nuuvem: nuuvemUrl,
+        hype: hypeUrl,
+        amazon: amazonUrl,
+        steam: item.id ? `https://store.steampowered.com/app/${item.id}` : undefined
+      }
+    });
+  };
 
   // Manipuladores de Monetização
   const handleSaveMonetizationSettings = (newSettings: MonetizationSettings) => {
@@ -1633,7 +1850,7 @@ requests>=2.31.0`,
                         return (
                           <tr
                             key={game.id}
-                            onClick={() => setSelectedGameId(game.id)}
+                            onClick={() => handleOpenGameModal(game)}
                             className="hover:bg-[#233446]/50 transition cursor-pointer"
                           >
                             <td className="px-6 py-4 flex items-center gap-3">
@@ -1646,10 +1863,8 @@ requests>=2.31.0`,
                               <img
                                 src={game.header_image}
                                 alt={game.name}
+                                onError={handleImageError}
                                 className="w-14 h-8 object-cover rounded bg-[#101822] shrink-0"
-                                onError={(e) => {
-                                  (e.target as HTMLElement).style.display = 'none';
-                                }}
                               />
                               <div>
                                 <span className="font-bold text-white block flex items-center gap-2">
@@ -1688,11 +1903,11 @@ requests>=2.31.0`,
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setSelectedGameId(game.id);
+                                  handleOpenGameModal(game);
                                 }}
                                 className="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition"
                               >
-                                Ver Métricas
+                                Ver Métricas & Crítica
                               </button>
                             </td>
                           </tr>
@@ -1774,18 +1989,20 @@ requests>=2.31.0`,
                   return (
                     <div
                       key={d.id}
-                      className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg"
+                      onClick={() => handleOpenGameModal(d)}
+                      className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer transform hover:-translate-y-0.5"
                     >
                       <div className="relative h-44 w-full bg-[#101822] overflow-hidden">
                         <img
                           src={d.image}
                           alt={d.name}
+                          onError={handleImageError}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
                         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                           {d.discount_percent > 0 && (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md animate-pulse">
                               -{d.discount_percent}%
                             </span>
                           )}
@@ -1826,19 +2043,20 @@ requests>=2.31.0`,
 
                         <div className="grid grid-cols-2 gap-2 pt-1">
                           <button
-                            onClick={() => {
-                              setSelectedReviewGameId('1086940');
-                              setActiveTab('reviews');
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenGameModal(d);
                             }}
                             className="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1"
                           >
-                            <Newspaper className="w-3.5 h-3.5" />
-                            <span>Crítica</span>
+                            <Newspaper className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>Crítica & Dados</span>
                           </button>
                           <a
                             href={buyUrl}
                             target="_blank"
                             rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1"
                           >
                             <ShoppingCart className="w-3.5 h-3.5" />
@@ -1917,18 +2135,20 @@ requests>=2.31.0`,
                     return (
                       <div
                         key={item.id}
-                        className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg"
+                        onClick={() => handleOpenGameModal(item)}
+                        className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer transform hover:-translate-y-0.5"
                       >
                         <div className="relative h-40 w-full bg-[#101822] overflow-hidden">
                           <img
                             src={item.image}
                             alt={item.name}
+                            onError={handleImageError}
                             className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
                           <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                             {item.discount > 0 && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white animate-pulse shadow-md">
                                 -{item.discount}%
                               </span>
                             )}
@@ -1950,10 +2170,21 @@ requests>=2.31.0`,
                           </div>
 
                           <div className="space-y-1.5 pt-2 border-t border-[#2a475e]">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenGameModal(item);
+                              }}
+                              className="w-full py-2 px-3 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-black rounded-lg transition shadow-md flex items-center justify-center gap-1.5"
+                            >
+                              <BookOpen className="w-3.5 h-3.5" />
+                              <span>Ver Dados, Crítica & Requisitos</span>
+                            </button>
                             <a
                               href={nuuvemUrl}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="w-full py-1.5 px-3 bg-[#171a21] hover:bg-cyan-600 text-cyan-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between"
                             >
                               <span>Buscar Menor Preço Nuuvem</span>
@@ -1963,6 +2194,7 @@ requests>=2.31.0`,
                               href={hypeUrl}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="w-full py-1.5 px-3 bg-[#171a21] hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between"
                             >
                               <span>Ver Ofertas Hype Games</span>
@@ -1972,6 +2204,7 @@ requests>=2.31.0`,
                               href={`https://store.steampowered.com/app/${item.id}`}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="w-full py-1.5 px-3 bg-[#101822] hover:bg-[#233446] text-slate-400 hover:text-white text-[11px] rounded-lg transition flex items-center justify-between"
                             >
                               <span>Abrir Loja Steam Oficial</span>
@@ -1987,134 +2220,320 @@ requests>=2.31.0`,
           </div>
         )}
 
-        {/* TAB: HUB CONSOLES & PC */}
-        {activeTab === 'platforms' && (
-          <div className="space-y-8 animate-fade-in">
-            {/* Banner Introdução Consoles */}
-            <div className="bg-gradient-to-r from-[#171a21] via-[#1f1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8">
-              <div className="max-w-3xl space-y-2">
-                <span className="inline-block px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold">
-                  ECOSSISTEMA GAMER COMPLETO
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Hub Multiplataforma (PC & Consoles)</h2>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Atendemos todos os nichos gamer: PC (Steam & Epic Games), PlayStation 5, Xbox Series X|S / Game Pass e Nintendo Switch. Compre chaves oficiais e cartões pré-pagos digitais em reais sem tarifas extras.
-                </p>
+        {/* TAB: HUB CONSOLES & PC (CATÁLOGO MULTIPLATAFORMA COMPLETO) */}
+        {activeTab === 'platforms' && (() => {
+          const filteredCatalog = MULTIPLATFORM_GAMES.filter((g) => {
+            const matchPlat = catalogPlatform === 'all' || g.platform.toLowerCase() === catalogPlatform.toLowerCase();
+            const matchSearch =
+              !catalogSearch ||
+              g.name.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+              g.developer.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+              g.genres.some((gen) => gen.toLowerCase().includes(catalogSearch.toLowerCase()));
+            return matchPlat && matchSearch;
+          });
+
+          // Promoções SEMPRE aparecem primeiro (requisito do usuário!)
+          const sortedCatalog = [...filteredCatalog].sort((a, b) => {
+            const aPromo = a.discount_percent > 0;
+            const bPromo = b.discount_percent > 0;
+            if (aPromo && !bPromo) return -1;
+            if (!aPromo && bPromo) return 1;
+            if (a.discount_percent !== b.discount_percent) return b.discount_percent - a.discount_percent;
+            return b.rating - a.rating;
+          });
+
+          const totalPages = Math.max(1, Math.ceil(sortedCatalog.length / catalogPerPage));
+          const safeCurrentPage = Math.min(catalogPage, totalPages);
+          const pagedGames = sortedCatalog.slice((safeCurrentPage - 1) * catalogPerPage, safeCurrentPage * catalogPerPage);
+
+          return (
+            <div className="space-y-8 animate-fade-in">
+              {/* Banner Introdução Consoles & PC */}
+              <div className="bg-gradient-to-r from-[#171a21] via-[#1f1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                <div className="absolute -right-8 -top-8 w-60 h-60 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="max-w-3xl space-y-2 relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold">
+                    <Tv className="w-3.5 h-3.5" />
+                    <span>ECOSSISTEMA GAMER MULTIPLATAFORMA COMPLETO</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Catálogo de Jogos: Consoles & PC Gamer
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Navegue pelos maiores sucessos de PC (Steam/Epic), PlayStation 5, Xbox Series X|S e Nintendo Switch. Veja análises da crítica, especificações técnicas detalhadas e compre com desconto via chaves e créditos oficiais.
+                  </p>
+                </div>
               </div>
+
+              {/* Barra de Filtros de Plataforma e Busca */}
+              <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-4 sm:p-5 space-y-4 shadow-md">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  {/* Seletor de Plataforma em Abas */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+                    {([
+                      { id: 'all', label: 'Todas as Plataformas', icon: '🎮' },
+                      { id: 'PC', label: 'PC Gamer (Steam & Epic)', icon: '💻' },
+                      { id: 'PlayStation', label: 'PlayStation 5 & 4', icon: '🟦' },
+                      { id: 'Xbox', label: 'Xbox Series & Cloud', icon: '🟩' },
+                      { id: 'Nintendo', label: 'Nintendo Switch', icon: '🟥' }
+                    ] as const).map((plat) => {
+                      const isSelected = catalogPlatform === plat.id;
+                      return (
+                        <button
+                          key={plat.id}
+                          onClick={() => {
+                            setCatalogPlatform(plat.id);
+                            setCatalogPage(1);
+                          }}
+                          className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-[#66c0f4] text-[#101822] shadow-sm'
+                              : 'bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e]'
+                          }`}
+                        >
+                          <span>{plat.icon}</span>
+                          <span>{plat.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Campo de Busca Rápida no Catálogo */}
+                  <div className="relative max-w-xs w-full">
+                    <input
+                      type="text"
+                      value={catalogSearch}
+                      onChange={(e) => {
+                        setCatalogSearch(e.target.value);
+                        setCatalogPage(1);
+                      }}
+                      placeholder="Buscar no catálogo..."
+                      className="w-full bg-[#101822] border border-[#2a475e] text-white text-xs rounded-lg px-3.5 py-2 pl-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
+                    />
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  </div>
+                </div>
+
+                {/* Subinfo: Ordem de Promoções e Contador */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#2a475e]/60 text-xs text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold">
+                      <Zap className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                      Promoções com desconto sempre exibidas em primeiro lugar
+                    </span>
+                  </div>
+                  <div>
+                    <span>Total de <strong className="text-white font-mono">{sortedCatalog.length}</strong> jogo(s) disponível(is)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grade de Jogos Multiplataforma */}
+              {pagedGames.length === 0 ? (
+                <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-12 text-center text-slate-400 space-y-3">
+                  <Gamepad2 className="w-12 h-12 text-slate-400 mx-auto" />
+                  <p className="text-base font-bold text-white">Nenhum jogo encontrado para estes filtros.</p>
+                  <p className="text-xs">Tente selecionar "Todas as Plataformas" ou limpar o campo de busca.</p>
+                  <button
+                    onClick={() => {
+                      setCatalogPlatform('all');
+                      setCatalogSearch('');
+                      setCatalogPage(1);
+                    }}
+                    className="px-4 py-2 bg-[#66c0f4] text-[#101822] font-bold text-xs rounded-lg transition"
+                  >
+                    Ver Todos os Jogos
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {pagedGames.map((game) => {
+                    const sid = monetizationSettings.rakutenSid || '4770537';
+                    const mid = monetizationSettings.hypeMid || '53304';
+                    let directBuyUrl = game.store_url || 'https://www.nuuvem.com';
+                    if (game.store === 'Hype Games') {
+                      directBuyUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(game.name)}`)}`;
+                    } else if (game.store === 'Nuuvem') {
+                      directBuyUrl = `https://www.nuuvem.com/item/${game.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+                    } else if (game.store === 'Amazon') {
+                      directBuyUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(game.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
+                    }
+
+                    // Cores de badge por plataforma
+                    const platformBadgeClasses =
+                      game.platform === 'PC'
+                        ? 'bg-cyan-950/90 text-cyan-300 border-cyan-500/40'
+                        : game.platform === 'PlayStation'
+                        ? 'bg-blue-950/90 text-blue-300 border-blue-500/40'
+                        : game.platform === 'Xbox'
+                        ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40'
+                        : 'bg-red-950/90 text-red-300 border-red-500/40';
+
+                    return (
+                      <div
+                        key={game.id}
+                        onClick={() => handleOpenGameModal(game)}
+                        className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg cursor-pointer transform hover:-translate-y-0.5"
+                      >
+                        <div className="relative h-44 w-full bg-[#101822] overflow-hidden">
+                          <img
+                            src={game.image}
+                            alt={game.name}
+                            onError={handleImageError}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                          
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                            {game.discount_percent > 0 && (
+                              <span className="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md animate-pulse">
+                                -{game.discount_percent}%
+                              </span>
+                            )}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${platformBadgeClasses} backdrop-blur-sm`}>
+                              {game.platform_label}
+                            </span>
+                          </div>
+
+                          <div className="absolute top-2.5 right-2.5">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#171a21]/90 text-amber-300 border border-amber-500/30">
+                              ★ {game.rating}%
+                            </span>
+                          </div>
+
+                          <div className="absolute bottom-2 left-3 right-3">
+                            <span className="text-[10px] text-slate-300 font-medium block truncate">
+                              {game.developer} · {game.release_year}
+                            </span>
+                            <h3 className="text-sm font-extrabold text-white truncate" title={game.name}>
+                              {game.name}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                          <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                            {game.review_verdict || game.description}
+                          </p>
+
+                          <div className="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
+                            <div>
+                              {game.discount_percent > 0 ? (
+                                <>
+                                  <span className="text-[10px] text-slate-400 line-through block">
+                                    R$ {game.regular_price.toFixed(2).replace('.', ',')}
+                                  </span>
+                                  <span className="text-lg font-black text-emerald-400">
+                                    R$ {game.deal_price.toFixed(2).replace('.', ',')}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-base font-extrabold text-white">
+                                  {game.deal_price > 0 ? `R$ ${game.deal_price.toFixed(2).replace('.', ',')}` : 'Gratuito'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-slate-400 block">Loja Parceira</span>
+                              <span className="text-xs font-bold text-slate-200">{game.store}</span>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenGameModal(game);
+                              }}
+                              className="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-200 hover:text-white text-xs font-bold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1"
+                            >
+                              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+                              <span>Dados & Crítica</span>
+                            </button>
+                            <a
+                              href={directBuyUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-black rounded-lg transition shadow-md flex items-center justify-center gap-1"
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5" />
+                              <span>Comprar</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* BARRA DE PAGINAÇÃO NAVEGÁVEL (Páginas 1, 2, 3...) */}
+              {totalPages > 1 && (
+                <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+                  {/* Seletor de itens por página */}
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>Exibir por página:</span>
+                    <div className="flex items-center gap-1 bg-[#171a21] p-1 rounded border border-[#2a475e]">
+                      {[4, 8, 12, 16].map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => {
+                            setCatalogPerPage(size);
+                            setCatalogPage(1);
+                          }}
+                          className={`px-2 py-0.5 rounded text-xs transition ${
+                            catalogPerPage === size
+                              ? 'bg-[#66c0f4] text-[#101822] font-bold'
+                              : 'text-slate-300 hover:text-white'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="text-slate-400 hidden md:inline">
+                      · Mostrando {(safeCurrentPage - 1) * catalogPerPage + 1} a {Math.min(safeCurrentPage * catalogPerPage, sortedCatalog.length)} de {sortedCatalog.length}
+                    </span>
+                  </div>
+
+                  {/* Botões de Navegação Numerados */}
+                  <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                    <button
+                      onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}
+                      disabled={safeCurrentPage === 1}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#171a21] border border-[#2a475e] text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    >
+                      ← Anterior
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCatalogPage(pageNum)}
+                        className={`w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center ${
+                          safeCurrentPage === pageNum
+                            ? 'bg-[#66c0f4] text-[#101822] shadow-sm'
+                            : 'bg-[#171a21] border border-[#2a475e] text-slate-300 hover:text-white hover:bg-[#233446]'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => setCatalogPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={safeCurrentPage === totalPages}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#171a21] border border-[#2a475e] text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    >
+                      Próxima →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Cards dos 4 Grandes Pilares de Plataformas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* PC Gamer */}
-              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-500/30 flex items-center justify-center text-[#66c0f4]">
-                    <Monitor className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-[#66c0f4] transition">
-                    PC Gamer (Steam & Epic)
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Chaves de ativação digitais com descontos de até 85%. Ativação oficial e suporte a mods.
-                  </p>
-                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
-                    Lojas parceiras: <strong>Nuuvem (MID 46796)</strong> e <strong>Hype Games (MID 53304)</strong>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setDealsPlatform('PC');
-                    setActiveTab('deals');
-                  }}
-                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
-                >
-                  Ver Ofertas de PC
-                </button>
-              </div>
-
-              {/* PlayStation */}
-              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-blue-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-blue-950/80 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                    <span className="text-xl font-black">PS</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition">
-                    PlayStation 5 & 4
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Cartões de créditos da PSN brasileira com entrega por código digital e Pix, além de mídias físicas na Amazon.
-                  </p>
-                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
-                    Ofertas em: <strong>Hype Games</strong> (Gift Cards) e <strong>Amazon</strong> (Jogos Físicos)
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setDealsPlatform('PlayStation');
-                    setActiveTab('deals');
-                  }}
-                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-blue-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
-                >
-                  Ver Ofertas PlayStation
-                </button>
-              </div>
-
-              {/* Xbox */}
-              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-emerald-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                    <span className="text-xl font-black">XB</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition">
-                    Xbox & Game Pass
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Assinaturas de Xbox Game Pass Ultimate (3 meses), cartões Xbox Live e jogos Play Anywhere.
-                  </p>
-                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
-                    Ofertas em: <strong>Hype Games</strong> e <strong>Nuuvem</strong>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setDealsPlatform('Xbox');
-                    setActiveTab('deals');
-                  }}
-                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-emerald-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
-                >
-                  Ver Ofertas Xbox
-                </button>
-              </div>
-
-              {/* Nintendo */}
-              <div className="bg-[#1b2838] border border-[#2a475e] hover:border-red-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-red-950/80 border border-red-500/30 flex items-center justify-center text-red-400">
-                    <span className="text-xl font-black">NSW</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-red-400 transition">
-                    Nintendo Switch
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Cartões eShop digitais para comprar jogos na loja Nintendo Brasil, e jogos físicos na Amazon.
-                  </p>
-                  <div className="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
-                    Ofertas em: <strong>Hype Games</strong> (eShop BR) e <strong>Amazon</strong>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setDealsPlatform('Nintendo');
-                    setActiveTab('deals');
-                  }}
-                  className="mt-4 w-full py-2 bg-[#171a21] hover:bg-red-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]"
-                >
-                  Ver Ofertas Nintendo
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 2: CRÍTICAS & REVIEWS EDITORIAIS (COM IA & AFILIADOS) */}
         {activeTab === 'reviews' && (
