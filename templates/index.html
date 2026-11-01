@@ -101,6 +101,14 @@
             <!-- Actions / Status -->
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button 
+                    onclick="openAffiliatesModal()" 
+                    class="bg-[#1b2838] hover:bg-[#233446] border border-[#2a475e] text-amber-300 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                    title="Configurar códigos de Afiliados (Nuuvem & Amazon)"
+                >
+                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="hidden sm:inline">Meus Afiliados</span>
+                </button>
+                <button 
                     onclick="openPixModal()" 
                     class="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm"
                     title="Apoiar este projeto com Pix"
@@ -158,11 +166,44 @@
         </div>
     </div>
 
+    <!-- PRIMARY NAVIGATION TABS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES) -->
+    <nav class="bg-[#101822] border-b border-[#2a475e] sticky top-16 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 overflow-x-auto py-2.5">
+            <div class="flex items-center gap-2">
+                <button id="nav-btn-dashboard" onclick="switchMainTab('dashboard')" class="nav-tab-btn active px-4 py-2 rounded-lg text-xs font-bold text-[#101822] bg-[#66c0f4] transition flex items-center gap-2 shadow-sm whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span>Dashboard & Biblioteca</span>
+                </button>
+                <button id="nav-btn-deals" onclick="switchMainTab('deals')" class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>⚡ Radar de Promoções</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] bg-red-600/90 text-white font-extrabold">-75%</span>
+                </button>
+                <button id="nav-btn-search" onclick="switchMainTab('search')" class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <span>🔍 Buscar Qualquer Jogo (Steam Ao Vivo)</span>
+                </button>
+                <button id="nav-btn-platforms" onclick="switchMainTab('platforms')" class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>🎮 Hub Consoles & PC (PS5, Xbox, Switch)</span>
+                </button>
+            </div>
+            <div class="hidden lg:flex items-center gap-3 text-[11px] text-slate-400 shrink-0">
+                <span class="flex items-center gap-1.5 text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-md">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Afiliados: Hype Games (MID 53304) · Nuuvem (MID 46796)</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
     <!-- MAIN DASHBOARD CONTENT -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
         
-        <!-- INTRO HERO BANNER -->
-        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <!-- SECTION 1: DASHBOARD & BIBLIOTECA -->
+        <div id="tab-section-dashboard" class="space-y-8">
+            <!-- INTRO HERO BANNER -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Visão Geral da Biblioteca</h1>
                 <p class="text-sm text-slate-400 mt-1">Estatísticas consolidadas com cores representativas de cada título e nicho.</p>
@@ -338,6 +379,112 @@
 
         </div>
 
+        <!-- SEÇÃO DE OFERTAS PARCEIRAS & AFILIADOS (Nuuvem & Amazon) -->
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 mb-8 shadow-md">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                        <span class="text-amber-400">🏷️</span>
+                        <span>Melhores Ofertas de Chaves Steam Oficiais</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Adquira jogos com até 75% de desconto via parceiros autorizados e apoie a plataforma GameLens.</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-md font-semibold">Parceiro Nuuvem</span>
+                    <span class="bg-amber-950/80 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-md font-semibold">Amazon Games</span>
+                </div>
+            </div>
+
+            <!-- Grid de Cards de Ofertas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Oferta 1: Elden Ring -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
+                    <div class="relative rounded-lg overflow-hidden mb-3">
+                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" alt="Elden Ring" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-emerald-500 text-black text-[11px] font-extrabold px-2 py-0.5 rounded shadow">-34% OFF</span>
+                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">Chave Steam</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm truncate">Elden Ring</h3>
+                        <p class="text-[11px] text-slate-400">FromSoftware · RPG / Soulslike</p>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span class="text-xs text-slate-500 line-through">R$ 229,90</span>
+                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 151,70</span>
+                        </div>
+                    </div>
+                    <a id="deal-link-1245620" href="https://www.nuuvem.com/item/elden-ring?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <span>Ver Oferta na Nuuvem</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+
+                <!-- Oferta 2: Baldur's Gate 3 -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
+                    <div class="relative rounded-lg overflow-hidden mb-3">
+                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg" alt="Baldur's Gate 3" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-purple-500 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">GOTY 2023</span>
+                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">Chave Steam</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm truncate">Baldur's Gate 3</h3>
+                        <p class="text-[11px] text-slate-400">Larian Studios · RPG / Turnos</p>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span class="text-xs text-slate-500 line-through">R$ 199,99</span>
+                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 159,99</span>
+                        </div>
+                    </div>
+                    <a id="deal-link-1086940" href="https://www.nuuvem.com/item/baldurs-gate-3?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <span>Ver Oferta na Nuuvem</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+
+                <!-- Oferta 3: Cyberpunk 2077 -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
+                    <div class="relative rounded-lg overflow-hidden mb-3">
+                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg" alt="Cyberpunk 2077" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-emerald-500 text-black text-[11px] font-extrabold px-2 py-0.5 rounded shadow">-50% OFF</span>
+                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">GOG / Steam</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm truncate">Cyberpunk 2077</h3>
+                        <p class="text-[11px] text-slate-400">CD PROJEKT RED · RPG / Ação</p>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span class="text-xs text-slate-500 line-through">R$ 199,90</span>
+                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 99,95</span>
+                        </div>
+                    </div>
+                    <a id="deal-link-1091500" href="https://www.nuuvem.com/item/cyberpunk-2077?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <span>Ver Oferta na Nuuvem</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+
+                <!-- Oferta 4: The Witcher 3 -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#66c0f4] transition group">
+                    <div class="relative rounded-lg overflow-hidden mb-3">
+                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg" alt="The Witcher 3" class="w-full h-28 object-cover group-hover:scale-105 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-emerald-500 text-black text-[11px] font-extrabold px-2 py-0.5 rounded shadow">-75% OFF</span>
+                        <span class="absolute top-2 right-2 bg-black/70 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded">Chave Steam</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm truncate">The Witcher 3: Wild Hunt</h3>
+                        <p class="text-[11px] text-slate-400">CD PROJEKT RED · RPG</p>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span class="text-xs text-slate-500 line-through">R$ 129,99</span>
+                            <span class="text-base font-extrabold text-emerald-400 font-mono">R$ 32,49</span>
+                        </div>
+                    </div>
+                    <a id="deal-link-292030" href="https://www.nuuvem.com/item/the-witcher-3-wild-hunt?partner=albertgamer" target="_blank" rel="noreferrer" class="mt-3.5 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <span>Ver Oferta na Nuuvem</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
         <!-- TABELA DE DADOS DETALHADA COM FILTRO E ORDENAÇÃO -->
         <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
             
@@ -408,6 +555,199 @@
             </div>
 
         </div>
+        <!-- FIM SECTION 1: DASHBOARD & BIBLIOTECA -->
+
+        <!-- SECTION 2: RADAR DE PROMOÇÕES & DESCONTOS -->
+        <div id="tab-section-deals" class="hidden space-y-8 animate-fade-in">
+            <!-- Header da Seção de Ofertas -->
+            <div class="bg-gradient-to-r from-[#171a21] via-[#1b2838] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span>RADAR ATIVO · OFERTAS VERIFICADAS EM TEMPO REAL</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Central de Promoções & Chaves Oficiais
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                            Economize até 75% em ativações oficiais Steam, consoles (PS5, Xbox, Nintendo) e gift cards em reais com entrega instantânea e pagamento via Pix pelas nossas lojas parceiras.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button onclick="filterDealsPlatform('all')" class="deal-pill-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition">Todas</button>
+                        <button onclick="filterDealsPlatform('PC')" class="deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">PC (Steam/Epic)</button>
+                        <button onclick="filterDealsPlatform('PlayStation')" class="deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">PlayStation</button>
+                        <button onclick="filterDealsPlatform('Xbox')" class="deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">Xbox</button>
+                        <button onclick="filterDealsPlatform('Nintendo')" class="deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition">Nintendo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Dinâmica de Ofertas -->
+            <div id="deals-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Preenchido dinamicamente pelo JavaScript -->
+            </div>
+        </div>
+        <!-- FIM SECTION 2: RADAR DE PROMOÇÕES -->
+
+        <!-- SECTION 3: BUSCA UNIVERSAL AO VIVO DE QUALQUER JOGO -->
+        <div id="tab-section-search" class="hidden space-y-8 animate-fade-in">
+            <!-- Search Hero -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden shadow-xl">
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
+                        API GLOBAL DA STEAM INTEGRADA AO VIVO
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                        Pesquise os Dados de Qualquer Jogo do Mundo
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-300">
+                        Digite o nome de qualquer título lançado na Steam ou consoles para consultar preços em BRL, descontos ativos, análises e onde comprar mais barato.
+                    </p>
+
+                    <!-- Barra de Pesquisa Ampla -->
+                    <div class="relative max-w-xl mx-auto mt-4">
+                        <input 
+                            type="text" 
+                            id="universal-search-input" 
+                            placeholder="Digite o nome do jogo (ex: GTA, God of War, Forza, Resident Evil, FIFA)..." 
+                            class="w-full bg-[#101822] border-2 border-[#2a475e] text-white text-sm rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:border-[#66c0f4] transition shadow-inner placeholder-slate-400"
+                            onkeydown="if(event.key === 'Enter') executeUniversalSearch()"
+                        />
+                        <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <button 
+                            onclick="executeUniversalSearch()" 
+                            class="absolute right-2 top-2 bottom-2 px-4 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-bold rounded-lg transition flex items-center gap-1.5"
+                        >
+                            <span>Buscar</span>
+                        </button>
+                    </div>
+
+                    <!-- Sugestões Rápidas de Jogos Populares -->
+                    <div class="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
+                        <span class="text-slate-400">Sugestões:</span>
+                        <button onclick="triggerQuickSearch('Grand Theft Auto V')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Grand Theft Auto V</button>
+                        <button onclick="triggerQuickSearch('Elden Ring')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Elden Ring</button>
+                        <button onclick="triggerQuickSearch('God of War')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">God of War</button>
+                        <button onclick="triggerQuickSearch('Cyberpunk 2077')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Cyberpunk 2077</button>
+                        <button onclick="triggerQuickSearch('Red Dead Redemption 2')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Red Dead Redemption 2</button>
+                        <button onclick="triggerQuickSearch('Resident Evil 4')" class="px-2.5 py-1 rounded-md bg-[#101822] hover:bg-[#233446] border border-[#2a475e] text-slate-300 transition">Resident Evil 4</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de Resultados da Pesquisa Universal -->
+            <div id="search-results-container" class="space-y-4">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <span id="search-status-label">Digite um título acima para pesquisar</span>
+                    <span id="search-count-label"></span>
+                </div>
+                <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Cards de pesquisa ao vivo gerados pelo JavaScript -->
+                </div>
+            </div>
+        </div>
+        <!-- FIM SECTION 3: BUSCA UNIVERSAL -->
+
+        <!-- SECTION 4: HUB MULTIPLATAFORMA (PC & CONSOLES) -->
+        <div id="tab-section-platforms" class="hidden space-y-8 animate-fade-in">
+            <!-- Banner Introdução Consoles -->
+            <div class="bg-gradient-to-r from-[#171a21] via-[#1f1b2e] to-[#171a21] border border-[#2a475e] rounded-2xl p-6 sm:p-8">
+                <div class="max-w-3xl space-y-2">
+                    <span class="inline-block px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold">
+                        ECOSSISTEMA GAMER COMPLETO
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Hub Multiplataforma (PC & Consoles)</h2>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Atendemos todos os nichos gamer: PC (Steam & Epic Games), PlayStation 5, Xbox Series X|S / Game Pass e Nintendo Switch. Compre chaves oficiais e cartões pré-pagos digitais em reais sem tarifas extras.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cards dos 4 Grandes Pilares de Plataformas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- PC Gamer -->
+                <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-500/30 flex items-center justify-center text-[#66c0f4]">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.64 3.16 8.54 7.44 9.65l2.4-3.48a4.995 4.995 0 0 1-1.84-3.87 5 5 0 0 1 5-5c1.84 0 3.44.99 4.29 2.47l3.2-1.37C21.05 6.07 16.94 2 12 2zm3 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-[#66c0f4] transition">PC Gamer (Steam & Epic)</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Chaves de ativação digitais com descontos de até 85%. Ativação oficial e suporte a mods.
+                        </p>
+                        <div class="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                            Lojas parceiras: <strong>Nuuvem (MID 46796)</strong> e <strong>Hype Games (MID 53304)</strong>
+                        </div>
+                    </div>
+                    <button onclick="filterDealsPlatform('PC'); switchMainTab('deals')" class="mt-4 w-full py-2 bg-[#171a21] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]">
+                        Ver Ofertas de PC
+                    </button>
+                </div>
+
+                <!-- PlayStation -->
+                <div class="bg-[#1b2838] border border-[#2a475e] hover:border-blue-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-blue-950/80 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                            <span class="text-xl font-black">PS</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition">PlayStation 5 & 4</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Cartões de créditos da PSN brasileira com entrega por código digital e Pix, além de mídias físicas na Amazon.
+                        </p>
+                        <div class="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                            Ofertas em: <strong>Hype Games</strong> (Gift Cards) e <strong>Amazon</strong> (Jogos Físicos)
+                        </div>
+                    </div>
+                    <button onclick="filterDealsPlatform('PlayStation'); switchMainTab('deals')" class="mt-4 w-full py-2 bg-[#171a21] hover:bg-blue-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]">
+                        Ver Ofertas PlayStation
+                    </button>
+                </div>
+
+                <!-- Xbox -->
+                <div class="bg-[#1b2838] border border-[#2a475e] hover:border-emerald-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                            <span class="text-xl font-black">XB</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-emerald-400 transition">Xbox & Game Pass</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Assinaturas de Xbox Game Pass Ultimate (3 meses), cartões Xbox Live e jogos Play Anywhere.
+                        </p>
+                        <div class="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                            Ofertas em: <strong>Hype Games</strong> e <strong>Nuuvem</strong>
+                        </div>
+                    </div>
+                    <button onclick="filterDealsPlatform('Xbox'); switchMainTab('deals')" class="mt-4 w-full py-2 bg-[#171a21] hover:bg-emerald-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]">
+                        Ver Ofertas Xbox
+                    </button>
+                </div>
+
+                <!-- Nintendo -->
+                <div class="bg-[#1b2838] border border-[#2a475e] hover:border-red-500 rounded-xl p-5 flex flex-col justify-between transition group shadow-lg">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-red-950/80 border border-red-500/30 flex items-center justify-center text-red-400">
+                            <span class="text-xl font-black">NSW</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-red-400 transition">Nintendo Switch</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Cartões eShop digitais para comprar jogos na loja Nintendo Brasil, e jogos físicos na Amazon.
+                        </p>
+                        <div class="text-[11px] text-slate-400 bg-[#121c27] p-2.5 rounded-lg border border-[#2a475e]">
+                            Ofertas em: <strong>Hype Games</strong> (eShop BR) e <strong>Amazon</strong>
+                        </div>
+                    </div>
+                    <button onclick="filterDealsPlatform('Nintendo'); switchMainTab('deals')" class="mt-4 w-full py-2 bg-[#171a21] hover:bg-red-600 hover:text-white text-xs font-bold text-slate-200 rounded-lg transition border border-[#2a475e]">
+                        Ver Ofertas Nintendo
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- FIM SECTION 4: HUB MULTIPLATAFORMA -->
 
     </main>
 
@@ -474,8 +814,47 @@
                     </div>
                 </div>
 
-                <!-- Botão Link Loja Steam -->
-                <div class="flex items-center justify-end gap-3 pt-2">
+                <!-- Onde Comprar com Desconto (Afiliados Nuuvem & Amazon) -->
+                <div class="bg-[#121c27] border border-[#2a475e] rounded-xl p-4 space-y-2.5">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-white flex items-center gap-1.5">
+                            <span class="text-emerald-400">⚡</span>
+                            <span>Melhores Ofertas de Ativação Steam</span>
+                        </span>
+                        <span class="text-[10px] text-slate-400 bg-[#171a21] px-2 py-0.5 rounded border border-[#2a475e]">Chaves Oficiais</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <a 
+                            id="modal-nuuvem-link" 
+                            href="#" 
+                            target="_blank" 
+                            rel="noreferrer"
+                            class="px-3.5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm"
+                        >
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                <span>Comprar na Nuuvem</span>
+                            </span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Ativação Steam</span>
+                        </a>
+                        <a 
+                            id="modal-amazon-link" 
+                            href="#" 
+                            target="_blank" 
+                            rel="noreferrer"
+                            class="px-3.5 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-black rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm"
+                        >
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                <span>Ver na Amazon</span>
+                            </span>
+                            <span class="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Ofertas PC</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação do Rodapé do Modal -->
+                <div class="flex items-center justify-between gap-3 pt-2">
                     <button 
                         onclick="closeGameModal()" 
                         class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition"
@@ -489,7 +868,7 @@
                         rel="noreferrer"
                         class="px-4 py-2 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5"
                     >
-                        <span>Ver na Loja Steam</span>
+                        <span>Abrir na Loja Steam</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                         </svg>
@@ -502,13 +881,26 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="bg-[#171a21] border-t border-[#2a475e] py-6 mt-12 text-center text-xs text-slate-400">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>Steam Analytics Dashboard · Cores Semânticas por Jogo e Nicho</span>
-            <div class="flex items-center gap-4 text-slate-400">
-                <a href="/api/stats" target="_blank" class="hover:text-[#66c0f4] transition">API Stats</a>
-                <span aria-hidden="true">·</span>
-                <a href="/docs" target="_blank" class="hover:text-[#66c0f4] transition">Documentação Swagger (/docs)</a>
+    <footer class="bg-[#171a21] border-t border-[#2a475e] py-8 mt-12 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 space-y-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-white text-sm">Game<span class="text-[#66c0f4]">Lens</span></span>
+                    <span>·</span>
+                    <span>Portal Gamer, Críticas & Análise de Biblioteca</span>
+                </div>
+                <div class="flex items-center gap-4 text-slate-400 flex-wrap justify-center">
+                    <button onclick="openAffiliatesModal()" class="hover:text-amber-300 transition">⚙️ Configurar Afiliados</button>
+                    <span>·</span>
+                    <button onclick="openPixModal()" class="text-emerald-400 hover:underline transition">☕ Doar via Pix</button>
+                    <span>·</span>
+                    <a href="/api/stats" target="_blank" class="hover:text-[#66c0f4] transition">API Stats</a>
+                    <span>·</span>
+                    <a href="/docs" target="_blank" class="hover:text-[#66c0f4] transition">Swagger Docs</a>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-[#2a475e]/60 text-[11px] text-slate-400 leading-relaxed text-center sm:text-left">
+                <strong>Aviso de Transparência & Afiliados:</strong> O GameLens participa dos programas oficiais de parceiros e associados (Nuuvem & Amazon). Ao adquirir jogos ou chaves de ativação Steam através de nossos links, recebemos uma comissão sem custo adicional para você, apoiando a infraestrutura independente do portal.
             </div>
         </div>
     </footer>
@@ -550,6 +942,415 @@
 
         function getGenreColor(genre) {
             return GENRE_COLORS[genre] || '#66c0f4';
+        }
+
+        // Configuração de Afiliados (Rakuten Advertising, Hype Games, Nuuvem & Amazon)
+        const DEFAULT_AFFILIATE_CONFIG = {
+            rakutenSid: '4770537',        // Site ID oficial do Albert na Rakuten
+            hypeMid: '53304',            // MID oficial da Hype Games (Level Up)
+            nuuvemMid: '46796',          // MID da Nuuvem na Rakuten
+            nuuvemPartnerId: 'albertgamer', // Slug/ID de Parceiro Nuuvem
+            amazonTag: 'albertgames-20'  // Tag Amazon Associates Brasil
+        };
+
+        function getAffiliateConfig() {
+            try {
+                const saved = localStorage.getItem('gamelens_affiliate_config');
+                if (saved) return { ...DEFAULT_AFFILIATE_CONFIG, ...JSON.parse(saved) };
+            } catch (e) {}
+            return DEFAULT_AFFILIATE_CONFIG;
+        }
+
+        function saveAffiliateConfig(cfg) {
+            try {
+                localStorage.setItem('gamelens_affiliate_config', JSON.stringify(cfg));
+            } catch (e) {}
+        }
+
+        const GAME_SLUGS = {
+            '1245620': 'elden-ring',
+            '1086940': 'baldurs-gate-3',
+            '292030': 'the-witcher-3-wild-hunt',
+            '1091500': 'cyberpunk-2077',
+            '105600': 'terraria',
+            '289070': 'sid-meiers-civilization-vi',
+            '413150': 'stardew-valley',
+            '553850': 'helldivers-2',
+            '1145360': 'hades',
+            '367520': 'hollow-knight',
+            '730': 'counter-strike-2',
+            '570': 'dota-2'
+        };
+
+        function getAffiliateNuuvemUrl(game) {
+            const cfg = getAffiliateConfig();
+            const slug = (game && game.id && GAME_SLUGS[String(game.id)]) || (game && game.name ? game.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'games');
+            return `https://www.nuuvem.com/item/${slug}?partner=${encodeURIComponent(cfg.nuuvemPartnerId)}`;
+        }
+
+        function getAffiliateHypeUrl(gameName) {
+            const cfg = getAffiliateConfig();
+            const sid = cfg.rakutenSid || '4770537';
+            const mid = cfg.hypeMid || '53304';
+            const targetUrl = encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(gameName || 'jogos')}`);
+            return `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${targetUrl}`;
+        }
+
+        function getAffiliateAmazonUrl(game) {
+            const cfg = getAffiliateConfig();
+            const query = encodeURIComponent(((game && game.name) || 'jogo') + ' jogo');
+            return `https://www.amazon.com.br/s?k=${query}&tag=${encodeURIComponent(cfg.amazonTag)}`;
+        }
+
+        function updateAllAffiliateLinks() {
+            const cfg = getAffiliateConfig();
+            Object.keys(GAME_SLUGS).forEach(id => {
+                const el = document.getElementById(`deal-link-${id}`);
+                if (el) {
+                    el.href = `https://www.nuuvem.com/item/${GAME_SLUGS[id]}?partner=${encodeURIComponent(cfg.nuuvemPartnerId)}`;
+                }
+            });
+        }
+
+        // ==============================================================================
+        // CONTROLE DAS ABAS PRINCIPAIS (DASHBOARD, OFERTAS, BUSCA UNIVERSAL, CONSOLES)
+        // ==============================================================================
+        let activeTab = 'dashboard';
+        let allDeals = [];
+        let currentDealsPlatform = 'all';
+
+        function switchMainTab(tab) {
+            activeTab = tab;
+            const tabs = ['dashboard', 'deals', 'search', 'platforms'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`nav-btn-${t}`);
+                const section = document.getElementById(`tab-section-${t}`);
+                if (!btn || !section) return;
+
+                if (t === tab) {
+                    btn.className = 'nav-tab-btn active px-4 py-2 rounded-lg text-xs font-bold text-[#101822] bg-[#66c0f4] transition flex items-center gap-2 shadow-sm whitespace-nowrap';
+                    section.classList.remove('hidden');
+                } else {
+                    btn.className = 'nav-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-[#1b2838] transition flex items-center gap-2 whitespace-nowrap';
+                    section.classList.add('hidden');
+                }
+            });
+
+            // Ações específicas ao abrir cada aba
+            if (tab === 'deals' && allDeals.length === 0) {
+                fetchDeals();
+            } else if (tab === 'search') {
+                const input = document.getElementById('universal-search-input');
+                if (input && !input.value) {
+                    input.focus();
+                    triggerQuickSearch('Elden Ring');
+                }
+            }
+        }
+
+        // ==============================================================================
+        // RADAR DE PROMOÇÕES E OFERTAS
+        // ==============================================================================
+        async function fetchDeals(platform = 'all') {
+            currentDealsPlatform = platform;
+            const grid = document.getElementById('deals-grid');
+            if (grid && allDeals.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+                        <div class="w-8 h-8 border-2 border-[#66c0f4] border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs">Sincronizando radar de promoções ativas...</span>
+                    </div>
+                `;
+            }
+
+            try {
+                const url = platform === 'all' ? '/api/deals' : `/api/deals?platform=${encodeURIComponent(platform)}`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    allDeals = data.deals || [];
+                    renderDealsGrid(allDeals);
+                }
+            } catch (e) {
+                console.error("Erro ao carregar ofertas:", e);
+            }
+        }
+
+        function filterDealsPlatform(platform) {
+            currentDealsPlatform = platform;
+            document.querySelectorAll('.deal-pill-btn').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                const isMatch = (platform === 'all' && text.includes('todas')) || text.includes(platform.toLowerCase());
+                if (isMatch) {
+                    btn.className = 'deal-pill-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#66c0f4] text-[#101822] transition';
+                } else {
+                    btn.className = 'deal-pill-btn px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#171a21] text-slate-300 hover:text-white hover:bg-[#233446] border border-[#2a475e] transition';
+                }
+            });
+
+            if (allDeals.length === 0) {
+                fetchDeals(platform);
+            } else {
+                const filtered = platform === 'all' ? allDeals : allDeals.filter(d => (d.platform || '').toLowerCase() === platform.toLowerCase());
+                renderDealsGrid(filtered);
+            }
+        }
+
+        function renderDealsGrid(deals) {
+            const grid = document.getElementById('deals-grid');
+            if (!grid) return;
+
+            if (!deals || deals.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8">
+                        <p class="text-sm font-semibold text-white mb-1">Nenhuma oferta encontrada para esta categoria no momento.</p>
+                        <p class="text-xs">O radar verifica novas promoções diariamente.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = deals.map(d => {
+                const disc = d.discount_percent || 0;
+                const discBadge = disc > 0 ? `<span class="px-2 py-0.5 rounded text-[11px] font-black bg-red-600 text-white shadow-md">-${disc}%</span>` : '';
+                const oldPriceFormatted = d.regular_price ? `R$ ${d.regular_price.toFixed(2).replace('.', ',')}` : '';
+                const dealPriceFormatted = d.deal_price ? `R$ ${d.deal_price.toFixed(2).replace('.', ',')}` : 'Sob Consulta';
+                
+                // Link de afiliado inteligente conforme a loja
+                let buyUrl = d.deal_url;
+                if (d.store === 'Hype Games') {
+                    buyUrl = getAffiliateHypeUrl(d.name);
+                } else if (d.store === 'Nuuvem') {
+                    buyUrl = getAffiliateNuuvemUrl({ id: d.id, name: d.name });
+                } else if (d.store === 'Amazon') {
+                    buyUrl = getAffiliateAmazonUrl({ name: d.name });
+                }
+
+                return `
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
+                        <div class="relative h-44 w-full bg-[#101822] overflow-hidden">
+                            <img src="${d.image}" alt="${d.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x300/171a21/66c0f4?text=GameLens'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                                ${discBadge}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-200 backdrop-blur-sm border border-white/10">
+                                    ${d.platform_label || d.platform}
+                                </span>
+                            </div>
+                            <div class="absolute top-2.5 right-2.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#171a21]/90 text-amber-300 border border-amber-500/30">
+                                    ★ ${d.rating}%
+                                </span>
+                            </div>
+                            <div class="absolute bottom-2 left-3 right-3">
+                                <span class="text-[10px] text-emerald-400 font-bold block">${d.badge || 'Oferta Oficial'}</span>
+                                <h3 class="text-sm font-extrabold text-white truncate">${d.name}</h3>
+                            </div>
+                        </div>
+
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                                ${d.review_verdict || 'Excelente oportunidade para adquirir e jogar com ativação imediata.'}
+                            </p>
+
+                            <div class="pt-2 border-t border-[#2a475e]/60 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 line-through block">${oldPriceFormatted}</span>
+                                    <span class="text-lg font-black text-emerald-400">${dealPriceFormatted}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-400 block">Loja Parceira</span>
+                                    <span class="text-xs font-bold text-slate-200">${d.store}</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button onclick="openEditorialCritique('${d.id}')" class="py-2 px-2.5 bg-[#171a21] hover:bg-[#233446] text-slate-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-center gap-1">
+                                    <span>📝 Crítica</span>
+                                </button>
+                                <a href="${buyUrl}" target="_blank" rel="noreferrer" class="py-2 px-2.5 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-extrabold rounded-lg transition shadow-md flex items-center justify-center gap-1">
+                                    <span>🛒 Pegar</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==============================================================================
+        // BUSCA UNIVERSAL AO VIVO NA STEAM STORE API & DEALS
+        // ==============================================================================
+        async function executeUniversalSearch() {
+            const input = document.getElementById('universal-search-input');
+            const query = (input ? input.value : '').trim();
+            if (!query || query.length < 2) return;
+
+            const status = document.getElementById('search-status-label');
+            const count = document.getElementById('search-count-label');
+            const grid = document.getElementById('search-results-grid');
+
+            if (status) status.textContent = `Consultando base global da Steam para "${query}"...`;
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+                        <div class="w-8 h-8 border-2 border-[#66c0f4] border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs">Buscando na API pública oficial da Valve...</span>
+                    </div>
+                `;
+            }
+
+            try {
+                const res = await fetch(`/api/search_store?q=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    renderUniversalSearchResults(data);
+                } else {
+                    if (status) status.textContent = 'Erro ao consultar a API.';
+                }
+            } catch (err) {
+                console.error("Erro na busca universal:", err);
+                if (status) status.textContent = 'Falha temporária de conexão com a API da Steam.';
+            }
+        }
+
+        function triggerQuickSearch(title) {
+            const input = document.getElementById('universal-search-input');
+            if (input) input.value = title;
+            executeUniversalSearch();
+        }
+
+        function renderUniversalSearchResults(data) {
+            const status = document.getElementById('search-status-label');
+            const count = document.getElementById('search-count-label');
+            const grid = document.getElementById('search-results-grid');
+
+            const allResults = [];
+
+            // Adiciona correspondências locais enriquecidas
+            (data.local_games || []).forEach(g => {
+                allResults.push({
+                    id: g.id,
+                    name: g.name,
+                    image: g.header_image || `https://cdn.akamai.steamstatic.com/steam/apps/${g.id}/header.jpg`,
+                    price: g.price_formatted || (g.current_price_brl > 0 ? `R$ ${g.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito'),
+                    discount: g.discount_percent || 0,
+                    source: 'Catálogo Verificado GameLens',
+                    isLocal: true
+                });
+            });
+
+            // Adiciona resultados ao vivo da Steam Store
+            (data.steam_live_results || []).forEach(s => {
+                if (!allResults.some(r => String(r.id) === String(s.id))) {
+                    allResults.push({
+                        id: s.id,
+                        name: s.name,
+                        image: s.header_image,
+                        price: s.price_formatted,
+                        discount: s.discount_percent || 0,
+                        source: 'Steam Store Oficial',
+                        isLocal: false
+                    });
+                }
+            });
+
+            if (status) status.textContent = `Resultados encontrados para "${data.query}"`;
+            if (count) count.textContent = `${allResults.length} título(s)`;
+
+            if (allResults.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 bg-[#171a21] border border-[#2a475e] rounded-xl p-8">
+                        <p class="text-sm font-semibold text-white mb-1">Nenhum título encontrado com o termo "${data.query}".</p>
+                        <p class="text-xs">Tente buscar pelo nome oficial em inglês ou título principal.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = allResults.map(item => {
+                const discBadge = item.discount > 0 ? `<span class="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">-${item.discount}%</span>` : '';
+                const nuuvemUrl = getAffiliateNuuvemUrl({ id: item.id, name: item.name });
+                const hypeUrl = getAffiliateHypeUrl(item.name);
+                const amazonUrl = getAffiliateAmazonUrl({ name: item.name });
+
+                return `
+                    <div class="bg-[#1b2838] border border-[#2a475e] hover:border-[#66c0f4] rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg">
+                        <div class="relative h-40 w-full bg-[#101822] overflow-hidden">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x300/171a21/66c0f4?text=Steam'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                                ${discBadge}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-slate-300 border border-white/10">
+                                    AppID ${item.id}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] text-cyan-400 font-semibold block">${item.source}</span>
+                                <h3 class="text-sm font-bold text-white truncate" title="${item.name}">${item.name}</h3>
+                                <div class="mt-2 text-base font-extrabold text-emerald-400">
+                                    ${item.price}
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 pt-2 border-t border-[#2a475e]">
+                                <a href="${nuuvemUrl}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#171a21] hover:bg-cyan-600 text-cyan-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between">
+                                    <span>Buscar Menor Preço Nuuvem</span>
+                                    <span>→</span>
+                                </a>
+                                <a href="${hypeUrl}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#171a21] hover:bg-emerald-600 text-emerald-300 hover:text-white text-xs font-semibold rounded-lg transition border border-[#2a475e] flex items-center justify-between">
+                                    <span>Ver Ofertas Hype Games</span>
+                                    <span>→</span>
+                                </a>
+                                <a href="https://store.steampowered.com/app/${item.id}" target="_blank" rel="noreferrer" class="w-full py-1.5 px-3 bg-[#101822] hover:bg-[#233446] text-slate-400 hover:text-white text-[11px] rounded-lg transition flex items-center justify-between">
+                                    <span>Abrir Loja Steam Oficial</span>
+                                    <span>↗</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==============================================================================
+        // MODAL DE CRÍTICA EDITORIAL GAMELENS
+        // ==============================================================================
+        function openEditorialCritique(dealId) {
+            const deal = allDeals.find(d => d.id === dealId) || allDeals[0];
+            if (!deal) return;
+
+            const modal = document.getElementById('game-modal');
+            modal.classList.remove('hidden');
+
+            document.getElementById('modal-title').textContent = deal.name;
+            document.getElementById('modal-accent-line').style.backgroundColor = '#10b981';
+            document.getElementById('modal-dev').textContent = `Plataforma: ${deal.platform_label || deal.platform} · Loja: ${deal.store}`;
+            document.getElementById('modal-banner').src = deal.image;
+            document.getElementById('modal-description').textContent = deal.review_verdict || 'Título selecionado com selo de recomendação GameLens.';
+            
+            const modalHours = document.getElementById('modal-hours');
+            modalHours.textContent = `${deal.discount_percent}% OFF`;
+            modalHours.style.color = '#10b981';
+
+            document.getElementById('modal-rating').textContent = `${deal.rating}%`;
+            document.getElementById('modal-players').textContent = 'Recomendado';
+            document.getElementById('modal-price').textContent = `R$ ${deal.deal_price.toFixed(2).replace('.', ',')}`;
+            
+            document.getElementById('modal-genres').innerHTML = `Selo: <strong class="text-emerald-400 font-bold">${deal.badge || 'Oferta em Destaque'}</strong>`;
+            document.getElementById('modal-achievements').innerHTML = `Economia de: <strong class="text-[#66c0f4] tabular-nums">R$ ${(deal.regular_price - deal.deal_price).toFixed(2).replace('.', ',')}</strong>`;
+            
+            document.getElementById('modal-steam-link').href = deal.deal_url;
+            
+            const nuuvemLink = document.getElementById('modal-nuuvem-link');
+            if (nuuvemLink) nuuvemLink.href = deal.store === 'Nuuvem' ? deal.deal_url : getAffiliateNuuvemUrl({ name: deal.name });
+
+            const amazonLink = document.getElementById('modal-amazon-link');
+            if (amazonLink) amazonLink.href = getAffiliateAmazonUrl({ name: deal.name });
         }
 
         // Estado global da aplicação cliente
@@ -1077,9 +1878,14 @@
                         ${priceFormatted}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button class="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition">
-                            Detalhes
-                        </button>
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="event.stopPropagation(); openGameModal('${game.id}')" class="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition">
+                                Detalhes
+                            </button>
+                            <a href="${getAffiliateNuuvemUrl(game)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-semibold px-2 py-1.5 rounded transition flex items-center gap-1" title="Comprar Chave na Nuuvem com Desconto Parceiro">
+                                <span>🛒 Oferta</span>
+                            </a>
+                        </div>
                     </td>
                 `;
 
@@ -1223,6 +2029,12 @@
                 document.getElementById('modal-achievements').innerHTML = `Conquistas: <strong class="text-[#66c0f4] tabular-nums">${game.achievements_unlocked || 0} / ${game.total_achievements || 0}</strong>`;
                 
                 document.getElementById('modal-steam-link').href = `https://store.steampowered.com/app/${game.id}`;
+                
+                const nuuvemLink = document.getElementById('modal-nuuvem-link');
+                if (nuuvemLink) nuuvemLink.href = getAffiliateNuuvemUrl(game);
+
+                const amazonLink = document.getElementById('modal-amazon-link');
+                if (amazonLink) amazonLink.href = getAffiliateAmazonUrl(game);
             } catch (err) {
                 console.error("Erro ao carregar detalhes:", err);
             }
@@ -1258,6 +2070,51 @@
                     btn.classList.remove('bg-emerald-500', 'text-black');
                 }, 2000);
             });
+        }
+
+        // Modal de Afiliados (Rakuten SID, Hype Games, Nuuvem & Amazon)
+        function openAffiliatesModal() {
+            const cfg = getAffiliateConfig();
+            const sidInput = document.getElementById('input-rakuten-sid');
+            if (sidInput) sidInput.value = cfg.rakutenSid || '4770537';
+            const hypeInput = document.getElementById('input-hype-mid');
+            if (hypeInput) hypeInput.value = cfg.hypeMid || '53304';
+            document.getElementById('input-nuuvem-id').value = cfg.nuuvemPartnerId || 'albertgamer';
+            document.getElementById('input-amazon-id').value = cfg.amazonTag || 'albertgames-20';
+            document.getElementById('affiliates-modal').classList.remove('hidden');
+        }
+
+        function closeAffiliatesModal() {
+            document.getElementById('affiliates-modal').classList.add('hidden');
+        }
+
+        function saveAffiliateSettings() {
+            const sidInput = document.getElementById('input-rakuten-sid');
+            const hypeInput = document.getElementById('input-hype-mid');
+            const rakutenSid = (sidInput ? sidInput.value.trim() : '') || '4770537';
+            const hypeMid = (hypeInput ? hypeInput.value.trim() : '') || '53304';
+            const nuuvemId = document.getElementById('input-nuuvem-id').value.trim() || 'albertgamer';
+            const amazonId = document.getElementById('input-amazon-id').value.trim() || 'albertgames-20';
+            
+            saveAffiliateConfig({
+                rakutenSid,
+                hypeMid,
+                nuuvemMid: '46796',
+                nuuvemPartnerId: nuuvemId,
+                amazonTag: amazonId
+            });
+            
+            const btn = document.getElementById('btn-save-affiliates');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span>Salvo com Sucesso!</span>';
+            btn.classList.add('bg-emerald-500', 'text-black');
+            setTimeout(() => {
+                btn.innerHTML = orig;
+                btn.classList.remove('bg-emerald-500', 'text-black');
+                closeAffiliatesModal();
+                renderTable();
+                if (allDeals.length > 0) renderDealsGrid(allDeals);
+            }, 1200);
         }
     </script>
 
@@ -1299,6 +2156,103 @@
             </div>
             <div class="text-[11px] text-slate-400 border-t border-[#2a475e] pt-3">
                 Titular: <strong>Albert Alves</strong> · Obrigado por incentivar a plataforma!
+            </div>
+        </div>
+    </div>
+
+    <!-- AFFILIATES CONFIG MODAL -->
+    <div id="affiliates-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-lg w-full p-6 text-slate-200 relative shadow-2xl">
+            <button onclick="closeAffiliatesModal()" class="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Configurar IDs de Afiliados</h3>
+                    <p class="text-xs text-slate-400">Insira suas tags de parceiro para direcionar as comissões de venda.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <!-- Rakuten Advertising Site ID (SID) -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                            <span>🏢 Rakuten Advertising (Site ID / SID)</span>
+                        </label>
+                        <span class="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">Seu Perfil Ativo</span>
+                    </div>
+                    <input 
+                        id="input-rakuten-sid" 
+                        type="text" 
+                        placeholder="Ex: 4770537" 
+                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
+                    />
+                    <p class="text-[10px] text-slate-400 mt-1.5">Seu código oficial na Rakuten: <code>SID 4770537</code> (GameLens - Portal Gamer).</p>
+                </div>
+
+                <!-- Hype Games MID -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                            <span>⚡ Hype Games (Level Up · MID 53304)</span>
+                        </label>
+                        <span class="text-[10px] text-slate-400">Chaves Steam & Consoles</span>
+                    </div>
+                    <input 
+                        id="input-hype-mid" 
+                        type="text" 
+                        placeholder="Ex: 53304" 
+                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
+                    />
+                    <p class="text-[10px] text-slate-400 mt-1.5">Gera links rastreados: <code>https://click.linksynergy.com/deeplink?id=4770537&mid=53304...</code></p>
+                </div>
+
+                <!-- Nuuvem Partner ID -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                            <span>🎮 Nuuvem Partner ID</span>
+                        </label>
+                        <span class="text-[10px] text-slate-400">Chaves Steam (BRL)</span>
+                    </div>
+                    <input 
+                        id="input-nuuvem-id" 
+                        type="text" 
+                        placeholder="Ex: albertgamer" 
+                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
+                    />
+                    <p class="text-[10px] text-slate-400 mt-1.5">Gera links: <code>https://www.nuuvem.com/item/slug?partner=SEU_ID</code> (MID 46796).</p>
+                </div>
+
+                <!-- Amazon Associate Tag -->
+                <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-3.5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                            <span>📦 Amazon Associates Tag</span>
+                        </label>
+                        <span class="text-[10px] text-slate-400">Hardware & Jogos PC</span>
+                    </div>
+                    <input 
+                        id="input-amazon-id" 
+                        type="text" 
+                        placeholder="Ex: albertgames-20" 
+                        class="w-full bg-[#101822] border border-[#2a475e] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#66c0f4] font-mono"
+                    />
+                    <p class="text-[10px] text-slate-400 mt-1.5">Gera links com a tag <code>&tag=SEU_ID-20</code> nas buscas da Amazon Brasil.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-[#2a475e]">
+                <button onclick="closeAffiliatesModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition">
+                    Cancelar
+                </button>
+                <button id="btn-save-affiliates" onclick="saveAffiliateSettings()" class="px-5 py-2 text-xs font-bold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition shadow-md">
+                    Salvar e Atualizar Links
+                </button>
             </div>
         </div>
     </div>

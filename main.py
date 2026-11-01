@@ -9,6 +9,9 @@ Compatível com: Render, Vercel, Railway, Fly.io, GitHub e execução local.
 """
 
 import os
+import json
+import urllib.request
+import urllib.parse
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -398,7 +401,8 @@ async def serve_home(request: Request):
         context={
             "request": request,
             "stats": stats,
-            "games": list(GAMES_DATABASE.values())
+            "games": list(GAMES_DATABASE.values()),
+            "deals": DEALS_DATABASE
         }
     )
 
@@ -471,10 +475,293 @@ async def list_games(
     return {"total": len(games), "games": games}
 
 
+# ==============================================================================
+# RADAR DE OFERTAS & DESCONTOS MULTIPLATAFORMA (PC, PLAYSTATION, XBOX, NINTENDO)
+# ==============================================================================
+DEALS_DATABASE = [
+    {
+        "id": "deal-elden-ring",
+        "name": "Elden Ring",
+        "platform": "PC",
+        "platform_label": "PC / Steam",
+        "store": "Nuuvem",
+        "regular_price": 229.90,
+        "deal_price": 151.73,
+        "discount_percent": 34,
+        "rating": 93,
+        "deal_url": "https://www.nuuvem.com/item/elden-ring",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+        "badge": "Menor Preço em 3 Meses",
+        "review_verdict": "Obra-prima imperdível do estilo soulslike em mundo aberto. Vale cada centavo."
+    },
+    {
+        "id": "deal-cyberpunk",
+        "name": "Cyberpunk 2077: Ultimate Edition",
+        "platform": "PC",
+        "platform_label": "PC / Steam",
+        "store": "Nuuvem",
+        "regular_price": 199.90,
+        "deal_price": 99.95,
+        "discount_percent": 50,
+        "rating": 89,
+        "deal_url": "https://www.nuuvem.com/item/cyberpunk-2077",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+        "badge": "Sucesso de Vendas",
+        "review_verdict": "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
+    },
+    {
+        "id": "deal-witcher3",
+        "name": "The Witcher 3: Wild Hunt - Complete Edition",
+        "platform": "PC",
+        "platform_label": "PC / Steam",
+        "store": "Hype Games",
+        "regular_price": 129.99,
+        "deal_price": 32.49,
+        "discount_percent": 75,
+        "rating": 97,
+        "deal_url": "https://hype.games/br",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
+        "badge": "Desconto Histórico -75%",
+        "review_verdict": "Um dos maiores RPGs da história. Por esse valor, é compra obrigatória."
+    },
+    {
+        "id": "deal-rdr2",
+        "name": "Red Dead Redemption 2",
+        "platform": "PC",
+        "platform_label": "PC / Steam & Epic",
+        "store": "Hype Games",
+        "regular_price": 299.90,
+        "deal_price": 98.96,
+        "discount_percent": 67,
+        "rating": 92,
+        "deal_url": "https://hype.games/br",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg",
+        "badge": "Top Avaliado",
+        "review_verdict": "Narrativa cinematográfica sem paralelo com mundo aberto hiper-realista da Rockstar."
+    },
+    {
+        "id": "deal-gow",
+        "name": "God of War",
+        "platform": "PC",
+        "platform_label": "PC / Steam",
+        "store": "Nuuvem",
+        "regular_price": 199.90,
+        "deal_price": 79.96,
+        "discount_percent": 60,
+        "rating": 96,
+        "deal_url": "https://www.nuuvem.com/item/god-of-war",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
+        "badge": "PlayStation no PC -60%",
+        "review_verdict": "A jornada nórdica de Kratos e Atreus com combate visceral e excelente port de PC."
+    },
+    {
+        "id": "deal-re4",
+        "name": "Resident Evil 4 Remake",
+        "platform": "PC",
+        "platform_label": "PC / Steam",
+        "store": "Hype Games",
+        "regular_price": 249.00,
+        "deal_price": 124.50,
+        "discount_percent": 50,
+        "rating": 97,
+        "deal_url": "https://hype.games/br",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg",
+        "badge": "Terror Clássico -50%",
+        "review_verdict": "Um dos melhores remakes já feitos na indústria. Ação intensa e visuais deslumbrantes."
+    },
+    {
+        "id": "deal-spiderman2",
+        "name": "Marvel's Spider-Man 2",
+        "platform": "PlayStation",
+        "platform_label": "PlayStation 5",
+        "store": "Amazon",
+        "regular_price": 349.90,
+        "deal_price": 239.90,
+        "discount_percent": 31,
+        "rating": 90,
+        "deal_url": "https://www.amazon.com.br",
+        "image": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+        "badge": "Exclusivo PS5",
+        "review_verdict": "Gráficos de tirar o fôlego, exploração ágil por Nova York e combate refinado de Peter e Miles."
+    },
+    {
+        "id": "deal-psn-card",
+        "name": "Cartão Presente PlayStation Store R$ 100",
+        "platform": "PlayStation",
+        "platform_label": "PS5 / PS4 Gift Card",
+        "store": "Hype Games",
+        "regular_price": 100.00,
+        "deal_price": 95.00,
+        "discount_percent": 5,
+        "rating": 99,
+        "deal_url": "https://hype.games/br",
+        "image": "https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600&auto=format&fit=crop&q=80",
+        "badge": "Crédito Digital Instantâneo",
+        "review_verdict": "Ativação oficial de créditos na PSN brasileira com entrega imediata e Pix."
+    },
+    {
+        "id": "deal-gamepass",
+        "name": "Xbox Game Pass Ultimate (3 Meses)",
+        "platform": "Xbox",
+        "platform_label": "Xbox & PC Cloud",
+        "store": "Hype Games",
+        "regular_price": 179.99,
+        "deal_price": 149.90,
+        "discount_percent": 17,
+        "rating": 98,
+        "deal_url": "https://hype.games/br",
+        "image": "https://images.unsplash.com/photo-1605901309584-818e25960a8f?w=600&auto=format&fit=crop&q=80",
+        "badge": "O Melhor Custo-Benefício Gamer",
+        "review_verdict": "Centenas de jogos no catálogo, lançamentos Day One, EA Play e nuvem no celular e PC."
+    },
+    {
+        "id": "deal-forza5",
+        "name": "Forza Horizon 5",
+        "platform": "Xbox",
+        "platform_label": "Xbox Series & PC",
+        "store": "Nuuvem",
+        "regular_price": 249.00,
+        "deal_price": 124.50,
+        "discount_percent": 50,
+        "rating": 88,
+        "deal_url": "https://www.nuuvem.com",
+        "image": "https://cdn.akamai.steamstatic.com/steam/apps/1551360/header.jpg",
+        "badge": "Corrida em Mundo Aberto -50%",
+        "review_verdict": "O melhor jogo de corrida arcade da atualidade, ambientado no vibrante México."
+    },
+    {
+        "id": "deal-zelda-totk",
+        "name": "The Legend of Zelda: Tears of the Kingdom",
+        "platform": "Nintendo",
+        "platform_label": "Nintendo Switch",
+        "store": "Amazon",
+        "regular_price": 399.00,
+        "deal_price": 289.00,
+        "discount_percent": 28,
+        "rating": 96,
+        "deal_url": "https://www.amazon.com.br",
+        "image": "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&auto=format&fit=crop&q=80",
+        "badge": "Jogo do Ano Switch",
+        "review_verdict": "Criatividade sem limites com a mecânica de fusão e exploração vertical fantástica."
+    },
+    {
+        "id": "deal-nintendo-eshop",
+        "name": "Cartão Presente Nintendo eShop R$ 100",
+        "platform": "Nintendo",
+        "platform_label": "Nintendo Switch eShop",
+        "store": "Hype Games",
+        "regular_price": 100.00,
+        "deal_price": 96.00,
+        "discount_percent": 4,
+        "rating": 99,
+        "deal_url": "https://hype.games/br",
+        "image": "https://images.unsplash.com/photo-1612287233215-d227f2f111ee?w=600&auto=format&fit=crop&q=80",
+        "badge": "Crédito Oficial Nintendo",
+        "review_verdict": "Compre jogos digitais e DLCs na eShop brasileira com facilidade e segurança."
+    }
+]
+
+
+@app.get("/api/deals")
+async def get_deals(
+    platform: Optional[str] = Query(None, description="Filtrar por plataforma: all, PC, PlayStation, Xbox, Nintendo"),
+    min_discount: Optional[int] = Query(0, description="Desconto mínimo percentual")
+):
+    """
+    Retorna radar de promoções multiplataforma com dados de descontos, lojas e links.
+    """
+    results = DEALS_DATABASE.copy()
+
+    if platform and platform.lower() != "all" and platform.lower() != "todos":
+        results = [d for d in results if d["platform"].lower() == platform.lower()]
+
+    if min_discount > 0:
+        results = [d for d in results if d["discount_percent"] >= min_discount]
+
+    # Ordena por maior desconto
+    results.sort(key=lambda x: x["discount_percent"], reverse=True)
+
+    return {
+        "total": len(results),
+        "deals": results
+    }
+
+
+@app.get("/api/search_store")
+async def search_steam_store(q: str = Query(..., min_length=2, description="Nome de qualquer jogo")):
+    """
+    Pesquisa universal de QUALQUER jogo em tempo real:
+    1. Busca nos jogos cadastrados no GameLens
+    2. Busca nas ofertas ativas
+    3. Consulta a API pública da Steam Store em tempo real para trazer qualquer jogo do mundo!
+    """
+    query = q.strip()
+    query_lower = query.lower()
+
+    # 1. Correspondências locais no catálogo principal
+    local_games = [
+        g for g in GAMES_DATABASE.values()
+        if query_lower in g["name"].lower() or query_lower in g.get("developer", "").lower()
+    ]
+
+    # 2. Correspondências no banco de promoções
+    deal_matches = [
+        d for d in DEALS_DATABASE
+        if query_lower in d["name"].lower()
+    ]
+
+    # 3. Consulta ao vivo na Steam Store pública (sem necessidade de chaves pagas)
+    steam_live_results = []
+    try:
+        encoded_query = urllib.parse.quote(query)
+        steam_url = f"https://store.steampowered.com/api/storesearch/?term={encoded_query}&l=portuguese&cc=BR"
+        req = urllib.request.Request(
+            steam_url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) GameLens/2.0"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=3.5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            items = data.get("items", [])
+            for item in items[:10]:
+                item_id = str(item.get("id"))
+                price_info = item.get("price") or {}
+                orig_cents = price_info.get("initial", 0)
+                final_cents = price_info.get("final", 0)
+                curr_brl = final_cents / 100.0 if final_cents else 0.0
+                orig_brl = orig_cents / 100.0 if orig_cents else curr_brl
+
+                disc = 0
+                if orig_cents > 0 and final_cents < orig_cents:
+                    disc = int(round(((orig_cents - final_cents) / orig_cents) * 100))
+
+                steam_live_results.append({
+                    "id": item_id,
+                    "name": item.get("name"),
+                    "header_image": item.get("tiny_image") or f"https://cdn.akamai.steamstatic.com/steam/apps/{item_id}/header.jpg",
+                    "current_price_brl": curr_brl,
+                    "original_price_brl": orig_brl,
+                    "price_formatted": f"R$ {curr_brl:.2f}".replace(".", ",") if curr_brl > 0 else "Gratuito",
+                    "discount_percent": disc,
+                    "source": "steam_store"
+                })
+    except Exception:
+        # Falha silenciosa para nunca quebrar a requisição do usuário
+        pass
+
+    return {
+        "query": query,
+        "local_games": local_games,
+        "deal_matches": deal_matches,
+        "steam_live_results": steam_live_results
+    }
+
+
 @app.get("/api/health")
 async def health_check():
     """Endpoint de checagem de integridade para monitoramento (Render/UptimeRobot)."""
-    return {"status": "ok", "service": "steam-analytics-api", "version": "1.0.0"}
+    return {"status": "ok", "service": "gamelens-portal-api", "version": "2.0.0"}
 
 
 # ==============================================================================
