@@ -393,8 +393,9 @@ async def serve_home(request: Request):
     """
     stats = calculate_library_stats(GAMES_DATABASE)
     return templates.TemplateResponse(
-        "index.html",
-        {
+        request=request,
+        name="index.html",
+        context={
             "request": request,
             "stats": stats,
             "games": list(GAMES_DATABASE.values())
