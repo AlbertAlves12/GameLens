@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameLens - Portal & Dashboard de Biblioteca Gamer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        steam: {
+                            base: '#0e141b',
+                            dark: '#171a21',
+                            card: '#1b2838',
+                            hover: '#233446',
+                            border: '#2a475e',
+                            blue: '#66c0f4',
+                            sky: '#c7d5e0',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0e141b;
+            color: #c7d5e0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .tabular-nums {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101822;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #233446;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #314863;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- TOP HEADER STEAM NAVIGATION -->
+    <header class="bg-[#171a21] border-b border-[#2a475e] sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            
+            <!-- Logo & Brand Zone -->
+            <div class="flex items-center gap-3 shrink-0">
+                <svg class="w-8 h-8 text-[#66c0f4]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 4.64 3.16 8.54 7.44 9.65l2.4-3.48a4.995 4.995 0 0 1-1.84-3.87 5 5 0 0 1 5-5c1.84 0 3.44.99 4.29 2.47l3.2-1.37C21.05 6.07 16.94 2 12 2zm3 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                </svg>
+                <div class="flex flex-col">
+                    <span class="text-white font-extrabold text-lg tracking-tight">Game<span class="text-[#66c0f4]">Lens</span></span>
+                    <span class="text-[11px] text-slate-400">Portal Gamer & Analytics</span>
+                </div>
+            </div>
+
+            <!-- Quick Selector / Search Header Tool -->
+            <div class="flex-1 max-w-md hidden sm:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="global-search" 
+                        placeholder="Buscar por jogo ou desenvolvedor..." 
+                        class="w-full bg-[#1b2838] border border-[#2a475e] text-white text-sm rounded-lg px-4 py-2 pl-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
+                        oninput="handleSearch(this.value)"
+                    />
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Actions / Status -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <button 
+                    onclick="openPixModal()" 
+                    class="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                    title="Apoiar este projeto com Pix"
+                >
+                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Apoiar via Pix</span>
+                </button>
+                <button 
+                    onclick="refreshData()" 
+                    id="btn-refresh"
+                    class="bg-[#2a475e] hover:bg-[#3b5f7d] text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5"
+                    title="Atualizar dados da API"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span class="hidden sm:inline">Atualizar</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- GUIA DE CORES POR NICHO -->
+    <div class="bg-[#121c27] border-b border-[#2a475e]/60 py-2.5 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="text-slate-400 font-medium">Cores dos Nichos:</span>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="flex items-center gap-1 text-[11px]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></span>
+                        <span>Ação</span>
+                    </span>
+                    <span class="flex items-center gap-1 text-[11px]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#a855f7]"></span>
+                        <span>RPG</span>
+                    </span>
+                    <span class="flex items-center gap-1 text-[11px]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span>
+                        <span>Estratégia</span>
+                    </span>
+                    <span class="flex items-center gap-1 text-[11px]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span>
+                        <span>Indie</span>
+                    </span>
+                    <span class="flex items-center gap-1 text-[11px]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#06b6d4]"></span>
+                        <span>Simulação</span>
+                    </span>
+                </div>
+            </div>
+            <div class="text-slate-400 text-xs">
+                <span>Cores distintas para jogos e categorias ativas</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+        
+        <!-- INTRO HERO BANNER -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Visão Geral da Biblioteca</h1>
+                <p class="text-sm text-slate-400 mt-1">Estatísticas consolidadas com cores representativas de cada título e nicho.</p>
+            </div>
+            <!-- Quick Filter Bar -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="genre-filter-container">
+                <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
+                <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
+                    <span>RPG</span>
+                </button>
+                <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
+                    <span>Ação</span>
+                </button>
+                <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+                    <span>Estratégia</span>
+                </button>
+                <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+                    <span>Indie</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3 CARDS DE MÉTRICAS EM DESTAQUE -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Card 1: Total de Horas -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4]">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                    <span>TEMPO TOTAL REGISTRADO</span>
+                    <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="text-3xl sm:text-4xl font-bold text-white tabular-nums" id="card-total-hours">
+                    {{ stats.total_hours if stats else '0' }} <span class="text-lg font-normal text-slate-400">horas</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                    <span>Em <strong class="text-white" id="card-total-games">{{ stats.total_games if stats else '0' }}</strong> jogos catalogados</span>
+                    <span aria-hidden="true">·</span>
+                    <span class="text-emerald-400">+14.2h este mês</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Jogo Mais Jogado -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] cursor-pointer" onclick="openGameModal(currentStats?.most_played_game?.id || '730')">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                    <span>JOGO MAIS JOGADO</span>
+                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                </div>
+                <div class="text-2xl font-bold text-white truncate flex items-center gap-2" id="card-most-played-name">
+                    <span class="w-3 h-3 rounded-full bg-[#f97316] shrink-0"></span>
+                    <span>{{ stats.most_played_game.name if stats and stats.most_played_game else 'Counter-Strike 2' }}</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                    <span class="tabular-nums font-semibold text-[#f97316]" id="card-most-played-hours">{{ stats.most_played_game.hours_played if stats and stats.most_played_game else '845.2' }}h jogadas</span>
+                    <span aria-hidden="true">·</span>
+                    <span class="text-slate-300">Classificação: {{ stats.most_played_game.rating_label if stats and stats.most_played_game else 'Muito Positivas' }}</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Avaliação Média da Biblioteca -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4]">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                    <span>AVALIAÇÃO MÉDIA DA BIBLIOTECA</span>
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2m-7 0H4a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                    </svg>
+                </div>
+                <div class="text-3xl sm:text-4xl font-bold text-emerald-400 tabular-nums" id="card-avg-rating">
+                    {{ stats.avg_rating if stats else '91.8' }}%
+                </div>
+                <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                    <span>Índice Positivo Global</span>
+                    <span aria-hidden="true">·</span>
+                    <span class="text-slate-300">Baseado em análises de usuários Steam</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GRÁFICO DE LINHA: TENDÊNCIA E CRESCIMENTO DOS ÚLTIMOS 6 MESES -->
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 mb-8 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <div className="flex items-center gap-2 flex-wrap" style="display: flex; align-items: center; gap: 8px;">
+                        <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                            <span>Evolução de Horas Jogadas (Últimos 6 Meses)</span>
+                        </h2>
+                        <span id="line-growth-badge" class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-0.5 rounded-full font-bold">
+                            +123.8% de crescimento
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Comparativo mensal de dedicação à biblioteca e aceleração de atividade no período recente.</p>
+                </div>
+                <!-- Badges de Métricas do Semestre -->
+                <div class="flex items-center gap-3 text-xs flex-wrap">
+                    <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
+                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Média Mensal</span>
+                        <span class="font-mono font-bold text-white text-sm tabular-nums" id="line-avg-hours">473.9h</span>
+                    </div>
+                    <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
+                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Mês de Pico</span>
+                        <span class="font-bold text-[#66c0f4] text-sm" id="line-peak-month">Outubro (668.3h)</span>
+                    </div>
+                    <div class="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg hidden sm:block">
+                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Total no Período</span>
+                        <span class="font-mono font-bold text-emerald-400 text-sm tabular-nums" id="line-total-hours">2.843.8h</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Canvas do Gráfico de Linha -->
+            <div class="relative h-[280px] sm:h-[320px]">
+                <canvas id="trendLineChart"></canvas>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[#2a475e]/60 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#66c0f4]"></span>
+                        <span class="text-slate-300">Tempo Efetivo Mensal</span>
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-4 h-0.5 border-t border-dashed border-[#a855f7]"></span>
+                        <span class="text-slate-300">Linha de Média Semestral</span>
+                    </span>
+                </div>
+                <span class="text-[11px] text-slate-400">Passe o mouse sobre os pontos para ver ritmo e jogo destaque de cada mês</span>
+            </div>
+        </div>
+
+        <!-- 2 GRÁFICOS INTERATIVOS ESTILIZADOS COM CHART.JS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            
+            <!-- Gráfico 1: Barras - Top Jogos por Horas com Cores Distintas -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white">Top Jogos por Horas Jogadas</h2>
+                        <p class="text-xs text-slate-400">Cores distintas identificando cada jogo</p>
+                    </div>
+                    <!-- Seletor de Modo de Cor -->
+                    <div class="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e]">
+                        <button onclick="setHtmlColorMode('game')" id="btn-colormode-game" class="px-2.5 py-1 text-[11px] rounded bg-[#66c0f4] text-[#101822] font-semibold transition">Cor do Jogo</button>
+                        <button onclick="setHtmlColorMode('genre')" id="btn-colormode-genre" class="px-2.5 py-1 text-[11px] rounded text-slate-400 hover:text-white transition">Cor do Nicho</button>
+                    </div>
+                </div>
+                <div class="relative flex-1 min-h-[300px]">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 2: Rosca/Doughnut - Distribuição de Horas por Gênero/Nicho com Cores Semânticas -->
+            <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white">Distribuição por Nicho / Gênero</h2>
+                        <p class="text-xs text-slate-400">Proporção com cores de alto contraste por categoria</p>
+                    </div>
+                    <span class="text-xs font-mono text-[#66c0f4] bg-[#171a21] px-2 py-0.5 rounded border border-[#2a475e]">Chart.js</span>
+                </div>
+                <div class="relative flex-1 min-h-[300px] flex items-center justify-center">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TABELA DE DADOS DETALHADA COM FILTRO E ORDENAÇÃO -->
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
+            
+            <!-- Barra superior da tabela -->
+            <div class="p-5 border-b border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Catálogo Detalhado de Jogos</h2>
+                    <p class="text-xs text-slate-400">Identificação cromática por título e estilo de gameplay</p>
+                </div>
+                <!-- Filtros rápidos da tabela -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div id="table-active-filter-badge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded bg-[#171a21] border border-[#66c0f4]/50 text-xs text-white">
+                        <span class="w-2 h-2 rounded-full bg-[#66c0f4]"></span>
+                        <span class="text-slate-300">Nicho ativo:</span>
+                        <strong class="text-white" id="table-active-filter-text"></strong>
+                        <button onclick="filterByGenre('Todos')" class="ml-1 text-slate-400 hover:text-white transition p-0.5 rounded hover:bg-[#2a475e]" title="Remover filtro e ver todos os jogos">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <span class="text-xs text-slate-400">Ordenar por:</span>
+                    <select 
+                        id="table-sort-select" 
+                        onchange="handleSortChange(this.value)"
+                        class="bg-[#171a21] border border-[#2a475e] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#66c0f4]"
+                    >
+                        <option value="hours">Mais Jogados (Horas)</option>
+                        <option value="rating">Maior Avaliação (%)</option>
+                        <option value="players">Pico 24h Jogadores</option>
+                        <option value="price">Preço</option>
+                        <option value="name">Nome (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabela responsiva -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="text-xs uppercase bg-[#171a21] text-slate-400 border-b border-[#2a475e]">
+                        <tr>
+                            <th scope="col" class="px-6 py-3.5">Jogo & Cor Tema</th>
+                            <th scope="col" class="px-6 py-3.5">Nicho / Gênero</th>
+                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('hours')">
+                                Horas Jogadas ↕
+                            </th>
+                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('rating')">
+                                Avaliação Steam ↕
+                            </th>
+                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('players')">
+                                Pico 24h (Jogadores) ↕
+                            </th>
+                            <th scope="col" class="px-6 py-3.5 text-right cursor-pointer hover:text-white" onclick="toggleSort('price')">
+                                Preço Atual ↕
+                            </th>
+                            <th scope="col" class="px-6 py-3.5 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="games-table-body" class="divide-y divide-[#2a475e]/60">
+                        <!-- Linhas geradas dinamicamente pelo JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rodapé da tabela com contador -->
+            <div class="px-6 py-4 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between text-xs text-slate-400">
+                <span id="table-summary-text">Exibindo todos os jogos</span>
+                <span>Dados sincronizados com endpoint /api/games</span>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL DE DETALHES DO JOGO (/api/game/{game_id}) -->
+    <div id="game-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl animate-fade-in relative">
+            
+            <!-- Botão fechar -->
+            <button 
+                onclick="closeGameModal()" 
+                class="absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white rounded-full p-2 transition z-10"
+                title="Fechar"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <!-- Imagem de Capa do Jogo -->
+            <div class="relative h-48 sm:h-56 w-full bg-[#171a21] overflow-hidden">
+                <img id="modal-banner" src="" alt="Banner do Jogo" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+                <div id="modal-accent-line" class="absolute top-0 left-0 right-0 h-1 bg-[#66c0f4]"></div>
+                <div class="absolute bottom-4 left-6 right-6">
+                    <h3 id="modal-title" class="text-2xl font-extrabold text-white">Carregando...</h3>
+                    <p id="modal-dev" class="text-xs text-[#66c0f4]">Desenvolvedora: --</p>
+                </div>
+            </div>
+
+            <!-- Conteúdo do Modal -->
+            <div class="p-6 space-y-6">
+                
+                <p id="modal-description" class="text-sm text-slate-300 leading-relaxed">
+                    Carregando detalhes do jogo via API...
+                </p>
+
+                <!-- Grid de Métricas do Jogo -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#171a21] p-4 rounded-lg border border-[#2a475e]">
+                    <div>
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Horas Jogadas</span>
+                        <span id="modal-hours" class="text-lg font-bold text-white tabular-nums">0h</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Avaliação</span>
+                        <span id="modal-rating" class="text-lg font-bold text-emerald-400 tabular-nums">0%</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Pico 24h</span>
+                        <span id="modal-players" class="text-lg font-bold text-white tabular-nums">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Preço</span>
+                        <span id="modal-price" class="text-lg font-bold text-white tabular-nums">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Conquistas e Gêneros -->
+                <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 pt-2 border-t border-[#2a475e]">
+                    <div id="modal-genres">
+                        <span>Gêneros: <strong class="text-slate-200">Ação, RPG</strong></span>
+                    </div>
+                    <div id="modal-achievements">
+                        <span>Conquistas: <strong class="text-[#66c0f4] tabular-nums">0 / 0</strong></span>
+                    </div>
+                </div>
+
+                <!-- Botão Link Loja Steam -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button 
+                        onclick="closeGameModal()" 
+                        class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition"
+                    >
+                        Fechar
+                    </button>
+                    <a 
+                        id="modal-steam-link" 
+                        href="https://store.steampowered.com" 
+                        target="_blank" 
+                        rel="noreferrer"
+                        class="px-4 py-2 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5"
+                    >
+                        <span>Ver na Loja Steam</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#171a21] border-t border-[#2a475e] py-6 mt-12 text-center text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>Steam Analytics Dashboard · Cores Semânticas por Jogo e Nicho</span>
+            <div class="flex items-center gap-4 text-slate-400">
+                <a href="/api/stats" target="_blank" class="hover:text-[#66c0f4] transition">API Stats</a>
+                <span aria-hidden="true">·</span>
+                <a href="/docs" target="_blank" class="hover:text-[#66c0f4] transition">Documentação Swagger (/docs)</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT PURO COM CONTROLE DOS DADOS, CORES E GRÁFICOS -->
+    <script>
+        // Mapeamento de Cores por Nicho (Gênero)
+        const GENRE_COLORS = {
+            'Ação': '#ef4444',        // Vermelho
+            'RPG': '#a855f7',         // Púrpura
+            'Estratégia': '#f59e0b',  // Âmbar/Dourado
+            'Indie': '#10b981',       // Verde Esmeralda
+            'Simulação': '#06b6d4',   // Ciano
+            'Aventura': '#3b82f6',    // Azul Safira
+            'Soulslike': '#f97316',   // Laranja
+            'Competitivo': '#ec4899', // Pink
+            'Outros': '#94a3b8'
+        };
+
+        // Mapeamento de Cores por Jogo
+        const GAME_COLORS = {
+            '730': '#f97316',      // CS2 (Laranja)
+            '570': '#dc2626',      // Dota 2 (Vermelho)
+            '1086940': '#a855f7',  // Baldur's Gate 3 (Púrpura)
+            '1245620': '#eab308',  // Elden Ring (Dourado)
+            '105600': '#22c55e',   // Terraria (Verde)
+            '292030': '#f43f5e',   // The Witcher 3 (Carmesim)
+            '1091500': '#facc15',  // Cyberpunk 2077 (Amarelo Neon)
+            '289070': '#0284c7',   // Civilization VI (Azul)
+            '413150': '#10b981',   // Stardew Valley (Esmeralda)
+            '553850': '#fb923c',   // Helldivers 2 (Laranja/Amarelo)
+            '1145360': '#e11d48',  // Hades (Vermelho Escuro)
+            '367520': '#38bdf8'    // Hollow Knight (Ciano)
+        };
+
+        function getGameColor(gameId, primaryGenre) {
+            return GAME_COLORS[gameId] || GENRE_COLORS[primaryGenre] || '#66c0f4';
+        }
+
+        function getGenreColor(genre) {
+            return GENRE_COLORS[genre] || '#66c0f4';
+        }
+
+        // Estado global da aplicação cliente
+        let currentStats = null;
+        let allGames = [];
+        let filteredGames = [];
+        let currentSort = 'hours';
+        let sortAsc = false;
+        let selectedGenre = 'Todos';
+        let currentBarColorMode = 'game'; // 'game' ou 'genre'
+        let barChartInstance = null;
+        let doughnutChartInstance = null;
+        let lineChartInstance = null;
+
+        // Dados mockados de fallback
+        const FALLBACK_DATA = {
+            "total_games": 12,
+            "total_hours": 2843.8,
+            "avg_rating": 91.8,
+            "most_played_game": {
+                "id": "730",
+                "name": "Counter-Strike 2",
+                "hours_played": 845.2,
+                "header_image": "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
+                "rating_label": "Muito Positivas"
+            },
+            "genre_distribution": {
+                "Ação": 1414.1,
+                "RPG": 954.7,
+                "Estratégia": 609.1,
+                "Indie": 243.9
+            },
+            "top_games": [
+                { "id": "730", "name": "Counter-Strike 2", "hours_played": 845.2, "genres": ["Ação", "Tiro"], "user_rating": 88, "peak_24h_players": 1420850, "current_price_brl": 0.0, "price_formatted": "Gratuito", "developer": "Valve" },
+                { "id": "570", "name": "Dota 2", "hours_played": 430.7, "genres": ["Estratégia", "MOBA"], "user_rating": 82, "peak_24h_players": 710500, "current_price_brl": 0.0, "price_formatted": "Gratuito", "developer": "Valve" },
+                { "id": "1086940", "name": "Baldur's Gate 3", "hours_played": 312.4, "genres": ["RPG", "Estratégia"], "user_rating": 96, "peak_24h_players": 98120, "current_price_brl": 199.99, "price_formatted": "R$ 199,99", "developer": "Larian Studios" },
+                { "id": "1245620", "name": "Elden Ring", "hours_played": 264.8, "genres": ["RPG", "Soulslike"], "user_rating": 93, "peak_24h_players": 85400, "current_price_brl": 229.90, "price_formatted": "R$ 229,90", "developer": "FromSoftware" },
+                { "id": "105600", "name": "Terraria", "hours_played": 210.5, "genres": ["Ação", "Sandbox"], "user_rating": 98, "peak_24h_players": 41200, "current_price_brl": 32.99, "price_formatted": "R$ 32,99", "developer": "Re-Logic" },
+                { "id": "292030", "name": "The Witcher 3: Wild Hunt", "hours_played": 195.0, "genres": ["RPG", "Aventura"], "user_rating": 97, "peak_24h_players": 27300, "current_price_brl": 129.99, "price_formatted": "R$ 129,99", "developer": "CD PROJEKT RED" },
+                { "id": "1091500", "name": "Cyberpunk 2077", "hours_played": 182.5, "genres": ["RPG", "Ação"], "user_rating": 89, "peak_24h_players": 48200, "current_price_brl": 199.90, "price_formatted": "R$ 199,90", "developer": "CD PROJEKT RED" },
+                { "id": "289070", "name": "Sid Meier's Civilization VI", "hours_played": 178.4, "genres": ["Estratégia", "Turnos"], "user_rating": 86, "peak_24h_players": 32600, "current_price_brl": 129.00, "price_formatted": "R$ 129,00", "developer": "Firaxis Games" },
+                { "id": "413150", "name": "Stardew Valley", "hours_played": 145.6, "genres": ["Indie", "Simulação"], "user_rating": 98, "peak_24h_players": 52100, "current_price_brl": 24.99, "price_formatted": "R$ 24,99", "developer": "ConcernedApe" },
+                { "id": "553850", "name": "HELLDIVERS 2", "hours_played": 142.1, "genres": ["Ação", "Tiro"], "user_rating": 83, "peak_24h_players": 74800, "current_price_brl": 199.50, "price_formatted": "R$ 199,50", "developer": "Arrowhead" },
+                { "id": "1145360", "name": "Hades", "hours_played": 118.0, "genres": ["Ação", "Roguelike"], "user_rating": 98, "peak_24h_players": 16400, "current_price_brl": 73.99, "price_formatted": "R$ 73,99", "developer": "Supergiant Games" },
+                { "id": "367520", "name": "Hollow Knight", "hours_played": 98.3, "genres": ["Indie", "Metroidvania"], "user_rating": 97, "peak_24h_players": 14900, "current_price_brl": 46.99, "price_formatted": "R$ 46,99", "developer": "Team Cherry" }
+            ]
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDashboardData();
+        });
+
+        // Alternar modo de cor do gráfico de barras
+        function setHtmlColorMode(mode) {
+            currentBarColorMode = mode;
+            const btnGame = document.getElementById('btn-colormode-game');
+            const btnGenre = document.getElementById('btn-colormode-genre');
+            if (mode === 'game') {
+                btnGame.className = 'px-2.5 py-1 text-[11px] rounded bg-[#66c0f4] text-[#101822] font-semibold transition';
+                btnGenre.className = 'px-2.5 py-1 text-[11px] rounded text-slate-400 hover:text-white transition';
+            } else {
+                btnGenre.className = 'px-2.5 py-1 text-[11px] rounded bg-[#66c0f4] text-[#101822] font-semibold transition';
+                btnGame.className = 'px-2.5 py-1 text-[11px] rounded text-slate-400 hover:text-white transition';
+            }
+            if (currentStats) renderCharts(currentStats);
+        }
+
+        // Carrega dados da API (/api/stats)
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('/api/stats');
+                if (!response.ok) throw new Error('API indisponível');
+                const data = await response.json();
+                applyData(data);
+            } catch (err) {
+                console.warn('Utilizando fallback mockado local:', err.message);
+                applyData(FALLBACK_DATA);
+            }
+        }
+
+        // Aplica os dados nos cards, gráficos e tabela
+        function applyData(data) {
+            currentStats = data;
+            allGames = data.top_games || [];
+            filteredGames = [...allGames];
+
+            // Atualiza Cards de Métricas
+            document.getElementById('card-total-hours').innerHTML = `${data.total_hours.toLocaleString('pt-BR')} <span class="text-lg font-normal text-slate-400">horas</span>`;
+            document.getElementById('card-total-games').textContent = data.total_games;
+            if (data.most_played_game) {
+                const mostPlayed = data.most_played_game;
+                const gameColor = getGameColor(mostPlayed.id, 'Ação');
+                document.getElementById('card-most-played-name').innerHTML = `
+                    <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${gameColor}"></span>
+                    <span>${mostPlayed.name}</span>
+                `;
+                document.getElementById('card-most-played-hours').textContent = `${mostPlayed.hours_played}h jogadas`;
+                document.getElementById('card-most-played-hours').style.color = gameColor;
+            }
+            document.getElementById('card-avg-rating').textContent = `${data.avg_rating}%`;
+
+            // Atualiza Badges do Gráfico de Linha
+            const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
+            const monthlyHours = monthlyWeights.map(w => Math.round(data.total_hours * w * 10) / 10);
+            const growthRate = monthlyHours[0] > 0 ? (((monthlyHours[5] - monthlyHours[0]) / monthlyHours[0]) * 100).toFixed(1) : '0';
+            const avgSemester = Math.round((monthlyHours.reduce((a, b) => a + b, 0) / 6) * 10) / 10;
+            const peakMonthHours = Math.max(...monthlyHours);
+
+            const growthBadge = document.getElementById('line-growth-badge');
+            if (growthBadge) growthBadge.textContent = `+${growthRate}% de crescimento`;
+            const avgHoursEl = document.getElementById('line-avg-hours');
+            if (avgHoursEl) avgHoursEl.textContent = `${avgSemester}h`;
+            const peakMonthEl = document.getElementById('line-peak-month');
+            if (peakMonthEl) peakMonthEl.textContent = `Outubro (${peakMonthHours}h)`;
+            const totalHoursEl = document.getElementById('line-total-hours');
+            if (totalHoursEl) totalHoursEl.textContent = `${data.total_hours.toLocaleString('pt-BR')}h`;
+
+            // Renderiza Gráficos
+            renderCharts(data);
+
+            // Renderiza Tabela
+            renderTable();
+        }
+
+        // Renderiza os Gráficos Chart.js
+        function renderCharts(data) {
+            // 0. Gráfico de Linha: Tendência dos Últimos 6 Meses
+            const lineCtx = document.getElementById('trendLineChart');
+            if (lineCtx) {
+                const months = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'];
+                const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
+                const monthlyHours = monthlyWeights.map(w => Math.round(data.total_hours * w * 10) / 10);
+                const avgHours = Math.round((monthlyHours.reduce((a, b) => a + b, 0) / 6) * 10) / 10;
+                
+                let cumulativeSum = 0;
+                const cumulativeHours = monthlyHours.map(h => {
+                    cumulativeSum += h;
+                    return Math.round(cumulativeSum * 10) / 10;
+                });
+
+                const monthlyTopGames = [
+                    (data.top_games && data.top_games[0]) ? data.top_games[0].name : 'CS2',
+                    (data.top_games && data.top_games[1]) ? data.top_games[1].name : 'Dota 2',
+                    (data.top_games && data.top_games[3]) ? data.top_games[3].name : 'Elden Ring',
+                    (data.top_games && data.top_games[2]) ? data.top_games[2].name : "Baldur's Gate 3",
+                    (data.top_games && data.top_games[4]) ? data.top_games[4].name : 'Terraria',
+                    (data.top_games && data.top_games[0]) ? data.top_games[0].name : 'CS2'
+                ];
+
+                if (lineChartInstance) lineChartInstance.destroy();
+
+                lineChartInstance = new Chart(lineCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: months.map(m => `${m}/26`),
+                        datasets: [
+                            {
+                                label: 'Horas Jogadas no Mês',
+                                data: monthlyHours,
+                                borderColor: '#66c0f4',
+                                backgroundColor: 'rgba(102, 192, 244, 0.18)',
+                                fill: true,
+                                tension: 0.38,
+                                borderWidth: 2.5,
+                                pointBackgroundColor: '#66c0f4',
+                                pointBorderColor: '#0e141b',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 8,
+                                pointHoverBackgroundColor: '#38bdf8'
+                            },
+                            {
+                                label: 'Média Semestral',
+                                data: Array(6).fill(avgHours),
+                                borderColor: '#a855f7',
+                                borderDash: [5, 5],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                fill: false,
+                                tension: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'end',
+                                labels: {
+                                    color: '#cbd5e1',
+                                    font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' },
+                                    boxWidth: 12,
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(23, 26, 33, 0.96)',
+                                borderColor: '#66c0f4',
+                                borderWidth: 1.5,
+                                padding: 12,
+                                cornerRadius: 8,
+                                titleColor: '#ffffff',
+                                titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
+                                bodyColor: '#e2e8f0',
+                                bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
+                                displayColors: false,
+                                callbacks: {
+                                    title: (items) => {
+                                        if (!items.length) return '';
+                                        const idx = items[0].dataIndex;
+                                        return `📅 ${months[idx]} de 2026`;
+                                    },
+                                    beforeBody: (items) => {
+                                        if (!items.length) return [];
+                                        const idx = items[0].dataIndex;
+                                        const curHours = monthlyHours[idx];
+                                        const prevHours = idx > 0 ? monthlyHours[idx - 1] : null;
+                                        let diff = 'Início do período analisado';
+                                        if (prevHours !== null && prevHours > 0) {
+                                            const pct = (((curHours - prevHours) / prevHours) * 100).toFixed(1);
+                                            diff = Number(pct) >= 0 ? `+${pct}% vs mês anterior` : `${pct}% vs mês anterior`;
+                                        }
+                                        const daily = (curHours / 30).toFixed(1);
+                                        const topG = monthlyTopGames[idx] || 'Nenhum';
+
+                                        return [
+                                            `⏱️ Horas Registradas: ${curHours.toLocaleString('pt-BR')}h`,
+                                            `📈 Variação: ${diff}`,
+                                            `🏆 Jogo Mais Jogado no Mês: ${topG}`,
+                                            `⚡ Ritmo Médio Diário: ~${daily}h/dia`
+                                        ];
+                                    },
+                                    label: () => '',
+                                    afterBody: (items) => {
+                                        if (!items.length) return [];
+                                        const idx = items[0].dataIndex;
+                                        return [`📊 Total Acumulado até este mês: ${cumulativeHours[idx]}h`];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(42, 71, 94, 0.25)' },
+                                ticks: {
+                                    color: '#cbd5e1',
+                                    font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' }
+                                }
+                            },
+                            y: {
+                                grid: { color: 'rgba(42, 71, 94, 0.4)' },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: { family: 'JetBrains Mono' },
+                                    callback: (val) => `${val}h`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            // 1. Gráfico de Barras: Top 6 Jogos por Horas
+            const topSix = (data.top_games || []).slice(0, 6);
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            
+            const barColors = topSix.map(g => {
+                const primaryGenre = g.genres && g.genres.length > 0 ? g.genres[0] : 'Ação';
+                return currentBarColorMode === 'genre' ? getGenreColor(primaryGenre) : getGameColor(g.id, primaryGenre);
+            });
+
+            if (barChartInstance) barChartInstance.destroy();
+
+            barChartInstance = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: topSix.map(g => g.name),
+                    datasets: [{
+                        label: 'Horas Registradas',
+                        data: topSix.map(g => g.hours_played),
+                        backgroundColor: barColors,
+                        hoverBackgroundColor: barColors,
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            if (topSix[idx]) {
+                                openGameModal(topSix[idx].id);
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(23, 26, 33, 0.96)',
+                            borderColor: '#38bdf8',
+                            borderWidth: 1.5,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleColor: '#ffffff',
+                            titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
+                            bodyColor: '#e2e8f0',
+                            bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
+                            displayColors: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            callbacks: {
+                                title: (items) => {
+                                    if (!items.length) return '';
+                                    const idx = items[0].dataIndex;
+                                    const game = topSix[idx];
+                                    return game ? `🎮 ${game.name}` : items[0].label;
+                                },
+                                beforeBody: (items) => {
+                                    if (!items.length) return [];
+                                    const idx = items[0].dataIndex;
+                                    const game = topSix[idx];
+                                    if (!game) return [];
+                                    const percent = data.total_hours > 0 ? ((game.hours_played / data.total_hours) * 100).toFixed(1) : '0';
+                                    const primaryGenre = game.genres && game.genres[0] ? game.genres[0] : 'Geral';
+                                    const otherGenres = game.genres && game.genres.length > 1 ? ` (${game.genres.slice(1).join(', ')})` : '';
+                                    return [
+                                        `🏷️ Nicho Principal: ${primaryGenre}${otherGenres}`,
+                                        `⏱️ Tempo Jogado: ${game.hours_played.toLocaleString('pt-BR')} horas`,
+                                        `📊 Participação: ${percent}% do total da biblioteca`,
+                                        `⭐ Avaliação na Steam: ${game.user_rating}% (${game.rating_label || 'Positiva'})`,
+                                        `👥 Pico de Jogadores (24h): ${(game.peak_24h_players || 0).toLocaleString('pt-BR')}`,
+                                        `💰 Preço Atual: ${game.price_formatted || 'Gratuito'}`
+                                    ];
+                                },
+                                label: () => '',
+                                afterBody: () => ['👉 Clique na barra para abrir a ficha completa deste jogo']
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#e2e8f0',
+                                font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' },
+                                maxRotation: 25,
+                                minRotation: 20
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(42, 71, 94, 0.4)' },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: 'JetBrains Mono' },
+                                callback: (val) => `${val}h`
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Gráfico Doughnut: Cores de alto contraste por Nicho de Gênero
+            const genres = Object.keys(data.genre_distribution || {});
+            const genreValues = Object.values(data.genre_distribution || {});
+            const doughnutColors = genres.map(g => getGenreColor(g));
+            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+
+            if (doughnutChartInstance) doughnutChartInstance.destroy();
+
+            doughnutChartInstance = new Chart(doughnutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: genres,
+                    datasets: [{
+                        data: genreValues,
+                        backgroundColor: doughnutColors,
+                        borderColor: '#1b2838',
+                        borderWidth: 3,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            if (genres[idx]) {
+                                filterByGenre(genres[idx]);
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e2e8f0',
+                                font: { size: 12, family: 'Plus Jakarta Sans', weight: 'bold' },
+                                boxWidth: 12,
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(23, 26, 33, 0.96)',
+                            borderColor: '#a855f7',
+                            borderWidth: 1.5,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleColor: '#ffffff',
+                            titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
+                            bodyColor: '#e2e8f0',
+                            bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
+                            displayColors: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            callbacks: {
+                                title: (items) => {
+                                    if (!items.length) return '';
+                                    const genre = items[0].label;
+                                    return `🎯 Nicho: ${genre}`;
+                                },
+                                beforeBody: (items) => {
+                                    if (!items.length) return [];
+                                    const idx = items[0].dataIndex;
+                                    const genre = genres[idx];
+                                    const hours = data.genre_distribution[genre] || 0;
+                                    const percent = data.total_hours > 0 ? ((hours / data.total_hours) * 100).toFixed(1) : '0';
+                                    
+                                    const gamesInGenre = (data.top_games || []).filter(g => g.genres && g.genres.includes(genre));
+                                    const topInGenre = gamesInGenre.length > 0 ? gamesInGenre[0] : null;
+
+                                    return [
+                                        `⏱️ Total no Nicho: ${hours.toLocaleString('pt-BR')} horas`,
+                                        `📊 Participação Geral: ${percent}% de todo o tempo jogado`,
+                                        `📚 Títulos na Biblioteca: ${gamesInGenre.length} jogo(s)`,
+                                        topInGenre ? `🏆 Título Destaque: ${topInGenre.name} (${topInGenre.hours_played}h)` : ''
+                                    ].filter(Boolean);
+                                },
+                                label: () => '',
+                                afterBody: (items) => {
+                                    if (!items.length) return [];
+                                    const idx = items[0].dataIndex;
+                                    const genre = genres[idx];
+                                    const isCurrent = selectedGenre === genre;
+                                    return [
+                                        isCurrent
+                                            ? '↩️ Clique novamente na fatia para desmarcar e ver Todos os jogos'
+                                            : '👉 Clique na fatia para filtrar a tabela por este nicho'
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Renderiza as Linhas da Tabela
+        function renderTable() {
+            const tbody = document.getElementById('games-table-body');
+            tbody.innerHTML = '';
+
+            if (filteredGames.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-slate-400">
+                            Nenhum jogo encontrado com os filtros selecionados.
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('table-summary-text').textContent = 'Nenhum resultado';
+                return;
+            }
+
+            filteredGames.forEach(game => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-[#233446]/50 transition cursor-pointer border-b border-[#2a475e]/40';
+                tr.onclick = () => openGameModal(game.id);
+
+                const primaryGenre = game.genres && game.genres.length > 0 ? game.genres[0] : 'Geral';
+                const genreColor = getGenreColor(primaryGenre);
+                const gameColor = getGameColor(game.id, primaryGenre);
+                const priceFormatted = game.price_formatted || (game.current_price_brl > 0 ? `R$ ${game.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito');
+                const playersFormatted = (game.peak_24h_players || 0).toLocaleString('pt-BR');
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 flex items-center gap-3">
+                        <div class="w-1.5 h-10 rounded-full shrink-0 shadow-sm" style="background-color: ${gameColor}"></div>
+                        <img src="https://cdn.akamai.steamstatic.com/steam/apps/${game.id}/header.jpg" 
+                             alt="${game.name}" 
+                             class="w-14 h-8 object-cover rounded bg-[#101822] shrink-0" 
+                             onerror="this.src='https://placehold.co/120x60/171a21/66c0f4?text=Steam'">
+                        <div>
+                            <span class="font-bold text-white block">${game.name}</span>
+                            <span class="text-xs text-slate-400">${game.developer || 'Valve'}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${genreColor}"></span>
+                            <span class="text-slate-200 text-xs font-medium">${primaryGenre}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right tabular-nums font-semibold text-white">
+                        ${game.hours_played.toLocaleString('pt-BR')}h
+                    </td>
+                    <td class="px-6 py-4 text-right tabular-nums">
+                        <span class="text-emerald-400 font-bold">${game.user_rating}%</span>
+                    </td>
+                    <td class="px-6 py-4 text-right tabular-nums text-slate-300">
+                        ${playersFormatted}
+                    </td>
+                    <td class="px-6 py-4 text-right tabular-nums font-medium text-white">
+                        ${priceFormatted}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition">
+                            Detalhes
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('table-summary-text').textContent = `Exibindo ${filteredGames.length} de ${allGames.length} jogos`;
+        }
+
+        // Filtro em tempo real por busca de texto
+        function handleSearch(query) {
+            const term = query.toLowerCase().trim();
+            applyFilters(term, selectedGenre);
+        }
+
+        // Filtro por Gênero com alternância (Toggle)
+        function filterByGenre(genre) {
+            // Se clicar no mesmo gênero que já está ativo, desmarca e volta para 'Todos'
+            if (selectedGenre === genre && genre !== 'Todos') {
+                selectedGenre = 'Todos';
+            } else {
+                selectedGenre = genre;
+            }
+
+            // Atualiza botões
+            document.querySelectorAll('.genre-btn').forEach(btn => {
+                const btnText = btn.textContent.trim();
+                const isSelected = selectedGenre === 'Todos'
+                    ? btnText === 'Todos'
+                    : btnText.includes(selectedGenre);
+
+                if (isSelected) {
+                    btn.className = 'genre-btn px-3 py-1.5 text-xs font-semibold rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap flex items-center gap-1.5 shadow-sm';
+                } else {
+                    btn.className = 'genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5 border border-[#2a475e]';
+                }
+            });
+
+            // Atualiza badge de filtro na barra da tabela
+            const filterBadge = document.getElementById('table-active-filter-badge');
+            if (filterBadge) {
+                if (selectedGenre !== 'Todos') {
+                    filterBadge.classList.remove('hidden');
+                    filterBadge.classList.add('flex');
+                    document.getElementById('table-active-filter-text').textContent = selectedGenre;
+                } else {
+                    filterBadge.classList.add('hidden');
+                    filterBadge.classList.remove('flex');
+                }
+            }
+
+            const searchTerm = document.getElementById('global-search').value.toLowerCase().trim();
+            applyFilters(searchTerm, selectedGenre);
+        }
+
+        // Aplica busca e gênero juntos
+        function applyFilters(term, genre) {
+            filteredGames = allGames.filter(game => {
+                const matchesSearch = !term || game.name.toLowerCase().includes(term) || (game.developer && game.developer.toLowerCase().includes(term));
+                const matchesGenre = genre === 'Todos' || (game.genres && game.genres.includes(genre));
+                return matchesSearch && matchesGenre;
+            });
+
+            sortGames();
+            renderTable();
+        }
+
+        // Ordenação rápida da tabela
+        function handleSortChange(sortField) {
+            currentSort = sortField;
+            sortGames();
+            renderTable();
+        }
+
+        function toggleSort(field) {
+            if (currentSort === field) {
+                sortAsc = !sortAsc;
+            } else {
+                currentSort = field;
+                sortAsc = false;
+            }
+            sortGames();
+            renderTable();
+        }
+
+        function sortGames() {
+            filteredGames.sort((a, b) => {
+                let valA, valB;
+                if (currentSort === 'hours') {
+                    valA = a.hours_played;
+                    valB = b.hours_played;
+                } else if (currentSort === 'rating') {
+                    valA = a.user_rating;
+                    valB = b.user_rating;
+                } else if (currentSort === 'players') {
+                    valA = a.peak_24h_players || 0;
+                    valB = b.peak_24h_players || 0;
+                } else if (currentSort === 'price') {
+                    valA = a.current_price_brl || 0;
+                    valB = b.current_price_brl || 0;
+                } else if (currentSort === 'name') {
+                    return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+                }
+
+                return sortAsc ? valA - valB : valB - valA;
+            });
+        }
+
+        // Abertura do Modal de Detalhes (/api/game/{game_id})
+        async function openGameModal(gameId) {
+            const modal = document.getElementById('game-modal');
+            modal.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`/api/game/${gameId}`);
+                let game = null;
+                if (res.ok) {
+                    game = await res.json();
+                } else {
+                    game = allGames.find(g => String(g.id) === String(gameId)) || allGames[0];
+                }
+
+                const primaryGenre = game.genres && game.genres.length > 0 ? game.genres[0] : 'Ação';
+                const gameColor = getGameColor(game.id, primaryGenre);
+
+                document.getElementById('modal-title').textContent = game.name;
+                document.getElementById('modal-accent-line').style.backgroundColor = gameColor;
+                document.getElementById('modal-dev').textContent = `Desenvolvedora: ${game.developer || 'Steam Games'}`;
+                document.getElementById('modal-banner').src = `https://cdn.akamai.steamstatic.com/steam/apps/${game.id}/header.jpg`;
+                document.getElementById('modal-description').textContent = game.short_description || `${game.name} é um dos títulos mais influentes da biblioteca, acumulando alto índice de horas e engajamento da comunidade.`;
+                
+                const modalHours = document.getElementById('modal-hours');
+                modalHours.textContent = `${game.hours_played}h`;
+                modalHours.style.color = gameColor;
+
+                document.getElementById('modal-rating').textContent = `${game.user_rating}%`;
+                document.getElementById('modal-players').textContent = (game.peak_24h_players || 12000).toLocaleString('pt-BR');
+                document.getElementById('modal-price').textContent = game.price_formatted || (game.current_price_brl > 0 ? `R$ ${game.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito');
+                
+                document.getElementById('modal-genres').innerHTML = `Gêneros: <strong class="text-slate-200">${(game.genres || []).join(', ')}</strong>`;
+                document.getElementById('modal-achievements').innerHTML = `Conquistas: <strong class="text-[#66c0f4] tabular-nums">${game.achievements_unlocked || 0} / ${game.total_achievements || 0}</strong>`;
+                
+                document.getElementById('modal-steam-link').href = `https://store.steampowered.com/app/${game.id}`;
+            } catch (err) {
+                console.error("Erro ao carregar detalhes:", err);
+            }
+        }
+
+        function closeGameModal() {
+            document.getElementById('game-modal').classList.add('hidden');
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('game-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'game-modal') closeGameModal();
+        });
+
+        // Modal Pix
+        function openPixModal() {
+            document.getElementById('pix-modal').classList.remove('hidden');
+        }
+
+        function closePixModal() {
+            document.getElementById('pix-modal').classList.add('hidden');
+        }
+
+        function copyPixKey() {
+            const key = document.getElementById('pix-key-input').value;
+            navigator.clipboard.writeText(key).then(() => {
+                const btn = document.getElementById('btn-copy-pix');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<span>Chave Copiada!</span>';
+                btn.classList.add('bg-emerald-500', 'text-black');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.remove('bg-emerald-500', 'text-black');
+                }, 2000);
+            });
+        }
+    </script>
+
+    <!-- PIX DONATION MODAL -->
+    <div id="pix-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#1b2838] border border-[#2a475e] rounded-2xl max-w-md w-full p-6 text-slate-200 relative shadow-2xl">
+            <button onclick="closePixModal()" class="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Apoiar Projeto via Pix</h3>
+                    <p class="text-xs text-slate-400">100% livre de taxas. Incentiva a produção independente.</p>
+                </div>
+            </div>
+            <div class="bg-[#171a21] border border-[#2a475e] rounded-xl p-4 flex flex-col items-center justify-center mb-4">
+                <div class="w-32 h-32 bg-white rounded-lg p-2 mb-2 flex items-center justify-center">
+                    <svg class="w-28 h-28" viewBox="0 0 100 100" fill="black">
+                        <rect width="100" height="100" fill="white"/>
+                        <rect x="5" y="5" width="28" height="28" fill="black"/><rect x="9" y="9" width="20" height="20" fill="white"/><rect x="13" y="13" width="12" height="12" fill="black"/>
+                        <rect x="67" y="5" width="28" height="28" fill="black"/><rect x="71" y="9" width="20" height="20" fill="white"/><rect x="75" y="13" width="12" height="12" fill="black"/>
+                        <rect x="5" y="67" width="28" height="28" fill="black"/><rect x="9" y="71" width="20" height="20" fill="white"/><rect x="13" y="75" width="12" height="12" fill="black"/>
+                        <rect x="42" y="42" width="16" height="16" fill="#10b981"/>
+                    </svg>
+                </div>
+                <span class="text-[11px] text-slate-400">Aponte o app do seu banco para o QR Code</span>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Chave Pix:</label>
+                <div class="flex items-center gap-2 bg-[#171a21] border border-[#2a475e] rounded-lg p-2">
+                    <input id="pix-key-input" type="text" readOnly value="albertalves1205@gmail.com" class="bg-transparent text-xs text-white font-mono flex-1 outline-none"/>
+                    <button id="btn-copy-pix" onclick="copyPixKey()" class="px-3 py-1 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-bold rounded transition">
+                        Copiar
+                    </button>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 border-t border-[#2a475e] pt-3">
+                Titular: <strong>Albert Alves</strong> · Obrigado por incentivar a plataforma!
+            </div>
+        </div>
+    </div>
+</body>
+</html>

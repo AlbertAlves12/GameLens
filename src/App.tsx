@@ -1,0 +1,2076 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useMemo } from 'react';
+import {
+  Gamepad2,
+  Clock,
+  Trophy,
+  Flame,
+  Search,
+  ArrowUpDown,
+  ExternalLink,
+  Code2,
+  FileCode,
+  Copy,
+  Check,
+  Download,
+  BarChart3,
+  TrendingUp,
+  Server,
+  CheckCircle2,
+  X,
+  Palette,
+  Sparkles,
+  DollarSign,
+  ShoppingCart,
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+  ShieldCheck,
+  QrCode,
+  Settings,
+  Gift,
+  Share2,
+  HelpCircle,
+  Newspaper,
+  BookOpen,
+  Coffee,
+  Award,
+  Tag
+} from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Filler,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
+  GameReview,
+  MonetizationSettings,
+  DEFAULT_MONETIZATION_SETTINGS,
+  INITIAL_REVIEWS,
+  getAffiliateUrls,
+  generateProceduralAiReview,
+  AFFILIATE_PROGRAMS_GUIDE
+} from './monetizationData.ts';
+import { ReviewsView } from './components/ReviewsView.tsx';
+import { MonetizationHubView } from './components/MonetizationHubView.tsx';
+import { PixModal } from './components/PixModal.tsx';
+import { MonetizationSettingsModal } from './components/MonetizationSettingsModal.tsx';
+
+// Registrar módulos do Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Filler,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
+// Mapeamento de Cores por Nicho / Gênero
+export const GENRE_COLORS: Record<string, { bg: string; hover: string; border: string; text: string; label: string }> = {
+  'Ação': { bg: '#ef4444', hover: '#dc2626', border: '#f87171', text: 'text-red-400', label: 'Ação / Combate' },
+  'RPG': { bg: '#a855f7', hover: '#9333ea', border: '#c084fc', text: 'text-purple-400', label: 'RPG / Fantasia' },
+  'Estratégia': { bg: '#f59e0b', hover: '#d97706', border: '#fbbf24', text: 'text-amber-400', label: 'Estratégia / Tático' },
+  'Indie': { bg: '#10b981', hover: '#059669', border: '#34d399', text: 'text-emerald-400', label: 'Indie / Autoral' },
+  'Simulação': { bg: '#06b6d4', hover: '#0891b2', border: '#22d3ee', text: 'text-cyan-400', label: 'Simulação / Gestão' },
+  'Aventura': { bg: '#3b82f6', hover: '#2563eb', border: '#60a5fa', text: 'text-blue-400', label: 'Aventura / Exploração' },
+  'Soulslike': { bg: '#f97316', hover: '#ea580c', border: '#fb923c', text: 'text-orange-400', label: 'Soulslike / Hardcore' },
+  'Competitivo': { bg: '#ec4899', hover: '#db2777', border: '#f472b6', text: 'text-pink-400', label: 'Competitivo / PvP' },
+  'Sandbox': { bg: '#14b8a6', hover: '#0d9488', border: '#2dd4bf', text: 'text-teal-400', label: 'Sandbox / Criação' }
+};
+
+// Fallback seguro de cor de gênero
+export function getGenreColor(genreName: string) {
+  return GENRE_COLORS[genreName]?.bg || '#66c0f4';
+}
+
+// Tipo de jogo com cor temática individual
+interface SteamGame {
+  id: string;
+  name: string;
+  color: string;
+  hover_color: string;
+  hours_played: number;
+  genres: string[];
+  user_rating: number;
+  rating_label: string;
+  peak_24h_players: number;
+  current_price_brl: number;
+  price_formatted: string;
+  discount_percent: number;
+  developer: string;
+  release_year: number;
+  achievements_unlocked: number;
+  total_achievements: number;
+  header_image: string;
+  short_description: string;
+}
+
+// Catálogo com paleta de cores característica para cada jogo
+const INITIAL_GAMES: SteamGame[] = [
+  {
+    id: "730",
+    name: "Counter-Strike 2",
+    color: "#f97316", // Laranja tático CS
+    hover_color: "#ea580c",
+    hours_played: 845.2,
+    genres: ["Ação", "Tiro", "Competitivo"],
+    user_rating: 88,
+    rating_label: "Muito Positivas",
+    peak_24h_players: 1420850,
+    current_price_brl: 0.00,
+    price_formatted: "Gratuito",
+    discount_percent: 0,
+    developer: "Valve",
+    release_year: 2023,
+    achievements_unlocked: 1,
+    total_achievements: 1,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
+    short_description: "Durante mais de duas décadas, Counter-Strike ofereceu uma experiência competitiva de elite formada por milhões de jogadores em todo o mundo."
+  },
+  {
+    id: "570",
+    name: "Dota 2",
+    color: "#dc2626", // Vermelho carmesim Dota
+    hover_color: "#b91c1c",
+    hours_played: 430.7,
+    genres: ["Estratégia", "MOBA", "Competitivo"],
+    user_rating: 82,
+    rating_label: "Muito Positivas",
+    peak_24h_players: 710500,
+    current_price_brl: 0.00,
+    price_formatted: "Gratuito",
+    discount_percent: 0,
+    developer: "Valve",
+    release_year: 2013,
+    achievements_unlocked: 0,
+    total_achievements: 0,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg",
+    short_description: "Todos os dias, milhões de jogadores em todo o mundo entram em batalha como um dos mais de cem heróis do Dota."
+  },
+  {
+    id: "1086940",
+    name: "Baldur's Gate 3",
+    color: "#a855f7", // Púrpura épico Ilitide
+    hover_color: "#9333ea",
+    hours_played: 312.4,
+    genres: ["RPG", "Estratégia", "Aventura"],
+    user_rating: 96,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 98120,
+    current_price_brl: 199.99,
+    price_formatted: "R$ 199,99",
+    discount_percent: 20,
+    developer: "Larian Studios",
+    release_year: 2023,
+    achievements_unlocked: 48,
+    total_achievements: 54,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
+    short_description: "Reúna seu grupo e retorne aos Reinos Esquecidos em uma história de companheirismo, traição, sacrifício e a atração pelo poder supremo."
+  },
+  {
+    id: "1245620",
+    name: "Elden Ring",
+    color: "#eab308", // Dourado da Graça da Térvore
+    hover_color: "#ca8a04",
+    hours_played: 264.8,
+    genres: ["RPG", "Ação", "Soulslike"],
+    user_rating: 93,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 85400,
+    current_price_brl: 229.90,
+    price_formatted: "R$ 229,90",
+    discount_percent: 0,
+    developer: "FromSoftware Inc.",
+    release_year: 2022,
+    achievements_unlocked: 38,
+    total_achievements: 42,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+    short_description: "O NOVO RPG DE AÇÃO E FANTASIA. Levante-se, Maculado, e seja guiado pela graça para se tornar o novo Lorde Prístino."
+  },
+  {
+    id: "105600",
+    name: "Terraria",
+    color: "#22c55e", // Verde esmeralda pixel
+    hover_color: "#16a34a",
+    hours_played: 210.5,
+    genres: ["Ação", "Aventura", "Sandbox"],
+    user_rating: 98,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 41200,
+    current_price_brl: 32.99,
+    price_formatted: "R$ 32,99",
+    discount_percent: 50,
+    developer: "Re-Logic",
+    release_year: 2011,
+    achievements_unlocked: 89,
+    total_achievements: 115,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/105600/header.jpg",
+    short_description: "Cave, lute, explore, construa! O mundo é a sua tela e o chão é a sua tinta em um clássico sandbox aclamado."
+  },
+  {
+    id: "292030",
+    name: "The Witcher 3: Wild Hunt",
+    color: "#f43f5e", // Carmesim Lobo Branco
+    hover_color: "#e11d48",
+    hours_played: 195.0,
+    genres: ["RPG", "Aventura", "Mundo Aberto"],
+    user_rating: 97,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 27300,
+    current_price_brl: 129.99,
+    price_formatted: "R$ 129,99",
+    discount_percent: 75,
+    developer: "CD PROJEKT RED",
+    release_year: 2015,
+    achievements_unlocked: 68,
+    total_achievements: 78,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
+    short_description: "Você é Geralt de Rívia, mercenário matador de monstros. Seu caminho é um continente devastado pela guerra e repleto de feras."
+  },
+  {
+    id: "1091500",
+    name: "Cyberpunk 2077",
+    color: "#facc15", // Amarelo Neon Night City
+    hover_color: "#eab308",
+    hours_played: 182.5,
+    genres: ["RPG", "Ação", "Mundo Aberto"],
+    user_rating: 89,
+    rating_label: "Muito Positivas",
+    peak_24h_players: 48200,
+    current_price_brl: 199.90,
+    price_formatted: "R$ 199,90",
+    discount_percent: 50,
+    developer: "CD PROJEKT RED",
+    release_year: 2020,
+    achievements_unlocked: 44,
+    total_achievements: 44,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+    short_description: "Um RPG de ação em Night City, uma megalópole obcecada por poder, glamour e modificações corporais cibernéticas."
+  },
+  {
+    id: "289070",
+    name: "Sid Meier's Civilization® VI",
+    color: "#0284c7", // Azul imperial do globo
+    hover_color: "#0369a1",
+    hours_played: 178.4,
+    genres: ["Estratégia", "Turnos", "Simulação"],
+    user_rating: 86,
+    rating_label: "Muito Positivas",
+    peak_24h_players: 32600,
+    current_price_brl: 129.00,
+    price_formatted: "R$ 129,00",
+    discount_percent: 90,
+    developer: "Firaxis Games",
+    release_year: 2016,
+    achievements_unlocked: 62,
+    total_achievements: 120,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/289070/header.jpg",
+    short_description: "Construa um império que resista ao teste do tempo na lendária franquia de estratégia em turnos."
+  },
+  {
+    id: "413150",
+    name: "Stardew Valley",
+    color: "#10b981", // Verde vale orgânico
+    hover_color: "#059669",
+    hours_played: 145.6,
+    genres: ["Indie", "Simulação", "RPG"],
+    user_rating: 98,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 52100,
+    current_price_brl: 24.99,
+    price_formatted: "R$ 24,99",
+    discount_percent: 0,
+    developer: "ConcernedApe",
+    release_year: 2016,
+    achievements_unlocked: 35,
+    total_achievements: 40,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/413150/header.jpg",
+    short_description: "Herde a antiga fazenda de seu avô e construa a vida dos seus sonhos nesta simulação aconchegante e profunda."
+  },
+  {
+    id: "553850",
+    name: "HELLDIVERS™ 2",
+    color: "#fb923c", // Laranja/Amarelo Democracia
+    hover_color: "#f97316",
+    hours_played: 142.1,
+    genres: ["Ação", "Tiro", "Cooperativo"],
+    user_rating: 83,
+    rating_label: "Muito Positivas",
+    peak_24h_players: 74800,
+    current_price_brl: 199.50,
+    price_formatted: "R$ 199,50",
+    discount_percent: 0,
+    developer: "Arrowhead Game Studios",
+    release_year: 2024,
+    achievements_unlocked: 31,
+    total_achievements: 38,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/553850/header.jpg",
+    short_description: "A última linha de ataque da galáxia. Aliste-se nos Helldivers e lute pela liberdade democrática."
+  },
+  {
+    id: "1145360",
+    name: "Hades",
+    color: "#e11d48", // Vermelho lava submundo
+    hover_color: "#be123c",
+    hours_played: 118.0,
+    genres: ["Ação", "Roguelike", "Indie"],
+    user_rating: 98,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 16400,
+    current_price_brl: 73.99,
+    price_formatted: "R$ 73,99",
+    discount_percent: 60,
+    developer: "Supergiant Games",
+    release_year: 2020,
+    achievements_unlocked: 49,
+    total_achievements: 49,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1145360/header.jpg",
+    short_description: "Desafie o deus dos mortos e abra caminho para escapar do Submundo no aclamado rogue-like de ação rápida."
+  },
+  {
+    id: "367520",
+    name: "Hollow Knight",
+    color: "#38bdf8", // Azul alma etéreo
+    hover_color: "#0284c7",
+    hours_played: 98.3,
+    genres: ["Indie", "Metroidvania", "Ação"],
+    user_rating: 97,
+    rating_label: "Extremamente Positivas",
+    peak_24h_players: 14900,
+    current_price_brl: 46.99,
+    price_formatted: "R$ 46,99",
+    discount_percent: 50,
+    developer: "Team Cherry",
+    release_year: 2017,
+    achievements_unlocked: 53,
+    total_achievements: 63,
+    header_image: "https://cdn.akamai.steamstatic.com/steam/apps/367520/header.jpg",
+    short_description: "Uma aventura épica desenhada à mão através de um reino arruinado de insetos repleto de segredos e chefes desafiadores."
+  }
+];
+
+// Presets de bibliotecas para testes
+const PRESETS: Record<string, { label: string; filter: (g: SteamGame) => boolean }> = {
+  all: { label: 'Todos os Jogos (Geral)', filter: () => true },
+  rpg: { label: 'Foco RPG & Aventura', filter: (g) => g.genres.includes('RPG') || g.genres.includes('Aventura') },
+  competitive: { label: 'Foco Competitivo & FPS', filter: (g) => g.genres.includes('Competitivo') || g.genres.includes('Tiro') },
+  indie: { label: 'Foco Indies & Estratégia', filter: (g) => g.genres.includes('Indie') || g.genres.includes('Estratégia') }
+};
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'reviews' | 'monetization' | 'code' | 'api'>('dashboard');
+  const [activePreset, setActivePreset] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('Todos');
+  const [colorMode, setColorMode] = useState<'game' | 'genre'>('game'); // 'game' = cor do jogo, 'genre' = cor do nicho
+  const [sortBy, setSortBy] = useState<'hours' | 'rating' | 'players' | 'price' | 'name'>('hours');
+  const [sortAsc, setSortAsc] = useState(false);
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  const [copiedFile, setCopiedFile] = useState<string | null>(null);
+  const [activeCodeFile, setActiveCodeFile] = useState<'main.py' | 'templates/index.html' | 'requirements.txt' | 'README.md' | 'vercel.json'>('main.py');
+  const [apiEndpoint, setApiEndpoint] = useState<string>('/api/stats');
+  const [apiResponse, setApiResponse] = useState<string>('');
+
+  // Sistema de Monetização, Afiliados e Pix
+  const [monetizationSettings, setMonetizationSettings] = useState<MonetizationSettings>(() => {
+    try {
+      const saved = localStorage.getItem('steam_lens_monetization');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return DEFAULT_MONETIZATION_SETTINGS;
+  });
+
+  const [reviews, setReviews] = useState<Record<string, GameReview>>(INITIAL_REVIEWS);
+  const [selectedReviewGameId, setSelectedReviewGameId] = useState<string>('1086940');
+  const [isPixModalOpen, setIsPixModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [isGeneratingAiReview, setIsGeneratingAiReview] = useState(false);
+  const [revenueSimVisitors, setRevenueSimVisitors] = useState<number>(2000);
+  const [pixDonationAmount, setPixDonationAmount] = useState<number>(10);
+
+  // Manipuladores de Monetização
+  const handleSaveMonetizationSettings = (newSettings: MonetizationSettings) => {
+    setMonetizationSettings(newSettings);
+    try {
+      localStorage.setItem('steam_lens_monetization', JSON.stringify(newSettings));
+    } catch {
+      // ignore
+    }
+    setIsSettingsModalOpen(false);
+  };
+
+  const handleCopyPix = () => {
+    navigator.clipboard.writeText(monetizationSettings.pixKey);
+    setPixCopied(true);
+    setTimeout(() => setPixCopied(false), 2500);
+  };
+
+  const handleTriggerAiReview = (gameId: string) => {
+    const game = INITIAL_GAMES.find((g) => g.id === gameId);
+    if (!game) return;
+    setIsGeneratingAiReview(true);
+    setTimeout(() => {
+      const newReview = generateProceduralAiReview(game, monetizationSettings.editorialName);
+      setReviews((prev) => ({
+        ...prev,
+        [gameId]: newReview
+      }));
+      setIsGeneratingAiReview(false);
+    }, 700);
+  };
+
+  // Jogos ativos filtrados pelo preset atual
+  const presetGames = useMemo(() => {
+    const filterFn = PRESETS[activePreset].filter;
+    return INITIAL_GAMES.filter(filterFn);
+  }, [activePreset]);
+
+  // Estatísticas agregadas calculadas
+  const stats = useMemo(() => {
+    const totalHours = Math.round(presetGames.reduce((acc, g) => acc + g.hours_played, 0) * 10) / 10;
+    const avgRating = presetGames.length > 0 ? Math.round((presetGames.reduce((acc, g) => acc + g.user_rating, 0) / presetGames.length) * 10) / 10 : 0;
+    const totalValue = Math.round(presetGames.reduce((acc, g) => acc + g.current_price_brl, 0) * 100) / 100;
+    const mostPlayed = presetGames.length > 0 ? [...presetGames].sort((a, b) => b.hours_played - a.hours_played)[0] : null;
+
+    // Distribuição de gênero
+    const genreMap: Record<string, number> = {};
+    presetGames.forEach((g) => {
+      const primary = g.genres[0] || 'Outros';
+      genreMap[primary] = (genreMap[primary] || 0) + g.hours_played;
+    });
+
+    const sortedGenres = Object.fromEntries(
+      Object.entries(genreMap).sort(([, a], [, b]) => b - a)
+    );
+
+    return {
+      total_games: presetGames.length,
+      total_hours: totalHours,
+      avg_rating: avgRating,
+      total_library_value_brl: totalValue,
+      most_played_game: mostPlayed,
+      genre_distribution: sortedGenres
+    };
+  }, [presetGames]);
+
+  // Lista de jogos filtrada para a tabela
+  const tableGames = useMemo(() => {
+    let result = presetGames.filter((game) => {
+      const matchesSearch =
+        !searchTerm ||
+        game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        game.developer.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesGenre = selectedGenre === 'Todos' || game.genres.includes(selectedGenre);
+      return matchesSearch && matchesGenre;
+    });
+
+    result.sort((a, b) => {
+      let valA: any = a.hours_played;
+      let valB: any = b.hours_played;
+
+      if (sortBy === 'rating') {
+        valA = a.user_rating;
+        valB = b.user_rating;
+      } else if (sortBy === 'players') {
+        valA = a.peak_24h_players;
+        valB = b.peak_24h_players;
+      } else if (sortBy === 'price') {
+        valA = a.current_price_brl;
+        valB = b.current_price_brl;
+      } else if (sortBy === 'name') {
+        return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      }
+
+      return sortAsc ? valA - valB : valB - valA;
+    });
+
+    return result;
+  }, [presetGames, searchTerm, selectedGenre, sortBy, sortAsc]);
+
+  // Top 6 jogos ordenados por horas
+  const top6 = useMemo(() => {
+    return [...presetGames].sort((a, b) => b.hours_played - a.hours_played).slice(0, 6);
+  }, [presetGames]);
+
+  // Dados do gráfico de barras (Top 6 com Cores Distintas por Jogo ou por Nicho!)
+  const barChartData = useMemo(() => {
+    // Cores específicas para cada barra
+    const bgColors = top6.map((g) => {
+      if (colorMode === 'genre') {
+        const primaryGenre = g.genres[0] || 'Ação';
+        return getGenreColor(primaryGenre);
+      }
+      return g.color;
+    });
+
+    const hoverColors = top6.map((g) => {
+      if (colorMode === 'genre') {
+        const primaryGenre = g.genres[0] || 'Ação';
+        return GENRE_COLORS[primaryGenre]?.hover || '#38bdf8';
+      }
+      return g.hover_color;
+    });
+
+    return {
+      labels: top6.map((g) => g.name),
+      datasets: [
+        {
+          label: 'Horas Registradas',
+          data: top6.map((g) => g.hours_played),
+          backgroundColor: bgColors,
+          hoverBackgroundColor: hoverColors,
+          borderColor: bgColors,
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
+        }
+      ]
+    };
+  }, [top6, colorMode]);
+
+  // Dados do gráfico Doughnut (Cores vibrantes e contrastantes por Nicho de Gênero!)
+  const doughnutChartData = useMemo(() => {
+    const genres = Object.keys(stats.genre_distribution);
+    const data = Object.values(stats.genre_distribution);
+    
+    // Cada nicho/gênero tem sua cor exata e contrastante
+    const sliceColors = genres.map((genre) => getGenreColor(genre));
+    const sliceHoverColors = genres.map((genre) => GENRE_COLORS[genre]?.hover || '#38bdf8');
+
+    return {
+      labels: genres,
+      datasets: [
+        {
+          data: data,
+          backgroundColor: sliceColors,
+          hoverBackgroundColor: sliceHoverColors,
+          borderColor: '#1b2838',
+          borderWidth: 3,
+          hoverOffset: 8
+        }
+      ]
+    };
+  }, [stats]);
+
+  // Tendência dos últimos 6 meses (Maio a Outubro 2026)
+  const monthlyTrend = useMemo(() => {
+    const months = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'];
+    const shortMonths = ['Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out'];
+    
+    // Proporções ponderadas de sazonalidade (férias em julho, pico recente em outubro)
+    const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
+    
+    const monthlyTopGames = [
+      top6[0]?.name || 'Counter-Strike 2',
+      top6[1]?.name || 'Dota 2',
+      top6[3]?.name || 'Elden Ring',
+      top6[2]?.name || "Baldur's Gate 3",
+      top6[4]?.name || 'Terraria',
+      top6[0]?.name || 'Counter-Strike 2'
+    ];
+
+    const totalSemesterHours = stats.total_hours;
+    const hours = monthlyWeights.map((w) => Math.round(totalSemesterHours * w * 10) / 10);
+    
+    let sum = 0;
+    const cumulative = hours.map((h) => {
+      sum += h;
+      return Math.round(sum * 10) / 10;
+    });
+
+    const growthRate = hours[0] > 0 ? (((hours[hours.length - 1] - hours[0]) / hours[0]) * 100).toFixed(1) : '0';
+    const semesterAverage = Math.round((hours.reduce((a, b) => a + b, 0) / hours.length) * 10) / 10;
+    const peakIndex = hours.indexOf(Math.max(...hours));
+    const peakMonth = months[peakIndex];
+    const peakHours = hours[peakIndex];
+
+    return {
+      months,
+      shortMonths,
+      hours,
+      cumulative,
+      monthlyTopGames,
+      growthRate,
+      semesterAverage,
+      peakMonth,
+      peakHours,
+      totalSemesterHours: Math.round(hours.reduce((a, b) => a + b, 0) * 10) / 10
+    };
+  }, [stats.total_hours, top6]);
+
+  // Dados do gráfico de linha
+  const lineChartData = useMemo(() => {
+    return {
+      labels: monthlyTrend.months.map((m) => `${m}/26`),
+      datasets: [
+        {
+          label: 'Horas Jogadas no Mês',
+          data: monthlyTrend.hours,
+          borderColor: '#66c0f4',
+          backgroundColor: 'rgba(102, 192, 244, 0.18)',
+          fill: true,
+          tension: 0.38,
+          borderWidth: 2.5,
+          pointBackgroundColor: '#66c0f4',
+          pointBorderColor: '#0e141b',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: '#38bdf8',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 2
+        },
+        {
+          label: 'Média Semestral',
+          data: Array(monthlyTrend.months.length).fill(monthlyTrend.semesterAverage),
+          borderColor: '#a855f7',
+          borderDash: [5, 5],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+          tension: 0
+        }
+      ]
+    };
+  }, [monthlyTrend]);
+
+  // Jogo selecionado no modal
+  const selectedGame = useMemo(() => {
+    if (!selectedGameId) return null;
+    return INITIAL_GAMES.find((g) => g.id === selectedGameId) || null;
+  }, [selectedGameId]);
+
+  // Manipulador de cópia de arquivo
+  const handleCopyCode = (filename: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedFile(filename);
+    setTimeout(() => setCopiedFile(null), 2000);
+  };
+
+  // Simular chamada da API
+  const handleTestApi = (endpoint: string) => {
+    setApiEndpoint(endpoint);
+    if (endpoint === '/api/stats') {
+      setApiResponse(
+        JSON.stringify(
+          {
+            total_games: stats.total_games,
+            total_hours: stats.total_hours,
+            avg_rating: stats.avg_rating,
+            total_library_value_brl: stats.total_library_value_brl,
+            most_played_game: stats.most_played_game,
+            genre_distribution: stats.genre_distribution,
+            genre_colors: Object.fromEntries(
+              Object.entries(stats.genre_distribution).map(([genre]) => [genre, getGenreColor(genre)])
+            ),
+            top_games: presetGames.slice(0, 5)
+          },
+          null,
+          2
+        )
+      );
+    } else if (endpoint.startsWith('/api/game/')) {
+      const id = endpoint.split('/')[3] || '730';
+      const game = INITIAL_GAMES.find((g) => g.id === id) || INITIAL_GAMES[0];
+      setApiResponse(JSON.stringify(game, null, 2));
+    } else if (endpoint === '/api/games') {
+      setApiResponse(
+        JSON.stringify(
+          {
+            total: tableGames.length,
+            games: tableGames
+          },
+          null,
+          2
+        )
+      );
+    } else if (endpoint === '/api/health') {
+      setApiResponse(
+        JSON.stringify(
+          {
+            status: 'ok',
+            service: 'steam-analytics-api',
+            version: '1.0.0',
+            uptime_seconds: 1420
+          },
+          null,
+          2
+        )
+      );
+    }
+  };
+
+  // Conteúdo dos arquivos para visualização/download
+  const codeFiles: Record<string, string> = {
+    'main.py': `# Dashboard de Análise de Biblioteca e Mercado de Jogos (Steam API & Dados)
+# Back-end em Python com FastAPI e Cores Distintas por Jogo e Nicho
+
+# Cada jogo possui sua cor temática única e cada gênero/nicho possui sua cor identificadora!
+GENRE_COLORS = {
+    "Ação": "#ef4444",       # Vermelho
+    "RPG": "#a855f7",        # Púrpura
+    "Estratégia": "#f59e0b", # Dourado Âmbar
+    "Indie": "#10b981",      # Verde Esmeralda
+    "Simulação": "#06b6d4",  # Ciano
+    "Aventura": "#3b82f6"    # Azul
+}
+
+GAMES_DATABASE = {
+    "730": { "name": "Counter-Strike 2", "color": "#f97316", "genres": ["Ação", "Tiro"], ... },
+    "570": { "name": "Dota 2", "color": "#dc2626", "genres": ["Estratégia", "MOBA"], ... },
+    "1086940": { "name": "Baldur's Gate 3", "color": "#a855f7", "genres": ["RPG"], ... },
+    "1245620": { "name": "Elden Ring", "color": "#eab308", "genres": ["RPG", "Soulslike"], ... },
+    ...
+}`,
+    'templates/index.html': `<!-- templates/index.html com Cores Distintas para cada Jogo e Nicho -->
+<script>
+    // Cores específicas por Jogo e por Gênero para evitar monotonia visual:
+    const GAME_COLORS = {
+        '730': '#f97316',      // CS2 (Laranja)
+        '570': '#dc2626',      // Dota 2 (Vermelho)
+        '1086940': '#a855f7',  // Baldur's Gate 3 (Púrpura)
+        '1245620': '#eab308',  // Elden Ring (Dourado)
+        '105600': '#22c55e',   // Terraria (Verde)
+        '292030': '#f43f5e'    // The Witcher 3 (Carmesim)
+    };
+    const GENRE_COLORS = {
+        'Ação': '#ef4444',
+        'RPG': '#a855f7',
+        'Estratégia': '#f59e0b',
+        'Indie': '#10b981'
+    };
+</script>`,
+    'requirements.txt': `fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+jinja2>=3.1.3
+requests>=2.31.0`,
+    'README.md': `# Steam Analytics Dashboard - Cores por Jogo e Nicho
+
+- Paleta cromática distinta para cada jogo no Gráfico de Barras.
+- Paleta semântica por nicho de gênero (Ação: Vermelho, RPG: Púrpura, Estratégia: Âmbar, Indie: Verde) no Gráfico de Rosca.`,
+    'vercel.json': `{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}`
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0e141b] text-slate-100 flex flex-col font-sans">
+      {/* TOP HEADER STEAM NAVIGATION */}
+      <header className="bg-[#171a21] border-b border-[#2a475e] sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
+          
+          {/* Zone 1: Brand wordmark */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-[#1b2838] to-[#2a475e] border border-[#66c0f4]/50 flex items-center justify-center text-[#66c0f4] shadow-inner shadow-[#66c0f4]/20">
+              <Gamepad2 className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-white font-extrabold text-base sm:text-lg tracking-tight whitespace-nowrap flex items-center">
+                Game<span className="text-[#66c0f4]">Lens</span>
+              </span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold whitespace-nowrap">
+                Portal & Analytics Gamer
+              </span>
+            </div>
+          </div>
+
+          {/* Zone 2: Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-300">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'dashboard' ? 'text-[#66c0f4] font-semibold' : ''
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Dashboard</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'reviews' ? 'text-[#66c0f4] font-semibold' : ''
+              }`}
+            >
+              <Newspaper className="w-4 h-4" />
+              <span>Críticas & Reviews</span>
+              <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.2 rounded font-mono">IA</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('monetization')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'monetization' ? 'text-[#66c0f4] font-semibold' : ''
+              }`}
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Hub de Monetização</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-mono">Afiliados</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('code')}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'code' ? 'text-[#66c0f4] font-semibold' : ''
+              }`}
+            >
+              <Code2 className="w-4 h-4" />
+              <span>Código & Deploy</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('api');
+                if (!apiResponse) handleTestApi('/api/stats');
+              }}
+              className={`hover:text-[#66c0f4] transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                activeTab === 'api' ? 'text-[#66c0f4] font-semibold' : ''
+              }`}
+            >
+              <Server className="w-4 h-4" />
+              <span>API</span>
+            </button>
+          </nav>
+
+          {/* Zone 3: Primary Actions (Pix & Configurações de Monetização) */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              onClick={() => setIsPixModalOpen(true)}
+              className="px-3 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm"
+              title="Apoiar este projeto com Pix direto"
+            >
+              <Coffee className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Apoiar via</span> Pix
+            </button>
+
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs text-slate-300 hover:text-white bg-[#1b2838] hover:bg-[#233446] border border-[#2a475e] rounded-lg transition flex items-center gap-1.5"
+              title="Configurar suas tags de Afiliado (Nuuvem, Amazon) e Chave Pix"
+            >
+              <Settings className="w-3.5 h-3.5 text-[#66c0f4]" />
+              <span className="hidden md:inline">Afiliados & Pix</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('code')}
+              className="px-3 py-1.5 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-sm"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Exportar</span>
+            </button>
+          </div>
+
+        </div>
+      </header>
+
+      {/* SUB-BAR / PRESET & NICHOS BAR */}
+      <div className="bg-[#121c27] border-b border-[#2a475e]/60 py-2.5 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3 text-xs">
+          
+          <div className="flex items-center gap-2 text-slate-300 flex-wrap">
+            <span className="text-slate-400">Perfil da Biblioteca:</span>
+            <div className="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e]">
+              {Object.entries(PRESETS).map(([key, item]) => (
+                <button
+                  key={key}
+                  onClick={() => setActivePreset(key)}
+                  className={`px-2.5 py-1 rounded text-xs transition ${
+                    activePreset === key
+                      ? 'bg-[#66c0f4] text-[#101822] font-semibold shadow-sm'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Guia Visual dos Nichos Principais */}
+          <div className="flex items-center gap-3 text-slate-300 flex-wrap">
+            <span className="text-slate-400 font-medium">Cores dos Nichos:</span>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] shadow-sm"></span>
+                <span>Ação</span>
+              </span>
+              <span className="flex items-center gap-1 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#a855f7] shadow-sm"></span>
+                <span>RPG</span>
+              </span>
+              <span className="flex items-center gap-1 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] shadow-sm"></span>
+                <span>Estratégia</span>
+              </span>
+              <span className="flex items-center gap-1 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-sm"></span>
+                <span>Indie</span>
+              </span>
+              <span className="flex items-center gap-1 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4] shadow-sm"></span>
+                <span>Simulação</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* MAIN VIEWPORT */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+        
+        {/* TAB 1: DASHBOARD INTERATIVO */}
+        {activeTab === 'dashboard' && (
+          <div>
+            
+            {/* Header intro & Quick Filters */}
+            <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Estatísticas da Biblioteca Steam
+                </h1>
+                <p className="text-sm text-slate-400 mt-1">
+                  Métricas em tempo real com cromatografia distinta por jogo e por nicho de mercado.
+                </p>
+              </div>
+
+              {/* Genre Filter Buttons with custom colored indicators */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0">
+                {['Todos', 'RPG', 'Ação', 'Estratégia', 'Indie', 'Soulslike'].map((genre) => {
+                  const isSelected = selectedGenre === genre;
+                  const genreColor = GENRE_COLORS[genre]?.bg;
+
+                  return (
+                    <button
+                      key={genre}
+                      onClick={() => setSelectedGenre((prev) => (genre !== 'Todos' && prev === genre ? 'Todos' : genre))}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-md transition whitespace-nowrap flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-[#66c0f4] text-[#101822] font-semibold shadow-sm'
+                          : 'bg-[#1b2838] hover:bg-[#233446] text-slate-300 border border-[#2a475e]'
+                      }`}
+                    >
+                      {genreColor && (
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: genreColor }}
+                        ></span>
+                      )}
+                      <span>{genre}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3 CARDS DE MÉTRICAS EM DESTAQUE */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              
+              {/* Card 1: Total de Horas */}
+              <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] shadow-md">
+                <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                  <span>TEMPO TOTAL REGISTRADO</span>
+                  <div className="p-2 rounded-lg bg-[#171a21] text-[#66c0f4]">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-white font-mono tabular-nums">
+                  {stats.total_hours.toLocaleString('pt-BR')}{' '}
+                  <span className="text-lg font-normal text-slate-400 font-sans">horas</span>
+                </div>
+                <div className="text-xs text-slate-400 mt-3 flex items-center gap-2">
+                  <span>Em <strong className="text-white font-mono">{stats.total_games}</strong> jogos na biblioteca</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-emerald-400">R$ {stats.total_library_value_brl.toFixed(2)} estimado</span>
+                </div>
+              </div>
+
+              {/* Card 2: Jogo Mais Jogado (com cor tema do jogo!) */}
+              <div
+                onClick={() => stats.most_played_game && setSelectedGameId(stats.most_played_game.id)}
+                className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] cursor-pointer shadow-md group"
+              >
+                <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                  <span>JOGO MAIS JOGADO</span>
+                  <div
+                    className="p-2 rounded-lg bg-[#171a21] group-hover:scale-110 transition-transform"
+                    style={{ color: stats.most_played_game?.color || '#f59e0b' }}
+                  >
+                    <Trophy className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-white truncate flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: stats.most_played_game?.color || '#f97316' }}
+                  ></span>
+                  <span className="truncate">{stats.most_played_game?.name || 'Nenhum'}</span>
+                </div>
+                <div className="text-xs text-slate-400 mt-3 flex items-center gap-2">
+                  <span
+                    className="font-mono font-bold"
+                    style={{ color: stats.most_played_game?.color || '#66c0f4' }}
+                  >
+                    {stats.most_played_game?.hours_played}h jogadas
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-slate-300">
+                    {stats.most_played_game?.rating_label || 'Muito Positivas'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3: Avaliação Média da Biblioteca */}
+              <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 relative overflow-hidden transition hover:border-[#66c0f4] shadow-md">
+                <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+                  <span>AVALIAÇÃO MÉDIA DA BIBLIOTECA</span>
+                  <div className="p-2 rounded-lg bg-[#171a21] text-emerald-400">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="text-3xl sm:text-4xl font-bold text-emerald-400 font-mono tabular-nums">
+                  {stats.avg_rating}%
+                </div>
+                <div className="text-xs text-slate-400 mt-3 flex items-center gap-2">
+                  <span>Índice Positivo Global</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-slate-300">Baseado nas análises da comunidade Steam</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* GRÁFICO DE LINHA: TENDÊNCIA E CRESCIMENTO DOS ÚLTIMOS 6 MESES */}
+            <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 mb-8 shadow-md">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-[#66c0f4]" />
+                      <span>Evolução de Horas Jogadas (Últimos 6 Meses)</span>
+                    </h2>
+                    <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                      <span>↑</span>
+                      <span>+{monthlyTrend.growthRate}% de crescimento</span>
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Comparativo mensal de dedicação à biblioteca e aceleração de atividade no período recente.
+                  </p>
+                </div>
+
+                {/* Badges de Métricas do Semestre */}
+                <div className="flex items-center gap-3 text-xs flex-wrap">
+                  <div className="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
+                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Média Mensal</span>
+                    <span className="font-mono font-bold text-white text-sm tabular-nums">{monthlyTrend.semesterAverage}h</span>
+                  </div>
+                  <div className="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg">
+                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Mês de Pico</span>
+                    <span className="font-bold text-[#66c0f4] text-sm">{monthlyTrend.peakMonth} ({monthlyTrend.peakHours}h)</span>
+                  </div>
+                  <div className="bg-[#171a21] border border-[#2a475e] px-3.5 py-2 rounded-lg hidden sm:block">
+                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Total no Semestre</span>
+                    <span className="font-mono font-bold text-emerald-400 text-sm tabular-nums">{monthlyTrend.totalSemesterHours}h</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Canvas do Gráfico de Linha */}
+              <div className="relative h-[280px] sm:h-[320px]">
+                <Line
+                  data={lineChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                      mode: 'index',
+                      intersect: false
+                    },
+                    plugins: {
+                      legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                          color: '#cbd5e1',
+                          font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' },
+                          boxWidth: 12,
+                          usePointStyle: true
+                        }
+                      },
+                      tooltip: {
+                        backgroundColor: 'rgba(23, 26, 33, 0.96)',
+                        borderColor: '#66c0f4',
+                        borderWidth: 1.5,
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleColor: '#ffffff',
+                        titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
+                        bodyColor: '#e2e8f0',
+                        bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
+                        displayColors: false,
+                        callbacks: {
+                          title: (items) => {
+                            if (!items.length) return '';
+                            const idx = items[0].dataIndex;
+                            return `📅 ${monthlyTrend.months[idx]} de 2026`;
+                          },
+                          beforeBody: (items) => {
+                            if (!items.length) return [];
+                            const idx = items[0].dataIndex;
+                            const currentMonthHours = monthlyTrend.hours[idx];
+                            const prevMonthHours = idx > 0 ? monthlyTrend.hours[idx - 1] : null;
+                            let diffText = 'Início do período analisado';
+                            if (prevMonthHours !== null && prevMonthHours > 0) {
+                              const diffPct = (((currentMonthHours - prevMonthHours) / prevMonthHours) * 100).toFixed(1);
+                              diffText = Number(diffPct) >= 0 ? `+${diffPct}% vs mês anterior` : `${diffPct}% vs mês anterior`;
+                            }
+                            const dailyAvg = (currentMonthHours / 30).toFixed(1);
+                            const topGame = monthlyTrend.monthlyTopGames[idx] || 'Nenhum';
+
+                            return [
+                              `⏱️ Horas Registradas: ${currentMonthHours.toLocaleString('pt-BR')}h`,
+                              `📈 Variação: ${diffText}`,
+                              `🏆 Jogo Mais Jogado no Mês: ${topGame}`,
+                              `⚡ Ritmo Médio Diário: ~${dailyAvg}h/dia`
+                            ];
+                          },
+                          label: () => '',
+                          afterBody: (items) => {
+                            if (!items.length) return [];
+                            const idx = items[0].dataIndex;
+                            return [`📊 Total Acumulado até este mês: ${monthlyTrend.cumulative[idx]}h`];
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      x: {
+                        grid: { color: 'rgba(42, 71, 94, 0.25)' },
+                        ticks: {
+                          color: '#cbd5e1',
+                          font: { size: 11, family: 'Plus Jakarta Sans', weight: 'bold' }
+                        }
+                      },
+                      y: {
+                        grid: { color: 'rgba(42, 71, 94, 0.4)' },
+                        ticks: {
+                          color: '#94a3b8',
+                          font: { family: 'JetBrains Mono' },
+                          callback: (val) => `${val}h`
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Rodapé explicativo do gráfico de linha */}
+              <div className="mt-4 pt-3 border-t border-[#2a475e]/60 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#66c0f4]"></span>
+                    <span className="text-slate-300">Tempo Efetivo Mensal</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-4 h-0.5 border-t border-dashed border-[#a855f7]"></span>
+                    <span className="text-slate-300">Média Semestral ({monthlyTrend.semesterAverage}h)</span>
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-400">Passe o mouse sobre os pontos para ver ritmo e jogo destaque de cada mês</span>
+              </div>
+            </div>
+
+            {/* 2 GRÁFICOS INTERATIVOS ESTILIZADOS COM CHART.JS - COM CORES DISTINTAS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              
+              {/* Gráfico 1: Barras - Top Jogos com Cores Específicas por Jogo */}
+              <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col shadow-md">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                  <div>
+                    <h2 className="text-base font-bold text-white flex items-center gap-2">
+                      <span>Top Jogos por Horas Jogadas</span>
+                    </h2>
+                    <p className="text-xs text-slate-400">Cores distintas identificando cada jogo e sua identidade</p>
+                  </div>
+
+                  {/* Seletor de Modo de Cor no Gráfico de Barras */}
+                  <div className="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e] self-start sm:self-auto">
+                    <button
+                      onClick={() => setColorMode('game')}
+                      className={`px-2.5 py-1 text-[11px] rounded transition flex items-center gap-1 ${
+                        colorMode === 'game'
+                          ? 'bg-[#66c0f4] text-[#101822] font-semibold'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Colorir cada barra com a cor exclusiva do jogo"
+                    >
+                      <Palette className="w-3 h-3" />
+                      <span>Cor do Jogo</span>
+                    </button>
+                    <button
+                      onClick={() => setColorMode('genre')}
+                      className={`px-2.5 py-1 text-[11px] rounded transition flex items-center gap-1 ${
+                        colorMode === 'genre'
+                          ? 'bg-[#66c0f4] text-[#101822] font-semibold'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Colorir cada barra de acordo com o nicho/gênero"
+                    >
+                      <span>Cor do Nicho</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative flex-1 min-h-[300px]">
+                  <Bar
+                    data={barChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      onClick: (_event, elements) => {
+                        if (elements.length > 0) {
+                          const idx = elements[0].index;
+                          if (top6[idx]) {
+                            setSelectedGameId(top6[idx].id);
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                          backgroundColor: 'rgba(23, 26, 33, 0.96)',
+                          borderColor: '#38bdf8',
+                          borderWidth: 1.5,
+                          padding: 12,
+                          cornerRadius: 8,
+                          titleColor: '#ffffff',
+                          titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
+                          bodyColor: '#e2e8f0',
+                          bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
+                          displayColors: true,
+                          boxWidth: 8,
+                          boxHeight: 8,
+                          callbacks: {
+                            title: (items) => {
+                              if (!items.length) return '';
+                              const idx = items[0].dataIndex;
+                              const game = top6[idx];
+                              return game ? `🎮 ${game.name}` : items[0].label;
+                            },
+                            beforeBody: (items) => {
+                              if (!items.length) return [];
+                              const idx = items[0].dataIndex;
+                              const game = top6[idx];
+                              if (!game) return [];
+                              const percent = stats.total_hours > 0 ? ((game.hours_played / stats.total_hours) * 100).toFixed(1) : '0';
+                              const primaryGenre = game.genres[0] || 'Geral';
+                              const subGenres = game.genres.slice(1).join(', ');
+                              return [
+                                `🏷️ Nicho Principal: ${primaryGenre}${subGenres ? ` (${subGenres})` : ''}`,
+                                `⏱️ Tempo Jogado: ${game.hours_played.toLocaleString('pt-BR')} horas`,
+                                `📊 Participação: ${percent}% do total da biblioteca`,
+                                `⭐ Avaliação na Steam: ${game.user_rating}% (${game.rating_label})`,
+                                `👥 Pico de Jogadores (24h): ${game.peak_24h_players.toLocaleString('pt-BR')}`,
+                                `💰 Preço Atual: ${game.price_formatted}`
+                              ];
+                            },
+                            label: () => '',
+                            afterBody: () => ['👉 Clique na barra para abrir a ficha completa deste jogo']
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          grid: { display: false },
+                          ticks: {
+                            color: '#cbd5e1',
+                            font: { size: 11, weight: 'bold' }
+                          }
+                        },
+                        y: {
+                          grid: { color: 'rgba(42, 71, 94, 0.4)' },
+                          ticks: {
+                            color: '#94a3b8',
+                            callback: (val) => `${val}h`
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Mini legenda dos jogos do gráfico */}
+                <div className="mt-3 pt-3 border-t border-[#2a475e]/60 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-[11px] text-slate-300">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    {barChartData.labels.map((name, idx) => {
+                      const color = barChartData.datasets[0].backgroundColor[idx] as string;
+                      return (
+                        <div key={name} className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-sm shadow-sm" style={{ backgroundColor: color }}></span>
+                          <span className="text-slate-300 font-medium">{name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <span className="text-slate-400 text-[10px]">Passe o mouse ou clique para detalhes</span>
+                </div>
+              </div>
+
+              {/* Gráfico 2: Rosca/Doughnut - Distribuição de Gênero com Cores Vibrantes por Nicho */}
+              <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6 flex flex-col shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-base font-bold text-white">Distribuição por Nicho / Gênero</h2>
+                    <p className="text-xs text-slate-400">Proporção com cores de alto contraste para cada estilo</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectedGenre !== 'Todos' && (
+                      <button
+                        onClick={() => setSelectedGenre('Todos')}
+                        className="text-xs font-medium text-amber-300 bg-amber-400/15 hover:bg-amber-400/25 px-2.5 py-1 rounded border border-amber-400/30 flex items-center gap-1 transition"
+                        title="Filtro ativo. Clique para desmarcar e ver todos os jogos"
+                      >
+                        <span>Filtro: {selectedGenre}</span>
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <span className="text-xs font-mono text-[#66c0f4] bg-[#171a21] px-2.5 py-1 rounded border border-[#2a475e]">
+                      Gráfico 2 · Rosca
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative flex-1 min-h-[300px] flex items-center justify-center">
+                  <Doughnut
+                    data={doughnutChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      cutout: '68%',
+                      onClick: (_event, elements) => {
+                        if (elements.length > 0) {
+                          const idx = elements[0].index;
+                          const genres = Object.keys(stats.genre_distribution);
+                          if (genres[idx]) {
+                            const clickedGenre = genres[idx];
+                            // Alterna seleção: se clicar no mesmo nicho ativo, volta para 'Todos'
+                            setSelectedGenre((prev) => (prev === clickedGenre ? 'Todos' : clickedGenre));
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                          labels: {
+                            color: '#e2e8f0',
+                            font: { size: 12, weight: 'bold' },
+                            boxWidth: 14,
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                          }
+                        },
+                        tooltip: {
+                          backgroundColor: 'rgba(23, 26, 33, 0.96)',
+                          borderColor: '#a855f7',
+                          borderWidth: 1.5,
+                          padding: 12,
+                          cornerRadius: 8,
+                          titleColor: '#ffffff',
+                          titleFont: { size: 13, weight: 'bold', family: 'Plus Jakarta Sans' },
+                          bodyColor: '#e2e8f0',
+                          bodyFont: { size: 11.5, family: 'Plus Jakarta Sans' },
+                          displayColors: true,
+                          boxWidth: 8,
+                          boxHeight: 8,
+                          callbacks: {
+                            title: (items) => {
+                              if (!items.length) return '';
+                              const genre = items[0].label;
+                              return `🎯 Nicho: ${genre}`;
+                            },
+                            beforeBody: (items) => {
+                              if (!items.length) return [];
+                              const idx = items[0].dataIndex;
+                              const genres = Object.keys(stats.genre_distribution);
+                              const genre = genres[idx];
+                              const hours = stats.genre_distribution[genre] || 0;
+                              const percent = stats.total_hours > 0 ? ((hours / stats.total_hours) * 100).toFixed(1) : '0';
+                              
+                              const gamesInGenre = presetGames.filter(g => g.genres.includes(genre));
+                              const topInGenre = [...gamesInGenre].sort((a, b) => b.hours_played - a.hours_played)[0];
+
+                              return [
+                                `⏱️ Total no Nicho: ${hours.toLocaleString('pt-BR')} horas`,
+                                `📊 Participação Geral: ${percent}% de todo o tempo jogado`,
+                                `📚 Títulos na Biblioteca: ${gamesInGenre.length} jogo(s)`,
+                                topInGenre ? `🏆 Título Destaque: ${topInGenre.name} (${topInGenre.hours_played}h)` : ''
+                              ].filter(Boolean);
+                            },
+                            label: () => '',
+                            afterBody: (items) => {
+                              if (!items.length) return [];
+                              const idx = items[0].dataIndex;
+                              const genres = Object.keys(stats.genre_distribution);
+                              const genre = genres[idx];
+                              const isCurrent = selectedGenre === genre;
+                              return [
+                                isCurrent
+                                  ? '↩️ Clique novamente na fatia para desmarcar e ver Todos os jogos'
+                                  : '👉 Clique na fatia para filtrar a tabela por este nicho'
+                              ];
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Resumo percentual dos nichos */}
+                <div className="mt-3 pt-3 border-t border-[#2a475e]/60 flex flex-wrap items-center justify-around gap-2 text-xs">
+                  {Object.entries(stats.genre_distribution).map(([genre, hours]) => {
+                    const color = getGenreColor(genre);
+                    const pct = Math.round((hours / stats.total_hours) * 100);
+                    return (
+                      <div key={genre} className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></span>
+                        <span className="text-slate-300 font-medium">{genre}:</span>
+                        <span className="font-mono font-bold text-white">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+
+            {/* TABELA DE DADOS DETALHADA */}
+            <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
+              
+              {/* Barra superior de busca e ordenação */}
+              <div className="p-5 border-b border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                
+                <div className="relative flex-1 max-w-sm">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Filtrar por nome ou desenvolvedor..."
+                    className="w-full bg-[#171a21] border border-[#2a475e] text-white text-xs rounded-lg px-3.5 py-2 pl-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {selectedGenre !== 'Todos' && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#171a21] border border-[#66c0f4]/50 text-xs text-white">
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: getGenreColor(selectedGenre) }}
+                      ></span>
+                      <span className="text-slate-300">Nicho:</span>
+                      <strong className="text-white">{selectedGenre}</strong>
+                      <button
+                        onClick={() => setSelectedGenre('Todos')}
+                        className="ml-1 text-slate-400 hover:text-white transition p-0.5 rounded hover:bg-[#2a475e]"
+                        title="Remover filtro e ver todos os jogos"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  <span className="text-xs text-slate-400 whitespace-nowrap">Ordenar por:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="bg-[#171a21] border border-[#2a475e] text-xs text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#66c0f4]"
+                  >
+                    <option value="hours">Mais Jogados (Horas)</option>
+                    <option value="rating">Maior Avaliação (%)</option>
+                    <option value="players">Pico 24h Jogadores</option>
+                    <option value="price">Preço</option>
+                    <option value="name">Nome (A-Z)</option>
+                  </select>
+                  <button
+                    onClick={() => setSortAsc(!sortAsc)}
+                    className="p-1.5 bg-[#171a21] hover:bg-[#2a475e] text-slate-300 rounded border border-[#2a475e] transition"
+                    title={sortAsc ? 'Ordem Ascendente' : 'Ordem Descendente'}
+                  >
+                    <ArrowUpDown className="w-4 h-4" />
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Tabela de Jogos com Cores Específicas */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-300">
+                  <thead className="text-xs uppercase bg-[#171a21] text-slate-400 border-b border-[#2a475e]">
+                    <tr>
+                      <th scope="col" className="px-6 py-3.5">Jogo & Cor Tema</th>
+                      <th scope="col" className="px-6 py-3.5">Nicho / Gênero</th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3.5 text-right cursor-pointer hover:text-white"
+                        onClick={() => {
+                          setSortBy('hours');
+                          setSortAsc(sortBy === 'hours' ? !sortAsc : false);
+                        }}
+                      >
+                        Horas Registradas ↕
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3.5 text-right cursor-pointer hover:text-white"
+                        onClick={() => {
+                          setSortBy('rating');
+                          setSortAsc(sortBy === 'rating' ? !sortAsc : false);
+                        }}
+                      >
+                        Avaliação Steam ↕
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3.5 text-right cursor-pointer hover:text-white"
+                        onClick={() => {
+                          setSortBy('players');
+                          setSortAsc(sortBy === 'players' ? !sortAsc : false);
+                        }}
+                      >
+                        Pico 24h ↕
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3.5 text-right cursor-pointer hover:text-white"
+                        onClick={() => {
+                          setSortBy('price');
+                          setSortAsc(sortBy === 'price' ? !sortAsc : false);
+                        }}
+                      >
+                        Preço ↕
+                      </th>
+                      <th scope="col" className="px-6 py-3.5 text-center">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#2a475e]/50">
+                    {tableGames.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-8 text-center text-slate-400 text-sm">
+                          Nenhum jogo encontrado com os critérios de busca.
+                        </td>
+                      </tr>
+                    ) : (
+                      tableGames.map((game) => {
+                        const primaryGenre = game.genres[0] || 'Ação';
+                        const genreColor = getGenreColor(primaryGenre);
+
+                        return (
+                          <tr
+                            key={game.id}
+                            onClick={() => setSelectedGameId(game.id)}
+                            className="hover:bg-[#233446]/50 transition cursor-pointer"
+                          >
+                            <td className="px-6 py-4 flex items-center gap-3">
+                              {/* Barra de cor identificadora do jogo */}
+                              <div
+                                className="w-1.5 h-10 rounded-full shrink-0 shadow-sm"
+                                style={{ backgroundColor: game.color }}
+                                title={`Cor do jogo: ${game.name}`}
+                              ></div>
+                              <img
+                                src={game.header_image}
+                                alt={game.name}
+                                className="w-14 h-8 object-cover rounded bg-[#101822] shrink-0"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                }}
+                              />
+                              <div>
+                                <span className="font-bold text-white block flex items-center gap-2">
+                                  <span>{game.name}</span>
+                                </span>
+                                <span className="text-xs text-slate-400">{game.developer} · {game.release_year}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: genreColor }}
+                                ></span>
+                                <span className="text-xs font-medium text-slate-200">
+                                  {primaryGenre}
+                                </span>
+                                {game.genres[1] && (
+                                  <span className="text-xs text-slate-400">· {game.genres[1]}</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right font-mono font-semibold text-white tabular-nums">
+                              {game.hours_played.toLocaleString('pt-BR')}h
+                            </td>
+                            <td className="px-6 py-4 text-right font-mono tabular-nums">
+                              <span className="text-emerald-400 font-bold">{game.user_rating}%</span>
+                            </td>
+                            <td className="px-6 py-4 text-right font-mono text-slate-300 tabular-nums">
+                              {game.peak_24h_players.toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-6 py-4 text-right font-mono text-white tabular-nums">
+                              {game.price_formatted}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedGameId(game.id);
+                                }}
+                                className="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition"
+                              >
+                                Ver Métricas
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Rodapé da tabela */}
+              <div className="px-6 py-3.5 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between text-xs text-slate-400">
+                <span>Exibindo {tableGames.length} de {presetGames.length} jogos</span>
+                <span className="font-mono">Fonte: Steam Web & Dados Simulados</span>
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* TAB 2: CRÍTICAS & REVIEWS EDITORIAIS (COM IA & AFILIADOS) */}
+        {activeTab === 'reviews' && (
+          <ReviewsView
+            games={INITIAL_GAMES}
+            reviews={reviews}
+            selectedGameId={selectedReviewGameId}
+            onSelectGame={(id) => setSelectedReviewGameId(id)}
+            onTriggerAiReview={handleTriggerAiReview}
+            isGeneratingAi={isGeneratingAiReview}
+            monetizationSettings={monetizationSettings}
+            onOpenPixModal={() => setIsPixModalOpen(true)}
+          />
+        )}
+
+        {/* TAB 3: CENTRAL DE MONETIZAÇÃO, AFILIADOS & PIX */}
+        {activeTab === 'monetization' && (
+          <MonetizationHubView
+            games={INITIAL_GAMES}
+            settings={monetizationSettings}
+            onOpenSettings={() => setIsSettingsModalOpen(true)}
+            onOpenPixModal={() => setIsPixModalOpen(true)}
+          />
+        )}
+
+        {/* TAB 4: CÓDIGO PYTHON & DEPLOY */}
+        {activeTab === 'code' && (
+          <div className="space-y-6">
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Arquivos Prontos para Deploy (Python & FastAPI)</h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Todos os arquivos requisitados estão gerados e prontos para subir no Render, Vercel ou GitHub.
+                </p>
+              </div>
+
+              {/* Download / Copy All */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCopyCode(activeCodeFile, codeFiles[activeCodeFile])}
+                  className="px-3 py-1.5 text-xs font-semibold bg-[#2a475e] hover:bg-[#38bdf8] hover:text-[#101822] text-white rounded-lg transition flex items-center gap-1.5"
+                >
+                  {copiedFile === activeCodeFile ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedFile === activeCodeFile ? 'Copiado!' : 'Copiar Arquivo Atual'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* File Switcher Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[#2a475e]">
+              {(['main.py', 'templates/index.html', 'requirements.txt', 'README.md', 'vercel.json'] as const).map(
+                (file) => (
+                  <button
+                    key={file}
+                    onClick={() => setActiveCodeFile(file)}
+                    className={`px-3 py-1.5 text-xs font-mono rounded-t-lg transition flex items-center gap-1.5 ${
+                      activeCodeFile === file
+                        ? 'bg-[#1b2838] text-[#66c0f4] border-t-2 border-[#66c0f4] font-bold'
+                        : 'text-slate-400 hover:text-white bg-[#171a21]'
+                    }`}
+                  >
+                    <FileCode className="w-3.5 h-3.5" />
+                    <span>{file}</span>
+                  </button>
+                )
+              )}
+            </div>
+
+            {/* Code Box */}
+            <div className="bg-[#121c27] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
+              <div className="bg-[#171a21] px-4 py-2.5 border-b border-[#2a475e] flex items-center justify-between text-xs text-slate-400 font-mono">
+                <span>{activeCodeFile}</span>
+                <span>Python / Web Ready</span>
+              </div>
+              <pre className="p-4 sm:p-6 overflow-x-auto text-xs text-slate-300 font-mono leading-relaxed max-h-[500px]">
+                <code>{codeFiles[activeCodeFile]}</code>
+              </pre>
+            </div>
+
+            {/* Guia Rápido de Deploy Render */}
+            <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl p-6">
+              <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                Como hospedar no Render em 3 passos:
+              </h3>
+              <ol className="list-decimal list-inside text-xs text-slate-300 space-y-2 mt-2 leading-relaxed">
+                <li>Suba os arquivos deste repositório para o seu <strong>GitHub</strong>.</li>
+                <li>No <strong>Render.com</strong>, crie um novo <strong>Web Service</strong> e conecte o repositório.</li>
+                <li>Defina o Build Command como <code className="bg-[#171a21] px-1.5 py-0.5 rounded text-[#66c0f4]">pip install -r requirements.txt</code> e o Start Command como <code className="bg-[#171a21] px-1.5 py-0.5 rounded text-[#66c0f4]">uvicorn main:app --host 0.0.0.0 --port $PORT</code>.</li>
+              </ol>
+            </div>
+
+          </div>
+        )}
+
+        {/* TAB 3: TESTADOR DE API */}
+        {activeTab === 'api' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Testador Interativo de Endpoints da API</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Simule e inspecione as respostas JSON fornecidas pelo back-end FastAPI.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleTestApi('/api/stats')}
+                className={`px-3 py-1.5 text-xs font-mono rounded-lg transition ${
+                  apiEndpoint === '/api/stats'
+                    ? 'bg-[#66c0f4] text-[#101822] font-bold'
+                    : 'bg-[#1b2838] text-slate-300 hover:bg-[#2a475e]'
+                }`}
+              >
+                GET /api/stats
+              </button>
+              <button
+                onClick={() => handleTestApi('/api/game/730')}
+                className={`px-3 py-1.5 text-xs font-mono rounded-lg transition ${
+                  apiEndpoint === '/api/game/730'
+                    ? 'bg-[#66c0f4] text-[#101822] font-bold'
+                    : 'bg-[#1b2838] text-slate-300 hover:bg-[#2a475e]'
+                }`}
+              >
+                GET /api/game/730 (CS2)
+              </button>
+              <button
+                onClick={() => handleTestApi('/api/game/1086940')}
+                className={`px-3 py-1.5 text-xs font-mono rounded-lg transition ${
+                  apiEndpoint === '/api/game/1086940'
+                    ? 'bg-[#66c0f4] text-[#101822] font-bold'
+                    : 'bg-[#1b2838] text-slate-300 hover:bg-[#2a475e]'
+                }`}
+              >
+                GET /api/game/1086940 (Baldur's Gate 3)
+              </button>
+              <button
+                onClick={() => handleTestApi('/api/games')}
+                className={`px-3 py-1.5 text-xs font-mono rounded-lg transition ${
+                  apiEndpoint === '/api/games'
+                    ? 'bg-[#66c0f4] text-[#101822] font-bold'
+                    : 'bg-[#1b2838] text-slate-300 hover:bg-[#2a475e]'
+                }`}
+              >
+                GET /api/games
+              </button>
+              <button
+                onClick={() => handleTestApi('/api/health')}
+                className={`px-3 py-1.5 text-xs font-mono rounded-lg transition ${
+                  apiEndpoint === '/api/health'
+                    ? 'bg-[#66c0f4] text-[#101822] font-bold'
+                    : 'bg-[#1b2838] text-slate-300 hover:bg-[#2a475e]'
+                }`}
+              >
+                GET /api/health
+              </button>
+            </div>
+
+            {/* JSON Output Viewer */}
+            <div className="bg-[#121c27] border border-[#2a475e] rounded-xl overflow-hidden shadow-lg">
+              <div className="bg-[#171a21] px-4 py-2.5 border-b border-[#2a475e] flex items-center justify-between text-xs text-slate-400 font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">200 OK</span>
+                  <span>{apiEndpoint}</span>
+                </div>
+                <button
+                  onClick={() => handleCopyCode('api_response', apiResponse)}
+                  className="hover:text-white transition flex items-center gap-1"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copiar JSON</span>
+                </button>
+              </div>
+              <pre className="p-4 sm:p-6 overflow-x-auto text-xs text-[#38bdf8] font-mono leading-relaxed max-h-[500px]">
+                <code>{apiResponse || '// Clique em um dos endpoints acima para testar a resposta JSON'}</code>
+              </pre>
+            </div>
+
+          </div>
+        )}
+
+      </main>
+
+      {/* GAME DETAIL MODAL (/api/game/{game_id}) - com cor de destaque do jogo */}
+      {selectedGame && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1b2838] border border-[#2a475e] rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+            
+            {/* Botão fechar */}
+            <button
+              onClick={() => setSelectedGameId(null)}
+              className="absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white rounded-full p-2 transition z-10"
+              title="Fechar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Banner da Steam com linha de cor tema */}
+            <div className="relative h-48 sm:h-56 w-full bg-[#171a21] overflow-hidden">
+              <img
+                src={selectedGame.header_image}
+                alt={selectedGame.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1b2838] via-transparent to-transparent"></div>
+              
+              {/* Faixa com a cor tema do jogo */}
+              <div
+                className="absolute top-0 left-0 right-0 h-1"
+                style={{ backgroundColor: selectedGame.color }}
+              ></div>
+
+              <div className="absolute bottom-4 left-6 right-6">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: selectedGame.color }}
+                  ></span>
+                  <h3 className="text-2xl font-extrabold text-white">{selectedGame.name}</h3>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">
+                  {selectedGame.developer} · Lançamento {selectedGame.release_year}
+                </p>
+              </div>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="p-6 space-y-6">
+              
+              <p className="text-sm text-slate-300 leading-relaxed">
+                {selectedGame.short_description}
+              </p>
+
+              {/* 4 Cards de Métricas do Jogo */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#171a21] p-4 rounded-lg border border-[#2a475e]">
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Horas Jogadas</span>
+                  <span
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: selectedGame.color }}
+                  >
+                    {selectedGame.hours_played}h
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Avaliação</span>
+                  <span className="text-lg font-bold text-emerald-400 font-mono tabular-nums">
+                    {selectedGame.user_rating}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Pico 24h</span>
+                  <span className="text-lg font-bold text-white font-mono tabular-nums">
+                    {selectedGame.peak_24h_players.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-slate-400 block">Preço</span>
+                  <span className="text-lg font-bold text-white font-mono tabular-nums">
+                    {selectedGame.price_formatted}
+                  </span>
+                </div>
+              </div>
+
+              {/* Conquistas e Gêneros */}
+              <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 pt-2 border-t border-[#2a475e]">
+                <div className="flex items-center gap-1.5">
+                  <span>Gêneros:</span>
+                  <div className="flex items-center gap-1">
+                    {selectedGame.genres.map((g) => (
+                      <span
+                        key={g}
+                        className="px-2 py-0.5 rounded text-[11px] font-medium"
+                        style={{
+                          backgroundColor: `${getGenreColor(g)}20`,
+                          color: getGenreColor(g)
+                        }}
+                      >
+                        {g}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span>Conquistas: <strong className="text-[#66c0f4] font-mono">{selectedGame.achievements_unlocked} / {selectedGame.total_achievements}</strong></span>
+                </div>
+              </div>
+
+              {/* Botões de Ação & Compra com Afiliados */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#2a475e]">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => {
+                      setSelectedReviewGameId(selectedGame.id);
+                      setSelectedGameId(null);
+                      setActiveTab('reviews');
+                    }}
+                    className="px-3.5 py-2 text-xs font-bold text-purple-300 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 rounded-lg transition flex items-center gap-1.5 w-full sm:w-auto justify-center"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Ler Crítica Editorial (IA)</span>
+                  </button>
+                  <a
+                    href={getAffiliateUrls(selectedGame, monetizationSettings).nuuvem}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg transition flex items-center gap-1.5 shadow-sm w-full sm:w-auto justify-center"
+                    title={`Comprar ${selectedGame.name} com desconto parceiro`}
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>Comprar na Nuuvem</span>
+                  </a>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <button
+                    onClick={() => setSelectedGameId(null)}
+                    className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition"
+                  >
+                    Fechar
+                  </button>
+                  <a
+                    href={`https://store.steampowered.com/app/${selectedGame.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-2 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                  >
+                    <span>Loja Steam</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE APOIO VIA PIX */}
+      <PixModal
+        isOpen={isPixModalOpen}
+        onClose={() => setIsPixModalOpen(false)}
+        settings={monetizationSettings}
+      />
+
+      {/* MODAL DE CONFIGURAÇÕES DE AFILIADOS & PIX */}
+      <MonetizationSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        settings={monetizationSettings}
+        onSave={handleSaveMonetizationSettings}
+      />
+
+      {/* FOOTER COM AVISO DE AFILIADOS E TRANSPARÊNCIA */}
+      <footer className="bg-[#171a21] border-t border-[#2a475e] py-8 mt-12 text-slate-400 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-white flex items-center gap-1">Game<span className="text-[#66c0f4]">Lens</span></span>
+              <span>·</span>
+              <span>Portal Gamer, Críticas Especializadas & Analytics</span>
+            </div>
+            <div className="flex items-center gap-4 text-slate-400 flex-wrap justify-center">
+              <button onClick={() => setActiveTab('dashboard')} className="hover:text-[#66c0f4] transition">
+                Dashboard
+              </button>
+              <button onClick={() => setActiveTab('reviews')} className="hover:text-[#66c0f4] transition">
+                Críticas & Reviews
+              </button>
+              <button onClick={() => setActiveTab('monetization')} className="hover:text-[#66c0f4] transition">
+                Hub de Monetização
+              </button>
+              <button onClick={() => setIsPixModalOpen(true)} className="text-emerald-400 hover:underline transition">
+                ☕ Doar via Pix
+              </button>
+              <button onClick={() => setIsSettingsModalOpen(true)} className="hover:text-white transition">
+                ⚙️ Configurar Afiliados
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-[#2a475e]/60 text-[11px] text-slate-400 leading-relaxed text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>
+              <strong>Aviso de Transparência & Afiliados:</strong> Este site participa dos programas de afiliados oficiais da Nuuvem, Amazon Games e Green Man Gaming. Ao comprar através dos nossos links, recebemos uma comissão sem nenhum custo adicional para você. Isso apoia a infraestrutura e a continuidade da plataforma.
+            </p>
+            <span className="shrink-0 font-mono text-[10px] text-slate-400">v2.4.0 · 2026</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

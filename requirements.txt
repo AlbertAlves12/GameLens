@@ -1,0 +1,11 @@
+# ==============================================================================
+# Dependências Essenciais para o Dashboard Steam (FastAPI + Jinja2 + Uvicorn)
+# Instalação: pip install -r requirements.txt
+# ==============================================================================
+
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+jinja2>=3.1.3
+
+# Opcional: biblioteca para requisições HTTP caso queira integrar com a Steam Web API real
+requests>=2.31.0

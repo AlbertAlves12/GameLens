@@ -1,0 +1,6 @@
+{
+  "name": "Steam Analytics - Dashboard de Biblioteca & Mercado",
+  "description": "Dashboard profissional para análise de biblioteca Steam, estatísticas de horas jogadas, distribuição de gêneros e tendências de mercado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
