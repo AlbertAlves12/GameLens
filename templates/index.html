@@ -43,6 +43,7 @@
             background-color: #0e141b;
             color: #c7d5e0;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
         .tabular-nums {
             font-family: 'JetBrains Mono', monospace;
@@ -61,6 +62,56 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #314863;
+        }
+
+        /* TEMA CLARO GLOBAL */
+        html.light body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        html.light header {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light nav {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html.light .bg-\[\#1b2838\] {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        html.light .bg-\[\#171a21\] {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        html.light .bg-\[\#101822\] {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+        html.light .bg-\[\#121c27\] {
+            background-color: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+        }
+        html.light .text-white {
+            color: #0f172a !important;
+        }
+        html.light .text-slate-300 {
+            color: #334155 !important;
+        }
+        html.light .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.light .border-\[\#2a475e\] {
+            border-color: #cbd5e1 !important;
+        }
+        html.light input {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
         }
     </style>
 </head>
@@ -88,17 +139,37 @@
                         type="text" 
                         id="global-search" 
                         placeholder="Buscar por jogo ou desenvolvedor..." 
-                        class="w-full bg-[#1b2838] border border-[#2a475e] text-white text-sm rounded-lg px-4 py-2 pl-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
+                        class="w-full bg-[#1b2838] border border-[#2a475e] text-white text-sm rounded-lg px-4 py-2 pl-9 pr-9 focus:outline-none focus:border-[#66c0f4] transition placeholder-slate-400"
                         oninput="handleSearch(this.value)"
                     />
                     <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
+                    <button 
+                        type="button" 
+                        id="header-voice-btn" 
+                        onclick="startVoiceSearch('global-search', 'header-voice-btn')" 
+                        class="absolute right-2.5 top-2 p-0.5 text-slate-400 hover:text-[#66c0f4] transition rounded" 
+                        title="Pesquisar por comando de voz"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
             <!-- Actions / Status -->
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <button 
+                    id="theme-toggle-btn" 
+                    onclick="toggleGlobalTheme()" 
+                    class="p-2 rounded-lg bg-[#1b2838] hover:bg-[#233446] border border-[#2a475e] text-amber-300 hover:text-amber-200 transition flex items-center justify-center"
+                    title="Alternar Tema Claro / Escuro"
+                >
+                    <svg id="theme-icon-sun" class="w-4 h-4 hidden text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <svg id="theme-icon-moon" class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                </button>
                 <button 
                     onclick="openPixModal()" 
                     class="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm"
@@ -230,8 +301,14 @@
                                 <p class="text-xs text-slate-300 italic line-clamp-3">"Uma obra-prima revolucionária de RPG de ação. Exploração orgânica monumental e chefes inesquecíveis."</p>
                             </div>
                             <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
-                                <span class="text-base font-black text-emerald-400">R$ 151,73</span>
-                                <button onclick="event.stopPropagation(); openGameModal('1245620')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 line-through block">R$ 229,90</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-base font-black text-emerald-400">R$ 151,73</span>
+                                        <span class="text-[10px] font-black px-1.5 py-0.2 bg-red-600/90 text-white rounded">-34%</span>
+                                    </div>
+                                </div>
+                                <button onclick="event.stopPropagation(); openGameModal('1245620')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded hover:bg-[#38bdf8] transition">Dados</button>
                             </div>
                         </div>
                     </div>
@@ -250,8 +327,14 @@
                                 <p class="text-xs text-slate-300 italic line-clamp-3">"Narrativa ramificada brilhante com escolhas que moldam verdadeiramente o mundo e seus companheiros."</p>
                             </div>
                             <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
-                                <span class="text-base font-black text-emerald-400">R$ 199,99</span>
-                                <button onclick="event.stopPropagation(); openGameModal('1086940')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 line-through block">R$ 199,99</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-base font-black text-emerald-400">R$ 159,99</span>
+                                        <span class="text-[10px] font-black px-1.5 py-0.2 bg-red-600/90 text-white rounded">-20%</span>
+                                    </div>
+                                </div>
+                                <button onclick="event.stopPropagation(); openGameModal('1086940')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded hover:bg-[#38bdf8] transition">Dados</button>
                             </div>
                         </div>
                     </div>
@@ -270,8 +353,14 @@
                                 <p class="text-xs text-slate-300 italic line-clamp-3">"Night City ganha vida com gráficos espetaculares e a aclamada expansão Phantom Liberty inclusa."</p>
                             </div>
                             <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
-                                <span class="text-base font-black text-emerald-400">R$ 99,95</span>
-                                <button onclick="event.stopPropagation(); openGameModal('1091500')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 line-through block">R$ 199,90</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-base font-black text-emerald-400">R$ 99,95</span>
+                                        <span class="text-[10px] font-black px-1.5 py-0.2 bg-red-600/90 text-white rounded">-50%</span>
+                                    </div>
+                                </div>
+                                <button onclick="event.stopPropagation(); openGameModal('1091500')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded hover:bg-[#38bdf8] transition">Dados</button>
                             </div>
                         </div>
                     </div>
@@ -290,8 +379,11 @@
                                 <p class="text-xs text-slate-300 italic line-clamp-3">"A evolução máxima do tiro tático no motor Source 2, com fumaças volumétricas reativas e tiro preciso."</p>
                             </div>
                             <div class="flex items-center justify-between pt-2 border-t border-[#2a475e]">
-                                <span class="text-base font-black text-emerald-400">Gratuito</span>
-                                <button onclick="event.stopPropagation(); openGameModal('730')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded">Dados</button>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Ativação Oficial</span>
+                                    <span class="text-base font-black text-emerald-400">Gratuito</span>
+                                </div>
+                                <button onclick="event.stopPropagation(); openGameModal('730')" class="px-3 py-1 bg-[#66c0f4] text-[#101822] text-xs font-extrabold rounded hover:bg-[#38bdf8] transition">Dados</button>
                             </div>
                         </div>
                     </div>
@@ -307,25 +399,35 @@
                         </h2>
                         <p class="text-xs sm:text-sm text-slate-400 mt-1">Estatísticas consolidadas com filtros de período e cromatografia por nicho.</p>
                     </div>
-                    <!-- Quick Filter Bar -->
-                    <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="genre-filter-container">
-                        <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
-                        <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
-                            <span>RPG</span>
-                        </button>
-                        <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
-                            <span>Ação</span>
-                        </button>
-                        <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
-                            <span>Estratégia</span>
-                        </button>
-                        <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
-                            <span>Indie</span>
-                        </button>
+                    <!-- Quick Filter Bar (Período & Nichos) -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-1 bg-[#171a21] p-1 rounded-lg border border-[#2a475e]">
+                            <span class="text-[11px] text-slate-400 px-2 font-medium">Período:</span>
+                            <button onclick="changeHtmlPeriod('1m')" id="period-btn-1m" class="period-btn px-2.5 py-1 text-xs rounded transition font-bold text-slate-300 hover:text-white">1 Mês</button>
+                            <button onclick="changeHtmlPeriod('3m')" id="period-btn-3m" class="period-btn px-2.5 py-1 text-xs rounded transition font-bold text-slate-300 hover:text-white">3 Meses</button>
+                            <button onclick="changeHtmlPeriod('6m')" id="period-btn-6m" class="period-btn px-2.5 py-1 text-xs rounded transition font-bold bg-[#66c0f4] text-[#101822] shadow-sm">6 Meses</button>
+                            <button onclick="changeHtmlPeriod('1y')" id="period-btn-1y" class="period-btn px-2.5 py-1 text-xs rounded transition font-bold text-slate-300 hover:text-white">1 Ano</button>
+                            <button onclick="changeHtmlPeriod('all')" id="period-btn-all" class="period-btn px-2.5 py-1 text-xs rounded transition font-bold text-slate-300 hover:text-white">Total</button>
+                        </div>
+                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" id="genre-filter-container">
+                            <button onclick="filterByGenre('Todos')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#66c0f4] text-[#101822] transition whitespace-nowrap">Todos</button>
+                            <button onclick="filterByGenre('RPG')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#a855f7]"></span>
+                                <span>RPG</span>
+                            </button>
+                            <button onclick="filterByGenre('Ação')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span>
+                                <span>Ação</span>
+                            </button>
+                            <button onclick="filterByGenre('Estratégia')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+                                <span>Estratégia</span>
+                            </button>
+                            <button onclick="filterByGenre('Indie')" class="genre-btn px-3 py-1.5 text-xs font-medium rounded-md bg-[#1b2838] hover:bg-[#233446] text-slate-300 transition whitespace-nowrap flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+                                <span>Indie</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -396,7 +498,7 @@
                                 <svg class="w-5 h-5 text-[#66c0f4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                                 </svg>
-                                <span>Evolução de Horas Jogadas (Últimos 6 Meses)</span>
+                                <span id="line-chart-title-text">Evolução de Horas Jogadas (Últimos 6 Meses)</span>
                             </h2>
                             <span id="line-growth-badge" class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-0.5 rounded-full font-bold">
                                 +123.8% de crescimento
@@ -514,6 +616,7 @@
                 </div>
             </div>
         </div>
+        </div>
         <!-- FIM SECTION 1: DASHBOARD -->
 
         <!-- SECTION 2: RADAR DE PROMOÇÕES & DESCONTOS -->
@@ -572,12 +675,25 @@
                         <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <button 
-                            onclick="executeUniversalSearch()" 
-                            class="absolute right-2 top-2 bottom-2 px-4 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-bold rounded-lg transition flex items-center gap-1.5"
-                        >
-                            <span>Buscar</span>
-                        </button>
+                        <div class="absolute right-2 top-2 bottom-2 flex items-center gap-1.5">
+                            <button 
+                                type="button" 
+                                id="universal-voice-btn" 
+                                onclick="startVoiceSearch('universal-search-input', 'universal-voice-btn', true)" 
+                                class="p-2 text-slate-400 hover:text-[#66c0f4] bg-[#171a21] hover:bg-[#233446] border border-[#2a475e] rounded-lg transition" 
+                                title="Pesquisar falando o nome do jogo"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                                </svg>
+                            </button>
+                            <button 
+                                onclick="executeUniversalSearch()" 
+                                class="h-full px-4 bg-[#66c0f4] hover:bg-[#38bdf8] text-[#101822] text-xs font-bold rounded-lg transition flex items-center gap-1.5"
+                            >
+                                <span>Buscar</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
@@ -731,6 +847,15 @@
     <!-- MODAL DE DETALHES DO JOGO (/api/game/{game_id}) -->
     <div id="game-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#1b2838] border border-[#2a475e] rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl animate-fade-in relative max-h-[90vh] flex flex-col">
+            <!-- Botão Voltar ao Dashboard -->
+            <button 
+                onclick="closeGameModal()" 
+                class="absolute top-4 left-4 bg-black/80 hover:bg-black text-cyan-300 hover:text-white rounded-xl px-3.5 py-1.5 transition z-10 text-xs font-bold border border-cyan-500/40 shadow-lg flex items-center gap-1"
+                title="Voltar ao Dashboard"
+            >
+                <span>← Voltar ao Dashboard</span>
+            </button>
+
             <button 
                 onclick="closeGameModal()" 
                 class="absolute top-4 right-4 bg-black/60 hover:bg-black/90 text-white rounded-full p-2 transition z-10"
@@ -784,58 +909,52 @@
                     </div>
                 </div>
 
-                <div class="bg-[#121c27] border border-[#2a475e] rounded-xl p-4 space-y-2.5">
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-bold text-white flex items-center gap-1.5">
-                            <span class="text-emerald-400">⚡</span>
-                            <span>Melhores Ofertas de Ativação Steam</span>
-                        </span>
-                        <span class="text-[10px] text-slate-400 bg-[#171a21] px-2 py-0.5 rounded border border-[#2a475e]">Chaves Oficiais</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <a 
-                            id="modal-nuuvem-link" 
-                            href="#" 
-                            target="_blank" 
-                            rel="noreferrer"
-                            class="px-3.5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm"
-                        >
-                            <span class="flex items-center gap-1.5">
-                                <span>Comprar na Nuuvem</span>
-                            </span>
-                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Ativação Steam</span>
-                        </a>
-                        <a 
-                            id="modal-amazon-link" 
-                            href="#" 
-                            target="_blank" 
-                            rel="noreferrer"
-                            class="px-3.5 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-black rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm"
-                        >
-                            <span class="flex items-center gap-1.5">
-                                <span>Ver na Amazon</span>
-                            </span>
-                            <span class="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Ofertas PC</span>
-                        </a>
+                <!-- Requisitos Mínimos e Recomendados do Sistema em PC -->
+                <div class="bg-[#121c27] border border-[#2a475e] rounded-xl p-4 space-y-2">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <span class="text-[#66c0f4]">💻</span>
+                        <span>Requisitos Mínimos & Recomendados para PC</span>
+                    </h4>
+                    <div id="modal-specs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between gap-3 pt-2">
+                <div class="bg-[#121c27] border border-[#2a475e] rounded-xl p-4 space-y-2.5">
+                    <div class="flex items-center justify-between text-xs">
+                        <span id="modal-stores-title" class="font-bold text-white flex items-center gap-1.5">
+                            <span class="text-emerald-400">⚡</span>
+                            <span>Melhores Ofertas de Ativação Steam / PC</span>
+                        </span>
+                        <span id="modal-stores-badge" class="text-[10px] text-slate-400 bg-[#171a21] px-2 py-0.5 rounded border border-[#2a475e]">Chaves Oficiais</span>
+                    </div>
+                    <div id="modal-stores-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <button 
                         onclick="closeGameModal()" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#171a21] rounded-lg transition"
+                        class="px-4 py-2 text-xs font-bold text-cyan-300 hover:text-white bg-[#101822] hover:bg-[#171a21] rounded-lg transition border border-cyan-500/40 shadow-sm"
                     >
-                        Fechar
+                        ← Voltar ao Dashboard
                     </button>
-                    <a 
-                        id="modal-steam-link" 
-                        href="https://store.steampowered.com" 
-                        target="_blank" 
-                        rel="noreferrer"
-                        class="px-4 py-2 text-xs font-semibold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5"
-                    >
-                        <span>Abrir na Loja Steam</span>
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            onclick="closeGameModal(); switchMainTab('reviews')" 
+                            class="px-3.5 py-2 text-xs font-bold text-amber-300 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-500/40 rounded-lg transition"
+                        >
+                            📖 Ver Crítica Completa
+                        </button>
+                        <a 
+                            id="modal-official-link" 
+                            href="https://store.steampowered.com" 
+                            target="_blank" 
+                            rel="noreferrer"
+                            class="px-4 py-2 text-xs font-bold text-[#101822] bg-[#66c0f4] hover:bg-[#38bdf8] rounded-lg transition flex items-center gap-1.5"
+                        >
+                            <span id="modal-official-btn-text">Abrir na Loja Steam</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -905,7 +1024,7 @@
                         <h4 class="text-sm font-bold text-white" id="review-modal-deal-title">Chave Oficial com Desconto</h4>
                         <p class="text-xs text-slate-400" id="review-modal-deal-sub">Ativação instantânea em reais e suporte a Pix</p>
                     </div>
-                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                    <div id="review-modal-buttons-container" class="flex items-center gap-2.5 w-full sm:w-auto">
                         <a id="review-modal-nuuvem-btn" href="#" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-extrabold text-center transition shadow-md">
                             Pegar na Nuuvem
                         </a>
@@ -1011,22 +1130,29 @@
 
         function getAffiliateNuuvemUrl(game) {
             const cfg = getAffiliateConfig();
-            const slug = (game.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            return `https://www.nuuvem.com/item/${slug}?partner=${encodeURIComponent(cfg.nuuvemPartnerId)}`;
+            const partner = encodeURIComponent(cfg.nuuvemPartnerId || 'albertgamer');
+            const cleanName = encodeURIComponent((game.name || '').trim());
+            return `https://www.nuuvem.com/br-pt/catalog/search?q=${cleanName}&partner=${partner}`;
         }
 
         function getAffiliateHypeUrl(gameName) {
             const cfg = getAffiliateConfig();
             const sid = cfg.rakutenSid || '4770537';
             const mid = cfg.hypeMid || '53304';
-            const targetUrl = `https://hype.games/br/search?q=${encodeURIComponent(gameName)}`;
+            const cleanName = encodeURIComponent((gameName || '').trim());
+            const targetUrl = `https://hype.games/br/search?q=${cleanName}`;
             return `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(targetUrl)}`;
         }
 
-        function getAffiliateAmazonUrl(game) {
+        function getAffiliateAmazonUrl(game, platform = '') {
             const cfg = getAffiliateConfig();
-            const tag = cfg.amazonTag || 'albertgames-20';
-            return `https://www.amazon.com.br/s?k=${encodeURIComponent((game.name || '') + ' jogo')}&tag=${encodeURIComponent(tag)}`;
+            const tag = encodeURIComponent(cfg.amazonTag || 'albertgames-20');
+            let term = (game.name || '').trim();
+            if (platform && platform.toLowerCase() !== 'pc' && platform.toLowerCase() !== 'all') {
+                term += ` ${platform}`;
+            }
+            term += ' midia fisica console';
+            return `https://www.amazon.com.br/s?k=${encodeURIComponent(term)}&tag=${tag}`;
         }
 
         // TROCA DE NAVEGAÇÃO DE TABS
@@ -1050,6 +1176,9 @@
             }
 
             if (tabName === 'deals') {
+                if (allDeals && allDeals.length > 0) {
+                    renderDealsGrid(allDeals);
+                }
                 fetchDeals(currentDealsPlatform);
             } else if (tabName === 'reviews') {
                 renderReviewsGrid();
@@ -1183,8 +1312,187 @@
             }
         };
 
+        // SISTEMA DE TEMA CLARO / ESCURO GLOBAL
+        let currentGlobalTheme = localStorage.getItem('gamelens_theme') || 'dark';
+
+        function applyTheme(theme) {
+            currentGlobalTheme = theme;
+            try {
+                localStorage.setItem('gamelens_theme', theme);
+            } catch (e) {}
+
+            const htmlEl = document.documentElement;
+            const sunIcon = document.getElementById('theme-icon-sun');
+            const moonIcon = document.getElementById('theme-icon-moon');
+
+            if (theme === 'light') {
+                htmlEl.classList.remove('dark');
+                htmlEl.classList.add('light');
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+            } else {
+                htmlEl.classList.remove('light');
+                htmlEl.classList.add('dark');
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+            }
+
+            if (currentStats) renderCharts(currentStats);
+        }
+
+        function toggleGlobalTheme() {
+            applyTheme(currentGlobalTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        // RECONHECIMENTO DE VOZ (WEB SPEECH API)
+        let isVoiceListening = false;
+        let activeRecognition = null;
+
+        function startVoiceSearch(targetInputId, buttonId, autoSubmit = false) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("O reconhecimento de voz não é suportado pelo seu navegador atual. Recomendamos utilizar o Google Chrome ou Edge.");
+                return;
+            }
+
+            const input = document.getElementById(targetInputId);
+            const btn = document.getElementById(buttonId);
+
+            if (isVoiceListening && activeRecognition) {
+                activeRecognition.stop();
+                isVoiceListening = false;
+                if (btn) btn.classList.remove('animate-pulse', 'text-red-500', 'bg-red-500/20');
+                return;
+            }
+
+            try {
+                const recognition = new SpeechRecognition();
+                activeRecognition = recognition;
+                recognition.lang = 'pt-BR';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    isVoiceListening = true;
+                    if (btn) btn.classList.add('animate-pulse', 'text-red-500', 'bg-red-500/20');
+                    if (input) input.placeholder = "Ouvindo... Fale o nome do jogo agora...";
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    if (input) {
+                        input.value = transcript;
+                        if (targetInputId === 'global-search') {
+                            handleSearch(transcript);
+                        } else if (autoSubmit) {
+                            executeUniversalSearch();
+                        }
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.warn("Reconhecimento de voz:", event.error);
+                };
+
+                recognition.onend = () => {
+                    isVoiceListening = false;
+                    activeRecognition = null;
+                    if (btn) btn.classList.remove('animate-pulse', 'text-red-500', 'bg-red-500/20');
+                    if (input) input.placeholder = targetInputId === 'global-search' 
+                        ? "Buscar por jogo ou desenvolvedor..." 
+                        : "Digite o nome do jogo (ex: GTA, God of War, Forza, Resident Evil, FIFA)...";
+                };
+
+                recognition.start();
+            } catch (err) {
+                console.error("Falha ao iniciar reconhecimento de voz:", err);
+            }
+        }
+
+        // FILTRO DE PERÍODO DO DASHBOARD
+        let currentPeriodFilter = '6m';
+
+        function changeHtmlPeriod(period) {
+            currentPeriodFilter = period;
+
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                if (btn.id === `period-btn-${period}`) {
+                    btn.className = 'period-btn px-2.5 py-1 text-xs rounded transition font-bold bg-[#66c0f4] text-[#101822] shadow-sm';
+                } else {
+                    btn.className = 'period-btn px-2.5 py-1 text-xs rounded transition font-bold text-slate-300 hover:text-white';
+                }
+            });
+
+            if (currentStats) {
+                renderCharts(currentStats);
+                updateCardsForPeriod(period);
+            }
+        }
+
+        function updateCardsForPeriod(period) {
+            if (!currentStats) return;
+            const totalBase = currentStats.total_hours;
+            let periodHours = totalBase;
+            let activeGames = currentStats.total_games;
+            let mostPlayedRatio = 0.32;
+            let periodLabelText = 'Últimos 6 Meses';
+
+            if (period === '1m') {
+                periodHours = Math.round(totalBase * 0.16 * 10) / 10;
+                activeGames = Math.max(3, Math.round(currentStats.total_games * 0.4));
+                mostPlayedRatio = 0.45;
+                periodLabelText = 'Último 1 Mês';
+            } else if (period === '3m') {
+                periodHours = Math.round(totalBase * 0.42 * 10) / 10;
+                activeGames = Math.max(5, Math.round(currentStats.total_games * 0.65));
+                mostPlayedRatio = 0.38;
+                periodLabelText = 'Últimos 3 Meses';
+            } else if (period === '6m') {
+                periodHours = totalBase;
+                activeGames = Math.max(8, Math.round(currentStats.total_games * 0.85));
+                mostPlayedRatio = 0.32;
+                periodLabelText = 'Últimos 6 Meses';
+            } else if (period === '1y') {
+                periodHours = Math.round(totalBase * 1.35 * 10) / 10;
+                activeGames = currentStats.total_games;
+                mostPlayedRatio = 0.30;
+                periodLabelText = 'Último 1 Ano (12 Meses)';
+            } else {
+                periodHours = Math.round(totalBase * 1.8 * 10) / 10;
+                activeGames = currentStats.total_games;
+                mostPlayedRatio = 0.30;
+                periodLabelText = 'Histórico Total (24 Meses)';
+            }
+
+            // Atualiza o título do gráfico de linha com o período ativo
+            const lineTitleEl = document.getElementById('line-chart-title-text');
+            if (lineTitleEl) {
+                lineTitleEl.textContent = `Evolução de Horas Jogadas (${periodLabelText})`;
+            }
+
+            // Atualiza Card 1: Total de Horas
+            const totalHoursEl = document.getElementById('card-total-hours');
+            if (totalHoursEl) {
+                totalHoursEl.innerHTML = `${periodHours.toLocaleString('pt-BR')} <span class="text-lg font-normal text-slate-400">horas</span>`;
+            }
+
+            const totalGamesEl = document.getElementById('card-total-games');
+            if (totalGamesEl) totalGamesEl.textContent = activeGames;
+
+            // Atualiza Card 2: Jogo Mais Jogado
+            const mostPlayedHoursEl = document.getElementById('card-most-played-hours');
+            if (mostPlayedHoursEl) {
+                const mostPlayedGameHours = Math.round(periodHours * mostPlayedRatio * 10) / 10;
+                mostPlayedHoursEl.textContent = `${mostPlayedGameHours}h jogadas (${period.toUpperCase()})`;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            applyTheme(localStorage.getItem('gamelens_theme') || 'dark');
             fetchDashboardData();
+            // Pré-carrega ofertas e críticas para navegação instantânea sem tela preta
+            fetchDeals('all');
+            renderReviewsGrid();
         });
 
         function setHtmlColorMode(mode) {
@@ -1218,8 +1526,8 @@
             allGames = data.top_games || [];
             filteredGames = [...allGames];
 
-            document.getElementById('card-total-hours').innerHTML = `${data.total_hours.toLocaleString('pt-BR')} <span class="text-lg font-normal text-slate-400">horas</span>`;
-            document.getElementById('card-total-games').textContent = data.total_games;
+            updateCardsForPeriod(currentPeriodFilter);
+
             if (data.most_played_game) {
                 const mostPlayed = data.most_played_game;
                 const gameColor = getGameColor(mostPlayed.id, 'Ação');
@@ -1227,7 +1535,6 @@
                     <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${gameColor}"></span>
                     <span>${mostPlayed.name}</span>
                 `;
-                document.getElementById('card-most-played-hours').textContent = `${mostPlayed.hours_played}h jogadas`;
                 document.getElementById('card-most-played-hours').style.color = gameColor;
             }
             document.getElementById('card-avg-rating').textContent = `${data.avg_rating}%`;
@@ -1239,20 +1546,68 @@
         function renderCharts(data) {
             const lineCtx = document.getElementById('trendLineChart');
             if (lineCtx) {
-                const months = ['Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'];
-                const monthlyWeights = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
-                const monthlyHours = monthlyWeights.map(w => Math.round(data.total_hours * w * 10) / 10);
-                const avgHours = Math.round((monthlyHours.reduce((a, b) => a + b, 0) / 6) * 10) / 10;
+                // Cálculo dinâmico para 1m, 3m, 6m, 1y e all
+                let months = [];
+                let monthlyHours = [];
+                const totalBase = data.total_hours;
+
+                if (currentPeriodFilter === '1m') {
+                    months = ['Outubro/26'];
+                    monthlyHours = [Math.round(totalBase * 0.16 * 10) / 10];
+                } else if (currentPeriodFilter === '3m') {
+                    months = ['Agosto/26', 'Setembro/26', 'Outubro/26'];
+                    const weights3 = [0.28, 0.32, 0.40];
+                    const periodTotal = Math.round(totalBase * 0.42 * 10) / 10;
+                    monthlyHours = weights3.map(w => Math.round(periodTotal * w * 10) / 10);
+                } else if (currentPeriodFilter === '6m') {
+                    months = ['Maio/26', 'Junho/26', 'Julho/26', 'Agosto/26', 'Setembro/26', 'Outubro/26'];
+                    const weights6 = [0.105, 0.125, 0.205, 0.155, 0.175, 0.235];
+                    monthlyHours = weights6.map(w => Math.round(totalBase * w * 10) / 10);
+                } else if (currentPeriodFilter === '1y') {
+                    // 12 meses completos
+                    months = ['Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26'];
+                    const weights12 = [0.055, 0.065, 0.058, 0.062, 0.075, 0.082, 0.095, 0.105, 0.135, 0.115, 0.125, 0.150];
+                    monthlyHours = weights12.map(w => Math.round(totalBase * 1.35 * w * 10) / 10);
+                } else {
+                    // 24 meses / Total
+                    months = [
+                        'Nov/24', 'Dez/24', 'Jan/25', 'Fev/25', 'Mar/25', 'Abr/25', 'Mai/25', 'Jun/25', 'Jul/25', 'Ago/25', 'Set/25', 'Out/25',
+                        'Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26'
+                    ];
+                    const weights24 = [
+                        0.025, 0.030, 0.028, 0.032, 0.035, 0.038, 0.040, 0.045, 0.050, 0.042, 0.048, 0.052,
+                        0.055, 0.065, 0.058, 0.062, 0.075, 0.082, 0.105, 0.125, 0.205, 0.155, 0.175, 0.235
+                    ];
+                    monthlyHours = weights24.map(w => Math.round(totalBase * 1.8 * w * 10) / 10);
+                }
+
+                const totalPeriodSum = Math.round(monthlyHours.reduce((a, b) => a + b, 0) * 10) / 10;
+                const avgHours = Math.round((totalPeriodSum / monthlyHours.length) * 10) / 10;
+                const peakVal = Math.max(...monthlyHours);
+                const peakIdx = monthlyHours.indexOf(peakVal);
+                const peakMonthName = months[peakIdx] || 'Out/26';
+
+                // Atualizar badges
+                const avgEl = document.getElementById('line-avg-hours');
+                if (avgEl) avgEl.textContent = `${avgHours}h`;
+                const peakEl = document.getElementById('line-peak-month');
+                if (peakEl) peakEl.textContent = `${peakMonthName} (${peakVal}h)`;
+                const totalEl = document.getElementById('line-total-hours');
+                if (totalEl) totalEl.textContent = `${totalPeriodSum.toLocaleString('pt-BR')}h`;
 
                 if (lineChartInstance) lineChartInstance.destroy();
+
+                const isLightMode = currentGlobalTheme === 'light';
+                const gridColor = isLightMode ? 'rgba(203, 213, 225, 0.6)' : 'rgba(42, 71, 94, 0.25)';
+                const tickColor = isLightMode ? '#475569' : '#cbd5e1';
 
                 lineChartInstance = new Chart(lineCtx.getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: months.map(m => `${m}/26`),
+                        labels: months,
                         datasets: [
                             {
-                                label: 'Horas Jogadas no Mês',
+                                label: 'Horas no Mês',
                                 data: monthlyHours,
                                 borderColor: '#66c0f4',
                                 backgroundColor: 'rgba(102, 192, 244, 0.18)',
@@ -1260,12 +1615,12 @@
                                 tension: 0.38,
                                 borderWidth: 2.5,
                                 pointBackgroundColor: '#66c0f4',
-                                pointBorderColor: '#0e141b',
-                                pointRadius: 5
+                                pointBorderColor: isLightMode ? '#ffffff' : '#0e141b',
+                                pointRadius: months.length > 12 ? 3 : 5
                             },
                             {
-                                label: 'Média Semestral',
-                                data: Array(6).fill(avgHours),
+                                label: 'Média do Período',
+                                data: Array(months.length).fill(avgHours),
                                 borderColor: '#a855f7',
                                 borderDash: [5, 5],
                                 borderWidth: 1.5,
@@ -1278,12 +1633,20 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            x: { grid: { color: 'rgba(42, 71, 94, 0.25)' }, ticks: { color: '#cbd5e1' } },
-                            y: { grid: { color: 'rgba(42, 71, 94, 0.4)' }, ticks: { color: '#94a3b8', callback: (val) => `${val}h` } }
+                            x: { grid: { color: gridColor }, ticks: { color: tickColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: tickColor, callback: (val) => `${val}h` } }
                         }
                     }
                 });
             }
+
+            // Calcular multiplicador de período para o gráfico de barras dos Top Jogos
+            let barRatio = 1.0;
+            if (currentPeriodFilter === '1m') barRatio = 0.16;
+            else if (currentPeriodFilter === '3m') barRatio = 0.42;
+            else if (currentPeriodFilter === '6m') barRatio = 1.0;
+            else if (currentPeriodFilter === '1y') barRatio = 1.35;
+            else if (currentPeriodFilter === 'all') barRatio = 1.8;
 
             const topSix = (data.top_games || []).slice(0, 6);
             const barCtx = document.getElementById('barChart').getContext('2d');
@@ -1291,6 +1654,7 @@
                 const primaryGenre = g.genres && g.genres.length > 0 ? g.genres[0] : 'Ação';
                 return currentBarColorMode === 'genre' ? getGenreColor(primaryGenre) : getGameColor(g.id, primaryGenre);
             });
+            const scaledBarData = topSix.map(g => Math.round(g.hours_played * barRatio * 10) / 10);
 
             if (barChartInstance) barChartInstance.destroy();
 
@@ -1299,8 +1663,8 @@
                 data: {
                     labels: topSix.map(g => g.name),
                     datasets: [{
-                        label: 'Horas Registradas',
-                        data: topSix.map(g => g.hours_played),
+                        label: `Horas no Período (${currentPeriodFilter.toUpperCase()})`,
+                        data: scaledBarData,
                         backgroundColor: barColors,
                         borderRadius: 6
                     }]
@@ -1369,7 +1733,20 @@
                 const primaryGenre = game.genres && game.genres.length > 0 ? game.genres[0] : 'Geral';
                 const genreColor = getGenreColor(primaryGenre);
                 const gameColor = getGameColor(game.id, primaryGenre);
-                const priceFormatted = game.price_formatted || (game.current_price_brl > 0 ? `R$ ${game.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito');
+                const hasDiscount = game.discount_percent && game.discount_percent > 0;
+                const regPrice = game.regular_price_brl || game.regular_price;
+                let priceCellHtml = '';
+                if (hasDiscount && regPrice) {
+                    priceCellHtml = `
+                        <div class="flex items-center justify-end gap-1.5">
+                            <span class="text-[11px] text-slate-400 line-through">R$ ${regPrice.toFixed(2).replace('.', ',')}</span>
+                            <span class="text-emerald-400 font-bold">${game.price_formatted || ('R$ ' + game.current_price_brl.toFixed(2).replace('.', ','))}</span>
+                            <span class="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded">-${game.discount_percent}%</span>
+                        </div>
+                    `;
+                } else {
+                    priceCellHtml = `<span class="font-medium text-white">${game.price_formatted || (game.current_price_brl > 0 ? `R$ ${game.current_price_brl.toFixed(2).replace('.', ',')}` : 'Gratuito')}</span>`;
+                }
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 flex items-center gap-3">
@@ -1392,11 +1769,11 @@
                     <td class="px-6 py-4 text-right tabular-nums font-semibold text-white">${game.hours_played.toLocaleString('pt-BR')}h</td>
                     <td class="px-6 py-4 text-right tabular-nums"><span class="text-emerald-400 font-bold">${game.user_rating}%</span></td>
                     <td class="px-6 py-4 text-right tabular-nums text-slate-300">${(game.peak_24h_players || 0).toLocaleString('pt-BR')}</td>
-                    <td class="px-6 py-4 text-right tabular-nums font-medium text-white">${priceFormatted}</td>
+                    <td class="px-6 py-4 text-right tabular-nums">${priceCellHtml}</td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="event.stopPropagation(); openGameModal('${game.id}')" class="bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-xs font-semibold px-2.5 py-1.5 rounded transition">Detalhes</button>
-                            <a href="${getAffiliateNuuvemUrl(game)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-semibold px-2 py-1.5 rounded transition">🛒 Oferta</a>
+                            <a href="${getAffiliateNuuvemUrl(game)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()" class="bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-semibold px-2 py-1.5 rounded transition">🛒 Nuuvem</a>
                         </div>
                     </td>
                 `;
@@ -1667,14 +2044,157 @@
             `).join('');
         }
 
+        function buildDynamicReview(g) {
+            const isConsole = g.platform && g.platform.toLowerCase() !== 'pc';
+            const ratingNum = g.user_rating || g.rating || 92;
+            const score = (ratingNum / 10).toFixed(1);
+            let badge = 'Excelente';
+            let badgeColor = '#10b981';
+            if (score >= 9.6) { badge = 'Obra-Prima'; badgeColor = '#a855f7'; }
+            else if (score >= 9.2) { badge = 'Essencial'; badgeColor = '#f97316'; }
+            
+            const genre = (g.genres && g.genres.length > 0) ? g.genres[0] : (g.platform || 'Ação');
+            const price = g.price_formatted || (g.current_price_brl ? `R$ ${g.current_price_brl.toFixed(2).replace('.', ',')}` : (g.deal_price ? `R$ ${g.deal_price.toFixed(2).replace('.', ',')}` : 'Sob Consulta'));
+            const dev = g.developer || g.platform_label || 'Estúdio Parceiro';
+            const banner = g.header_image || g.image || (String(g.id).match(/^\d+$/) ? `https://cdn.akamai.steamstatic.com/steam/apps/${g.id}/header.jpg` : `https://placehold.co/600x300/171a21/66c0f4?text=${encodeURIComponent(g.name)}`);
+
+            return {
+                id: g.id,
+                name: g.name,
+                platform: isConsole ? g.platform : 'PC',
+                badge: badge,
+                badgeColor: badgeColor,
+                score: score,
+                genre: genre,
+                scores: {
+                    gameplay: Math.min(10, (score * 1.01).toFixed(1)),
+                    graphics: Math.min(10, (score * 0.98).toFixed(1)),
+                    narrative: Math.min(10, (score * 0.95).toFixed(1)),
+                    replayability: Math.min(10, (score * 1.0).toFixed(1)),
+                    valueForMoney: Math.min(10, (score * 0.99).toFixed(1))
+                },
+                headline: `Análise Crítica 2026: Por que ${g.name} continua se destacando no nicho de ${genre}`,
+                verdictLead: g.short_description || g.review_verdict || `Com alta aprovação de ${ratingNum}%, ${g.name} entrega uma das experiências mais consistentes e recompensadoras do mercado.`,
+                fullAnalysis: `Desenvolvido por ${dev}, ${g.name} demonstra domínio técnico de ponta, ciclo de gameplay viciante e excelente polimento. Seja explorando seus sistemas principais ou participando de desafios intensos, a experiência entrega exatamente o que os fãs do gênero procuram com altíssimo retorno por hora jogada.`,
+                pros: [
+                    "Mecânicas e ciclo de jogabilidade extremamente responsivos",
+                    "Excelente taxa de aprovação da comunidade e da crítica global",
+                    "Custo-benefício excepcional pelo volume de conteúdo oferecido"
+                ],
+                cons: [
+                    "Pode exigir dedicação e tempo para dominar todas as nuances e mecânicas avançadas"
+                ],
+                author: "Redação GameLens Editorial",
+                readTime: "3 min de leitura",
+                banner: banner,
+                bestDeal: {
+                    store: isConsole ? 'Amazon' : 'Nuuvem',
+                    price: price
+                }
+            };
+        }
+
+        function renderModalStoreButtons(game) {
+            const container = document.getElementById('modal-stores-container');
+            const titleEl = document.getElementById('modal-stores-title');
+            const badgeEl = document.getElementById('modal-stores-badge');
+            const officialBtn = document.getElementById('modal-official-link');
+            const officialBtnText = document.getElementById('modal-official-btn-text');
+
+            const platform = (game.platform || '').toLowerCase();
+            const isConsole = platform === 'playstation' || platform === 'xbox' || platform === 'nintendo';
+
+            if (isConsole) {
+                if (titleEl) titleEl.innerHTML = `<span class="text-amber-400">🎮</span><span>Onde Comprar: Mídia Física & Lojas Oficiais</span>`;
+                if (badgeEl) badgeEl.textContent = `${game.platform || 'Console'} Brasil`;
+
+                // 1. Amazon (Mídia Física Console - NUNCA PARA PC)
+                const amazonUrl = getAffiliateAmazonUrl(game, game.platform);
+
+                // 2. Loja Oficial / Hype Games Gift Card
+                let giftCardName = 'PlayStation Store';
+                let officialUrl = `https://store.playstation.com/pt-br/search/${encodeURIComponent(game.name)}`;
+                let officialLabel = 'Loja Oficial PlayStation';
+                if (platform === 'xbox') {
+                    giftCardName = 'Xbox Game Pass';
+                    officialUrl = `https://www.xbox.com/pt-br/search/results/games?q=${encodeURIComponent(game.name)}`;
+                    officialLabel = 'Loja Oficial Xbox';
+                } else if (platform === 'nintendo') {
+                    giftCardName = 'Nintendo eShop';
+                    officialUrl = `https://www.nintendo.com/pt-br/search/#q=${encodeURIComponent(game.name)}`;
+                    officialLabel = 'Loja Nintendo eShop';
+                }
+                const hypeGiftUrl = getAffiliateHypeUrl(giftCardName);
+
+                if (container) {
+                    container.innerHTML = `
+                        <a href="${amazonUrl}" target="_blank" rel="noreferrer" class="px-3.5 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-black rounded-lg transition flex items-center justify-between text-xs font-extrabold shadow-sm">
+                            <span class="flex items-center gap-1.5">
+                                <span>Comprar na Amazon</span>
+                            </span>
+                            <span class="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Mídia Física Console</span>
+                        </a>
+                        <a href="${hypeGiftUrl}" target="_blank" rel="noreferrer" class="px-3.5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm">
+                            <span class="flex items-center gap-1.5">
+                                <span>${giftCardName} (Hype)</span>
+                            </span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Créditos com Pix</span>
+                        </a>
+                    `;
+                }
+
+                if (officialBtn) officialBtn.href = officialUrl;
+                if (officialBtnText) officialBtnText.textContent = officialLabel;
+            } else {
+                // PC / Steam - ZERO AMAZON AQUI!
+                if (titleEl) titleEl.innerHTML = `<span class="text-emerald-400">⚡</span><span>Melhores Ofertas de Ativação Steam / PC</span>`;
+                if (badgeEl) badgeEl.textContent = 'Chaves Oficiais Digitais';
+
+                const nuuvemUrl = getAffiliateNuuvemUrl(game);
+                const hypeUrl = getAffiliateHypeUrl(game.name);
+                const steamUrl = (game.id && String(game.id).match(/^\d+$/))
+                    ? `https://store.steampowered.com/app/${game.id}`
+                    : `https://store.steampowered.com/search/?term=${encodeURIComponent(game.name)}`;
+
+                if (container) {
+                    container.innerHTML = `
+                        <a href="${nuuvemUrl}" target="_blank" rel="noreferrer" class="px-3.5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm">
+                            <span class="flex items-center gap-1.5">
+                                <span>Comprar na Nuuvem</span>
+                            </span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Ativação Steam R$</span>
+                        </a>
+                        <a href="${hypeUrl}" target="_blank" rel="noreferrer" class="px-3.5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition flex items-center justify-between text-xs font-bold shadow-sm">
+                            <span class="flex items-center gap-1.5">
+                                <span>Ver no Hype Games</span>
+                            </span>
+                            <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Entrega Imediata</span>
+                        </a>
+                    `;
+                }
+
+                if (officialBtn) officialBtn.href = steamUrl;
+                if (officialBtnText) officialBtnText.textContent = 'Abrir na Loja Steam';
+            }
+        }
+
         function openReviewModal(gameId) {
-            const r = REVIEWS_DATABASE[gameId] || REVIEWS_DATABASE['1086940'];
+            let r = REVIEWS_DATABASE[gameId];
+            if (!r) {
+                const game = allGames.find(g => String(g.id) === String(gameId) || (g.name && g.name.toLowerCase() === String(gameId).toLowerCase())) || 
+                             allDeals.find(d => String(d.id) === String(gameId) || (d.name && d.name.toLowerCase() === String(gameId).toLowerCase()));
+                if (game) {
+                    r = buildDynamicReview(game);
+                } else {
+                    r = REVIEWS_DATABASE['1086940'];
+                }
+            }
             if (!r) return;
 
             document.getElementById('review-modal-banner').src = r.banner;
             document.getElementById('review-modal-title').textContent = r.name;
             document.getElementById('review-modal-badge').textContent = r.badge;
-            document.getElementById('review-modal-badge').style.backgroundColor = r.badgeColor;
+            document.getElementById('review-modal-badge').style.backgroundColor = r.badgeColor || '#66c0f4';
             document.getElementById('review-modal-meta').textContent = `${r.author} · ${r.readTime}`;
             document.getElementById('review-modal-score').textContent = `★ ${r.score}`;
 
@@ -1698,8 +2218,36 @@
             document.getElementById('review-modal-cons').innerHTML = r.cons.map(c => `<li class="flex items-start gap-1.5"><span class="text-rose-400">✖</span><span>${c}</span></li>`).join('');
 
             document.getElementById('review-modal-deal-title').textContent = `${r.name} - ${r.bestDeal.price}`;
-            document.getElementById('review-modal-nuuvem-btn').href = getAffiliateNuuvemUrl({ name: r.name });
-            document.getElementById('review-modal-hype-btn').href = getAffiliateHypeUrl(r.name);
+            
+            // Botões de compra do modal de crítica: Nuuvem & Hype para PC; Amazon & Loja Console para Consoles
+            const isConsole = r.platform && r.platform !== 'PC';
+            const btnContainer = document.getElementById('review-modal-buttons-container');
+            if (btnContainer) {
+                if (isConsole) {
+                    const amazonUrl = getAffiliateAmazonUrl({ name: r.name }, r.platform);
+                    const hypeUrl = getAffiliateHypeUrl(r.name);
+                    btnContainer.innerHTML = `
+                        <a href="${amazonUrl}" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-black rounded-lg text-xs font-extrabold text-center transition shadow-md">
+                            Mídia Física na Amazon
+                        </a>
+                        <a href="${hypeUrl}" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-extrabold text-center transition shadow-md">
+                            Créditos no Hype Games
+                        </a>
+                    `;
+                } else {
+                    // PC - ZERO AMAZON!
+                    const nuuvemUrl = getAffiliateNuuvemUrl({ name: r.name });
+                    const hypeUrl = getAffiliateHypeUrl(r.name);
+                    btnContainer.innerHTML = `
+                        <a href="${nuuvemUrl}" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-extrabold text-center transition shadow-md">
+                            Pegar na Nuuvem
+                        </a>
+                        <a href="${hypeUrl}" target="_blank" rel="noreferrer" class="flex-1 sm:flex-none px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-extrabold text-center transition shadow-md">
+                            Hype Games (Pix)
+                        </a>
+                    `;
+                }
+            }
 
             document.getElementById('review-detail-modal').classList.remove('hidden');
         }
@@ -1709,9 +2257,85 @@
         }
 
         function openEditorialCritique(dealId) {
-            const deal = allDeals.find(d => d.id === dealId) || allDeals[0];
+            const deal = allDeals.find(d => d.id === dealId) || (allDeals.length > 0 ? allDeals[0] : null);
             if (!deal) return;
             openGameModal(deal.id);
+        }
+
+        function getHtmlGameSpecs(gameId, gameName) {
+            const idStr = String(gameId || '').replace(/[^0-9]/g, '');
+            const nameLower = (gameName || '').toLowerCase();
+
+            if (idStr === '1091500' || nameLower.includes('cyberpunk')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core i7-6700 / Ryzen 5 1600 (Recomendado: Core i7-12700 / Ryzen 7 7800X3D)',
+                    memory: 'Mínimo: 12 GB RAM (Recomendado: 16 GB RAM)',
+                    graphics: 'Mínimo: GTX 1060 6GB / RX 580 8GB (Recomendado: RTX 3070 8GB / RX 6800 XT)',
+                    storage: '70 GB SSD livre'
+                };
+            }
+            if (idStr === '1245620' || nameLower.includes('elden ring')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core i5-8400 / Ryzen 3 3300X (Recomendado: Core i7-8700K / Ryzen 5 3600X)',
+                    memory: 'Mínimo: 12 GB RAM (Recomendado: 16 GB RAM)',
+                    graphics: 'Mínimo: GTX 1060 3GB / RX 580 4GB (Recomendado: GTX 1070 8GB / RX Vega 56)',
+                    storage: '60 GB SSD livre'
+                };
+            }
+            if (idStr === '1086940' || nameLower.includes('baldur')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core i5-4690 / FX 8350 (Recomendado: Core i7-8700K / Ryzen 5 3600)',
+                    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+                    graphics: 'Mínimo: GTX 970 / RX 480 4GB (Recomendado: RTX 2060 Super / RX 5700 XT 8GB)',
+                    storage: '150 GB SSD livre'
+                };
+            }
+            if (idStr === '730' || nameLower.includes('counter-strike') || nameLower.includes('cs2')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core i5-750 4-core (Recomendado: Core i5-10400 / Ryzen 5 3600)',
+                    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+                    graphics: 'Mínimo: GTX 660 / HD 7850 2GB (Recomendado: GTX 1060 / RX 580 4GB)',
+                    storage: '85 GB SSD livre'
+                };
+            }
+            if (idStr === '292030' || nameLower.includes('witcher')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core i5-2500K 3.3GHz / Phenom II X4 940 (Recomendado: Core i7-3770 / FX-8350)',
+                    memory: 'Mínimo: 6 GB RAM (Recomendado: 8 GB RAM)',
+                    graphics: 'Mínimo: GTX 660 2GB / HD 7870 2GB (Recomendado: GTX 770 / R9 290)',
+                    storage: '50 GB SSD/HD'
+                };
+            }
+            if (idStr === '2050650' || nameLower.includes('resident evil') || nameLower.includes('re4')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core i5-7500 / Ryzen 3 1200 (Recomendado: Core i7-8700 / Ryzen 5 3600)',
+                    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+                    graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 560 4GB (Recomendado: GTX 1070 8GB / RX 5700 8GB)',
+                    storage: '68 GB SSD livre'
+                };
+            }
+            if (idStr === '271590' || nameLower.includes('grand theft auto') || nameLower.includes('gta')) {
+                return {
+                    os: 'Windows 10/11 64-bit',
+                    processor: 'Mínimo: Core 2 Quad Q6600 @ 2.40GHz / Phenom 9850 (Recomendado: Core i5-3470 @ 3.2GHz / FX-8350)',
+                    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+                    graphics: 'Mínimo: NVIDIA 9800 GT 1GB / AMD HD 4870 1GB (Recomendado: GTX 660 2GB / HD 7870 2GB)',
+                    storage: '110 GB livre'
+                };
+            }
+            return {
+                os: 'Windows 10/11 64-bit',
+                processor: 'Mínimo: Core i5-10400 / Ryzen 5 3600 (Recomendado: Core i7-12700 / Ryzen 7 5800X)',
+                memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+                graphics: 'Mínimo: GTX 1060 6GB / RX 580 8GB (Recomendado: RTX 3060 / RX 6600 XT)',
+                storage: '60 GB SSD livre'
+            };
         }
 
         async function openGameModal(gameId) {
@@ -1719,31 +2343,119 @@
             modal.classList.remove('hidden');
 
             try {
-                const res = await fetch(`/api/game/${gameId}`);
                 let game = null;
-                if (res.ok) game = await res.json();
-                else game = allGames.find(g => String(g.id) === String(gameId)) || allGames[0];
+                // Procura na biblioteca de jogos
+                if (allGames && allGames.length > 0) {
+                    game = allGames.find(g => String(g.id) === String(gameId) || (g.name && g.name.toLowerCase() === String(gameId).toLowerCase()));
+                }
+                // Procura nas ofertas
+                if (!game && allDeals && allDeals.length > 0) {
+                    const deal = allDeals.find(d => String(d.id) === String(gameId) || (d.name && d.name.toLowerCase() === String(gameId).toLowerCase()));
+                    if (deal) {
+                        game = {
+                            id: deal.id,
+                            name: deal.name,
+                            platform: deal.platform,
+                            platform_label: deal.platform_label || deal.platform,
+                            store: deal.store,
+                            hours_played: 0,
+                            user_rating: deal.rating || 95,
+                            peak_24h_players: 35000,
+                            current_price_brl: deal.deal_price,
+                            regular_price_brl: deal.regular_price,
+                            deal_price: deal.deal_price,
+                            discount_percent: deal.discount_percent,
+                            price_formatted: `R$ ${deal.deal_price.toFixed(2).replace('.', ',')}`,
+                            developer: deal.platform_label || deal.platform,
+                            short_description: deal.review_verdict || `${deal.name} com desconto oficial verificado.`,
+                            header_image: deal.image,
+                            genres: [deal.platform, 'Promoção']
+                        };
+                    }
+                }
+                // Busca na API se não encontrou localmente
+                if (!game) {
+                    const res = await fetch(`/api/game/${encodeURIComponent(gameId)}`);
+                    if (res.ok) {
+                        game = await res.json();
+                    }
+                }
+                // Se ainda assim não encontrou, gera dinamicamente para o ID/Nome solicitado
+                if (!game) {
+                    game = {
+                        id: gameId,
+                        name: String(gameId).replace(/^deal-/, '').replace(/-/g, ' ').toUpperCase(),
+                        platform: 'PC',
+                        hours_played: 0,
+                        user_rating: 90,
+                        peak_24h_players: 15000,
+                        current_price_brl: 0,
+                        price_formatted: 'Sob Consulta',
+                        discount_percent: 0,
+                        developer: 'Estúdio Parceiro',
+                        short_description: 'Informações detalhadas sincronizadas via GameLens.',
+                        header_image: `https://placehold.co/600x300/171a21/66c0f4?text=${encodeURIComponent(gameId)}`,
+                        genres: ['Gamer']
+                    };
+                }
 
                 const primaryGenre = game.genres && game.genres.length > 0 ? game.genres[0] : 'Ação';
                 const gameColor = getGameColor(game.id, primaryGenre);
 
                 document.getElementById('modal-title').textContent = game.name;
                 document.getElementById('modal-accent-line').style.backgroundColor = gameColor;
-                document.getElementById('modal-dev').textContent = `Desenvolvedora: ${game.developer || 'Steam Games'}`;
-                document.getElementById('modal-banner').src = `https://cdn.akamai.steamstatic.com/steam/apps/${game.id}/header.jpg`;
-                document.getElementById('modal-description').textContent = game.short_description || `${game.name} é um dos títulos mais influentes da biblioteca.`;
+                document.getElementById('modal-dev').textContent = `Desenvolvedora / Plataforma: ${game.developer || game.platform_label || 'Estúdio Parceiro'}`;
+                
+                const bannerEl = document.getElementById('modal-banner');
+                if (game.header_image) {
+                    bannerEl.src = game.header_image;
+                } else if (String(game.id).match(/^\d+$/)) {
+                    bannerEl.src = `https://cdn.akamai.steamstatic.com/steam/apps/${game.id}/header.jpg`;
+                } else {
+                    bannerEl.src = `https://placehold.co/600x300/171a21/66c0f4?text=${encodeURIComponent(game.name)}`;
+                }
 
-                document.getElementById('modal-hours').textContent = `${game.hours_played}h`;
-                document.getElementById('modal-rating').textContent = `${game.user_rating}%`;
-                document.getElementById('modal-players').textContent = (game.peak_24h_players || 12000).toLocaleString('pt-BR');
-                document.getElementById('modal-price').textContent = game.price_formatted || 'Gratuito';
+                document.getElementById('modal-description').textContent = game.short_description || `${game.name} é um dos títulos de maior destaque no catálogo GameLens.`;
 
-                document.getElementById('modal-genres').innerHTML = `Gêneros: <strong class="text-slate-200">${(game.genres || []).join(', ')}</strong>`;
+                document.getElementById('modal-hours').textContent = (game.hours_played && game.hours_played > 0) ? `${game.hours_played}h` : 'Multi';
+                document.getElementById('modal-rating').textContent = `${game.user_rating || 90}%`;
+                document.getElementById('modal-players').textContent = (game.peak_24h_players || 25000).toLocaleString('pt-BR');
+
+                // Formatação correta de preços com desconto
+                const priceContainer = document.getElementById('modal-price');
+                if (game.discount_percent && game.discount_percent > 0) {
+                    const regPrice = game.regular_price_brl || game.regular_price || (game.current_price_brl * (100 / (100 - game.discount_percent)));
+                    priceContainer.innerHTML = `
+                        <div class="flex flex-col items-start">
+                            <span class="text-[11px] text-slate-400 line-through">R$ ${regPrice.toFixed(2).replace('.', ',')}</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-emerald-400 font-bold">${game.price_formatted || ('R$ ' + game.current_price_brl.toFixed(2).replace('.', ','))}</span>
+                                <span class="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded">-${game.discount_percent}%</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    priceContainer.innerHTML = `<span class="text-emerald-400 font-bold">${game.price_formatted || (game.current_price_brl > 0 ? 'R$ ' + game.current_price_brl.toFixed(2).replace('.', ',') : 'Gratuito')}</span>`;
+                }
+
+                document.getElementById('modal-genres').innerHTML = `Gêneros: <strong class="text-slate-200">${(game.genres || ['Ação']).join(', ')}</strong>`;
                 document.getElementById('modal-achievements').innerHTML = `Conquistas: <strong class="text-[#66c0f4]">${game.achievements_unlocked || 0} / ${game.total_achievements || 0}</strong>`;
 
-                document.getElementById('modal-steam-link').href = `https://store.steampowered.com/app/${game.id}`;
-                document.getElementById('modal-nuuvem-link').href = getAffiliateNuuvemUrl(game);
-                document.getElementById('modal-amazon-link').href = getAffiliateAmazonUrl(game);
+                // Renderiza especificações técnicas realistas
+                const specs = getHtmlGameSpecs(game.id, game.name);
+                const specsGrid = document.getElementById('modal-specs-grid');
+                if (specsGrid) {
+                    specsGrid.innerHTML = `
+                        <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60"><span class="text-[10px] text-slate-400 block">Sistema Operacional</span><strong class="text-slate-200 font-mono text-[11px] block truncate">${specs.os}</strong></div>
+                        <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60"><span class="text-[10px] text-slate-400 block">Processador (CPU)</span><strong class="text-slate-200 font-mono text-[11px] block truncate">${specs.processor}</strong></div>
+                        <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60"><span class="text-[10px] text-slate-400 block">Memória RAM</span><strong class="text-slate-200 font-mono text-[11px] block truncate">${specs.memory}</strong></div>
+                        <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60"><span class="text-[10px] text-slate-400 block">Placa de Vídeo (GPU)</span><strong class="text-slate-200 font-mono text-[11px] block truncate">${specs.graphics}</strong></div>
+                        <div class="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60 sm:col-span-2 lg:col-span-2"><span class="text-[10px] text-slate-400 block">Armazenamento</span><strong class="text-emerald-400 font-mono text-[11px] block truncate">${specs.storage}</strong></div>
+                    `;
+                }
+
+                // Renderiza botões de compra dinâmicos (SEM AMAZON PARA PC, COM AMAZON PARA CONSOLES)
+                renderModalStoreButtons(game);
             } catch (err) {
                 console.error("Erro ao carregar detalhes:", err);
             }

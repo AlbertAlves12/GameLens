@@ -342,7 +342,7 @@ export const MonetizationHubView: React.FC<MonetizationHubViewProps> = ({
         <div className="space-y-3">
           <div className="bg-[#171a21] p-3 rounded-xl border border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 block">Link Nuuvem (Chave Oficial Steam):</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 block">Link Nuuvem (Chave Oficial Steam / R$):</span>
               <span className="text-xs font-mono text-slate-300 break-all">{testUrls.nuuvem}</span>
             </div>
             <button
@@ -356,17 +356,41 @@ export const MonetizationHubView: React.FC<MonetizationHubViewProps> = ({
 
           <div className="bg-[#171a21] p-3 rounded-xl border border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">Link Amazon Associados (Busca & Jogos PC):</span>
-              <span className="text-xs font-mono text-slate-300 break-all">{testUrls.amazon}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 block">Link Hype Games (Ativação Oficial / Pix):</span>
+              <span className="text-xs font-mono text-slate-300 break-all">{testUrls.hypeGames}</span>
             </div>
             <button
-              onClick={() => handleCopyLink(testUrls.amazon, 'amazon')}
+              onClick={() => handleCopyLink(testUrls.hypeGames, 'hype')}
               className="px-3 py-1.5 rounded-lg text-xs bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-white font-semibold transition shrink-0 flex items-center gap-1"
             >
-              {copiedUrl === 'amazon' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedUrl === 'amazon' ? 'Copiado!' : 'Copiar'}</span>
+              {copiedUrl === 'hype' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedUrl === 'hype' ? 'Copiado!' : 'Copiar'}</span>
             </button>
           </div>
+
+          {testUrls.amazon ? (
+            <div className="bg-[#171a21] p-3 rounded-xl border border-[#2a475e] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">Link Amazon Associados (Mídia Física Console):</span>
+                <span className="text-xs font-mono text-slate-300 break-all">{testUrls.amazon}</span>
+              </div>
+              <button
+                onClick={() => handleCopyLink(testUrls.amazon || '', 'amazon')}
+                className="px-3 py-1.5 rounded-lg text-xs bg-[#2a475e] hover:bg-[#66c0f4] hover:text-[#101822] text-white font-semibold transition shrink-0 flex items-center gap-1"
+              >
+                {copiedUrl === 'amazon' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedUrl === 'amazon' ? 'Copiado!' : 'Copiar'}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="bg-[#171a21]/60 p-3 rounded-xl border border-dashed border-[#2a475e] flex items-center justify-between text-xs text-slate-400">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+                <span>Amazon Brasil desativada para títulos de PC (reservada exclusivamente para Consoles PlayStation, Xbox e Nintendo em mídia física).</span>
+              </span>
+              <span className="text-[10px] font-bold uppercase text-slate-500 px-2 py-0.5 rounded bg-slate-800">PC Only</span>
+            </div>
+          )}
         </div>
       </div>
 

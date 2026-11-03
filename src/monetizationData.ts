@@ -84,7 +84,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 151.73,
     discount_percent: 34,
     rating: 93,
-    deal_url: "https://www.nuuvem.com/item/elden-ring",
+    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Elden%20Ring&partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
     badge: "Menor Preço em 3 Meses",
     review_verdict: "Obra-prima imperdível do estilo soulslike em mundo aberto. Vale cada centavo."
@@ -99,7 +99,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 99.95,
     discount_percent: 50,
     rating: 89,
-    deal_url: "https://www.nuuvem.com/item/cyberpunk-2077",
+    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Cyberpunk%202077&partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
     badge: "Sucesso de Vendas",
     review_verdict: "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
@@ -144,7 +144,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 79.96,
     discount_percent: 60,
     rating: 96,
-    deal_url: "https://www.nuuvem.com/item/god-of-war",
+    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=God%20of%20War&partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
     badge: "PlayStation no PC -60%",
     review_verdict: "A jornada nórdica de Kratos e Atreus com combate visceral e excelente port de PC."
@@ -353,7 +353,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Santa Monica Studio",
     release_year: 2022,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/item/god-of-war",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=God%20of%20War&partner=albertgamer",
     description: "Vivendo como um homem longe da sombra dos deuses, Kratos deve se adaptar a terras nórdicas desconhecidas e guiar seu filho Atreus em uma jornada visceral.",
     review_verdict: "Port primoroso para PC com suporte a DLSS, FSR e taxas de quadro desbloqueadas. Combate de peso ímpar.",
     headline: "A redenção nórdica do Fantasma de Esparta brilha com maestria nos computadores",
@@ -377,7 +377,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "CD PROJEKT RED",
     release_year: 2020,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/item/cyberpunk-2077",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Cyberpunk%202077&partner=albertgamer",
     description: "Um RPG de ação e aventura em mundo aberto ambientado em Night City, uma megalópole obcecada por poder, glamour e bio-modificações.",
     review_verdict: "A redenção completa. Com o patch 2.0 e a expansão Phantom Liberty com Idris Elba, tornou-se um dos melhores RPGs futuristas já feitos.",
     headline: "Night City ressurge como o ápice do visual ray tracing e narrativa cyberpunk",
@@ -1019,23 +1019,184 @@ export const INITIAL_REVIEWS: Record<string, GameReview> = {
  */
 export function getAffiliateUrls(game: { id: string; name: string }, config: MonetizationSettings) {
   const query = encodeURIComponent(game.name);
-  const slug = game.name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-
   const sid = config.rakutenSid || '4770537';
   const mid = config.hypeMid || '53304';
 
   return {
-    nuuvem: `https://www.nuuvem.com/br-pt/item/${slug}?partner=${encodeURIComponent(config.nuuvemPartnerId || 'steamgamer')}`,
+    nuuvem: `https://www.nuuvem.com/br-pt/catalog/search?q=${query}&partner=${encodeURIComponent(config.nuuvemPartnerId || 'albertgamer')}`,
     hypeGames: `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${query}`)}`,
-    amazon: `https://www.amazon.com.br/s?k=${query}+jogo+pc&tag=${encodeURIComponent(config.amazonAssociateId || 'gamerlens-20')}`,
+    amazon: undefined, // Amazon só vende mídia física e consoles, não possui chaves de ativação PC
     gmg: `https://www.greenmangaming.com/search?query=${query}&tap_a=${encodeURIComponent(config.gmgAffiliateId || 'gmgpartner')}`,
     steam: `https://store.steampowered.com/app/${game.id}/`
   };
+}
+
+/**
+ * Requisitos de Sistema Reais e Específicos por Jogo para PC
+ */
+export const REAL_GAME_SPECS: Record<string, {
+  os: string;
+  processor: string;
+  memory: string;
+  graphics: string;
+  storage: string;
+}> = {
+  '1091500': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i7-6700 / Ryzen 5 1600 (Recomendado: Core i7-12700 / Ryzen 7 7800X3D)',
+    memory: 'Mínimo: 12 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 1060 6GB / RX 580 8GB (Recomendado: RTX 2060 Super / RX 5700 XT)',
+    storage: '70 GB SSD livre',
+  },
+  '1245620': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i5-8400 / Ryzen 3 3300X (Recomendado: Core i7-8700K / Ryzen 5 3600X)',
+    memory: 'Mínimo: 12 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 1060 3GB / RX 580 4GB (Recomendado: GTX 1070 8GB / RX Vega 56)',
+    storage: '60 GB SSD livre',
+  },
+  '1086940': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i5-4690 / FX 8350 (Recomendado: Core i7-8700K / Ryzen 5 3600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 970 / RX 480 4GB (Recomendado: RTX 2060 Super / RX 5700 XT 8GB)',
+    storage: '150 GB SSD livre',
+  },
+  '730': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i5-750 4-core (Recomendado: Core i5-10400 / Ryzen 5 3600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 660 / HD 7850 2GB (Recomendado: GTX 1060 / RX 580 4GB)',
+    storage: '85 GB SSD livre',
+  },
+  '292030': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i5-2500K 3.3GHz / Phenom II X4 940 (Recomendado: Core i7-3770 / FX-8350)',
+    memory: 'Mínimo: 6 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: GTX 660 2GB / HD 7870 2GB (Recomendado: GTX 770 / R9 290)',
+    storage: '50 GB SSD/HD',
+  },
+  '105600': {
+    os: 'Windows 7/8/10/11 32/64-bit',
+    processor: 'Mínimo: Dual Core 2.0 GHz (Recomendado: Dual Core 3.0 GHz)',
+    memory: 'Mínimo: 2.5 GB RAM (Recomendado: 4 GB RAM)',
+    graphics: 'Mínimo: 128 MB VRAM Shader Model 2.0+ (Recomendado: 512 MB VRAM)',
+    storage: '500 MB livre',
+  },
+  '570': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Dual core Intel / AMD 2.8 GHz (Recomendado: Quad Core 3.2 GHz)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: GeForce 8600/9600GT / Radeon HD2600 (Recomendado: GTX 960 / RX 560)',
+    storage: '60 GB livre',
+  },
+  '2050650': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i5-7500 / Ryzen 3 1200 (Recomendado: Core i7-8700 / Ryzen 5 3600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 560 4GB (Recomendado: GTX 1070 8GB / RX 5700 8GB)',
+    storage: '68 GB SSD livre',
+  },
+  '271590': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core 2 Quad Q6600 @ 2.40GHz / Phenom 9850 (Recomendado: Core i5-3470 @ 3.2GHz / FX-8350)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: NVIDIA 9800 GT 1GB / AMD HD 4870 1GB (Recomendado: GTX 660 2GB / HD 7870 2GB)',
+    storage: '110 GB livre',
+  },
+  '553850': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i7-4790K / Ryzen 5 1500X (Recomendado: Core i7-9700K / Ryzen 7 3700X)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 470 4GB (Recomendado: RTX 2060 / RX 6600 XT)',
+    storage: '100 GB SSD livre',
+  },
+  '413150': {
+    os: 'Windows 7/8/10/11 32/64-bit',
+    processor: 'Mínimo: 2.0 GHz (Recomendado: 2.5 GHz+)',
+    memory: 'Mínimo: 2 GB RAM (Recomendado: 4 GB RAM)',
+    graphics: 'Mínimo: 256 MB VRAM Shader Model 3.0+ (Recomendado: 512 MB VRAM)',
+    storage: '500 MB livre',
+  },
+  '289070': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i3 2.5GHz / Phenom II 2.6GHz (Recomendado: 4ª Ger. i5 2.5GHz / FX8350)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: 1GB GTX 450 / Radeon HD 5570 (Recomendado: 2GB GTX 770 / Radeon HD 7970)',
+    storage: '15 GB livre',
+  },
+  '1145360': {
+    os: 'Windows 7 SP1 / 10 / 11 64-bit',
+    processor: 'Mínimo: Dual Core 2.4 GHz (Recomendado: Dual Core 3.0 GHz+)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: 1 GB VRAM DirectX 10+ (Recomendado: 2 GB VRAM)',
+    storage: '15 GB livre',
+  },
+  '367520': {
+    os: 'Windows 7/8/10/11 64-bit',
+    processor: 'Mínimo: Intel Core 2 Duo E5200 (Recomendado: Intel Core i3-3220)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: GeForce 9800GTX+ (1GB VRAM)',
+    storage: '9 GB livre',
+  },
+  '1593500': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Core i5-6600k / Ryzen 5 2400G (Recomendado: Core i7-7700k / Ryzen 5 3600X)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: GTX 1060 6GB / RX 570 4GB (Recomendado: RTX 2060 6GB / RX 5700 XT 8GB)',
+    storage: '70 GB SSD livre',
+  }
+};
+
+export function getRealGameSpecs(gameId: string, gameName: string, releaseYear?: number) {
+  const idStr = String(gameId || '').replace(/[^0-9]/g, '');
+  if (REAL_GAME_SPECS[idStr]) {
+    return REAL_GAME_SPECS[idStr];
+  }
+
+  const nameLower = (gameName || '').toLowerCase();
+  if (nameLower.includes('cyberpunk')) return REAL_GAME_SPECS['1091500'];
+  if (nameLower.includes('elden ring')) return REAL_GAME_SPECS['1245620'];
+  if (nameLower.includes('baldur')) return REAL_GAME_SPECS['1086940'];
+  if (nameLower.includes('counter-strike') || nameLower.includes('cs2') || nameLower.includes('cs:go')) return REAL_GAME_SPECS['730'];
+  if (nameLower.includes('witcher')) return REAL_GAME_SPECS['292030'];
+  if (nameLower.includes('resident evil') || nameLower.includes('re4')) return REAL_GAME_SPECS['2050650'];
+  if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return REAL_GAME_SPECS['271590'];
+  if (nameLower.includes('helldivers')) return REAL_GAME_SPECS['553850'];
+  if (nameLower.includes('god of war')) return REAL_GAME_SPECS['1593500'];
+  if (nameLower.includes('terraria')) return REAL_GAME_SPECS['105600'];
+  if (nameLower.includes('stardew')) return REAL_GAME_SPECS['413150'];
+  if (nameLower.includes('dota')) return REAL_GAME_SPECS['570'];
+  if (nameLower.includes('hades')) return REAL_GAME_SPECS['1145360'];
+  if (nameLower.includes('hollow knight')) return REAL_GAME_SPECS['367520'];
+  if (nameLower.includes('civilization')) return REAL_GAME_SPECS['289070'];
+
+  const yr = releaseYear || 2023;
+  if (yr >= 2023) {
+    return {
+      os: 'Windows 10/11 64-bit',
+      processor: 'Mínimo: Core i5-10400 / Ryzen 5 3600 (Recomendado: Core i7-12700 / Ryzen 7 5800X)',
+      memory: 'Mínimo: 12 GB RAM (Recomendado: 16 GB RAM)',
+      graphics: 'Mínimo: GTX 1060 6GB / RX 580 8GB (Recomendado: RTX 3060 / RX 6600 XT)',
+      storage: '70 GB SSD livre',
+    };
+  } else if (yr >= 2018) {
+    return {
+      os: 'Windows 10 64-bit',
+      processor: 'Mínimo: Core i5-8400 / Ryzen 3 3100 (Recomendado: Core i7-8700 / Ryzen 5 3600)',
+      memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+      graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 560 (Recomendado: GTX 1070 8GB / RX 590)',
+      storage: '50 GB livre',
+    };
+  } else {
+    return {
+      os: 'Windows 10 64-bit',
+      processor: 'Mínimo: Core i3-4130 / FX-6300 (Recomendado: Core i5-4590 / FX-8350)',
+      memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+      graphics: 'Mínimo: GTX 750 Ti / HD 7850 (Recomendado: GTX 960 / R9 280)',
+      storage: '30 GB livre',
+    };
+  }
 }
 
 /**

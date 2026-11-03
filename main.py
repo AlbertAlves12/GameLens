@@ -99,8 +99,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 89,
         "rating_label": "Muito Positivas",
         "peak_24h_players": 48200,
-        "current_price_brl": 199.90,
-        "price_formatted": "R$ 199,90",
+        "current_price_brl": 99.95,
+        "regular_price_brl": 199.90,
+        "price_formatted": "R$ 99,95",
         "discount_percent": 50,
         "developer": "CD PROJEKT RED",
         "release_year": 2020,
@@ -118,9 +119,10 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 93,
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 85400,
-        "current_price_brl": 229.90,
-        "price_formatted": "R$ 229,90",
-        "discount_percent": 0,
+        "current_price_brl": 151.73,
+        "regular_price_brl": 229.90,
+        "price_formatted": "R$ 151,73",
+        "discount_percent": 34,
         "developer": "FromSoftware Inc.",
         "release_year": 2022,
         "achievements_unlocked": 38,
@@ -137,8 +139,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 96,
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 98120,
-        "current_price_brl": 199.99,
-        "price_formatted": "R$ 199,99",
+        "current_price_brl": 159.99,
+        "regular_price_brl": 199.99,
+        "price_formatted": "R$ 159,99",
         "discount_percent": 20,
         "developer": "Larian Studios",
         "release_year": 2023,
@@ -156,8 +159,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 97,
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 27300,
-        "current_price_brl": 129.99,
-        "price_formatted": "R$ 129,99",
+        "current_price_brl": 32.49,
+        "regular_price_brl": 129.99,
+        "price_formatted": "R$ 32,49",
         "discount_percent": 75,
         "developer": "CD PROJEKT RED",
         "release_year": 2015,
@@ -176,6 +180,7 @@ GAMES_DATABASE: Dict[str, dict] = {
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 52100,
         "current_price_brl": 24.99,
+        "regular_price_brl": 24.99,
         "price_formatted": "R$ 24,99",
         "discount_percent": 0,
         "developer": "ConcernedApe",
@@ -194,8 +199,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 97,
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 14900,
-        "current_price_brl": 46.99,
-        "price_formatted": "R$ 46,99",
+        "current_price_brl": 23.49,
+        "regular_price_brl": 46.99,
+        "price_formatted": "R$ 23,49",
         "discount_percent": 50,
         "developer": "Team Cherry",
         "release_year": 2017,
@@ -232,8 +238,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 98,
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 16400,
-        "current_price_brl": 73.99,
-        "price_formatted": "R$ 73,99",
+        "current_price_brl": 29.59,
+        "regular_price_brl": 73.99,
+        "price_formatted": "R$ 29,59",
         "discount_percent": 60,
         "developer": "Supergiant Games",
         "release_year": 2020,
@@ -252,6 +259,7 @@ GAMES_DATABASE: Dict[str, dict] = {
         "rating_label": "Muito Positivas",
         "peak_24h_players": 74800,
         "current_price_brl": 199.50,
+        "regular_price_brl": 199.50,
         "price_formatted": "R$ 199,50",
         "discount_percent": 0,
         "developer": "Arrowhead Game Studios",
@@ -270,8 +278,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 98,
         "rating_label": "Extremamente Positivas",
         "peak_24h_players": 41200,
-        "current_price_brl": 32.99,
-        "price_formatted": "R$ 32,99",
+        "current_price_brl": 16.49,
+        "regular_price_brl": 32.99,
+        "price_formatted": "R$ 16,49",
         "discount_percent": 50,
         "developer": "Re-Logic",
         "release_year": 2011,
@@ -289,8 +298,9 @@ GAMES_DATABASE: Dict[str, dict] = {
         "user_rating": 86,
         "rating_label": "Muito Positivas",
         "peak_24h_players": 32600,
-        "current_price_brl": 129.00,
-        "price_formatted": "R$ 129,00",
+        "current_price_brl": 12.90,
+        "regular_price_brl": 129.00,
+        "price_formatted": "R$ 12,90",
         "discount_percent": 90,
         "developer": "Firaxis Games",
         "release_year": 2016,
@@ -426,20 +436,84 @@ async def get_library_stats():
 @app.get("/api/game/{game_id}")
 async def get_game_details(game_id: str):
     """
-    Retorna detalhes completos de um jogo específico pelo seu ID (AppID):
+    Retorna detalhes completos de um jogo específico pelo seu ID (Steam AppID ou DealID):
     - Nome, cor tema e capa
     - Avaliação e percentual de recomendação
     - Pico de jogadores simultâneos nas últimas 24h
-    - Preço atual e desconto
+    - Preço atual, regular e desconto
     - Conquistas desbloqueadas
     """
+    # 1. Procura na base de jogos Steam
     game = GAMES_DATABASE.get(game_id)
-    if not game:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Jogo com ID '{game_id}' não encontrado na base de dados."
-        )
-    return game
+    if game:
+        return game
+
+    # 2. Procura no banco de ofertas multiplataforma
+    deal = next((d for d in DEALS_DATABASE if d["id"] == game_id or d["id"].replace("deal-", "") == game_id.lower()), None)
+    if deal:
+        reg_price = deal.get("regular_price", deal["deal_price"])
+        return {
+            "id": deal["id"],
+            "name": deal["name"],
+            "color": "#66c0f4",
+            "hours_played": 0.0,
+            "genres": [deal["platform"], "Destaque"],
+            "platform": deal["platform"],
+            "platform_label": deal.get("platform_label", deal["platform"]),
+            "store": deal.get("store", "Loja Oficial"),
+            "user_rating": deal.get("rating", 94),
+            "rating_label": "Extremamente Positivas",
+            "peak_24h_players": 32000,
+            "current_price_brl": deal["deal_price"],
+            "regular_price_brl": reg_price,
+            "price_formatted": f"R$ {deal['deal_price']:.2f}".replace(".", ","),
+            "discount_percent": deal.get("discount_percent", 0),
+            "developer": deal.get("platform_label", "Console & PC"),
+            "release_year": 2024,
+            "achievements_unlocked": 0,
+            "total_achievements": 0,
+            "header_image": deal.get("image", ""),
+            "short_description": deal.get("review_verdict", f"{deal['name']} com oferta especial verificada no GameLens."),
+            "deal_url": deal.get("deal_url", "")
+        }
+
+    # 3. Busca por correspondência no nome
+    query_lower = game_id.lower().replace("-", " ")
+    for g in GAMES_DATABASE.values():
+        if query_lower in g["name"].lower():
+            return g
+    for d in DEALS_DATABASE:
+        if query_lower in d["name"].lower():
+            reg_price = d.get("regular_price", d["deal_price"])
+            return {
+                "id": d["id"],
+                "name": d["name"],
+                "color": "#66c0f4",
+                "hours_played": 0.0,
+                "genres": [d["platform"], "Destaque"],
+                "platform": d["platform"],
+                "platform_label": d.get("platform_label", d["platform"]),
+                "store": d.get("store", "Loja Oficial"),
+                "user_rating": d.get("rating", 94),
+                "rating_label": "Muito Positivas",
+                "peak_24h_players": 28000,
+                "current_price_brl": d["deal_price"],
+                "regular_price_brl": reg_price,
+                "price_formatted": f"R$ {d['deal_price']:.2f}".replace(".", ","),
+                "discount_percent": d.get("discount_percent", 0),
+                "developer": d.get("platform_label", "Console"),
+                "release_year": 2024,
+                "achievements_unlocked": 0,
+                "total_achievements": 0,
+                "header_image": d.get("image", ""),
+                "short_description": d.get("review_verdict", ""),
+                "deal_url": d.get("deal_url", "")
+            }
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Jogo com ID '{game_id}' não encontrado na base de dados."
+    )
 
 
 @app.get("/api/games")
@@ -489,7 +563,7 @@ DEALS_DATABASE = [
         "deal_price": 151.73,
         "discount_percent": 34,
         "rating": 93,
-        "deal_url": "https://www.nuuvem.com/item/elden-ring",
+        "deal_url": "https://www.nuuvem.com/br-pt/catalog/search?q=Elden%20Ring&partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
         "badge": "Menor Preço em 3 Meses",
         "review_verdict": "Obra-prima imperdível do estilo soulslike em mundo aberto. Vale cada centavo."
@@ -504,7 +578,7 @@ DEALS_DATABASE = [
         "deal_price": 99.95,
         "discount_percent": 50,
         "rating": 89,
-        "deal_url": "https://www.nuuvem.com/item/cyberpunk-2077",
+        "deal_url": "https://www.nuuvem.com/br-pt/catalog/search?q=Cyberpunk%202077&partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
         "badge": "Sucesso de Vendas",
         "review_verdict": "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
@@ -549,7 +623,7 @@ DEALS_DATABASE = [
         "deal_price": 79.96,
         "discount_percent": 60,
         "rating": 96,
-        "deal_url": "https://www.nuuvem.com/item/god-of-war",
+        "deal_url": "https://www.nuuvem.com/br-pt/catalog/search?q=God%20of%20War&partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
         "badge": "PlayStation no PC -60%",
         "review_verdict": "A jornada nórdica de Kratos e Atreus com combate visceral e excelente port de PC."
