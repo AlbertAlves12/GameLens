@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 
 interface CachedEntry<T> {
@@ -213,8 +214,8 @@ async function start() {
     }
   });
 
-  // Em desenvolvimento: Vite SPA
-  const isProduction = process.env.NODE_ENV === 'production';
+  // Em produção no Render.com: serve pasta dist pré-compilada
+  const isProduction = process.env.NODE_ENV === 'production' || fs.existsSync('dist/index.html');
   if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
