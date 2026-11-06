@@ -111,55 +111,82 @@ export const MonetizationSettingsModal: React.FC<SettingsModalProps> = ({
           {/* SEÇÃO 2: PROGRAMAS DE AFILIADOS */}
           <div className="bg-[#171a21] p-4 rounded-xl border border-[#2a475e]">
             <div className="flex items-center justify-between mb-3 text-[#66c0f4] font-bold text-xs uppercase tracking-wider">
-              <span>Tags de Afiliado (Lojas de Jogos)</span>
+              <span>Tags de Afiliado (Nuuvem, Rakuten & Amazon)</span>
               <span className="text-[10px] font-normal text-slate-400 lowercase">injetadas automaticamente nos botões</span>
             </div>
 
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
-                  <span className="font-semibold">Nuuvem (Tag de Parceiro):</span>
-                  <a href="https://www.nuuvem.com" target="_blank" rel="noreferrer" className="text-[11px] text-[#66c0f4] hover:underline flex items-center gap-1">
-                    <span>Criar conta Nuuvem</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                  <span className="font-semibold">Rakuten LinkSynergy / SID (Ex: OHkHh7XU04U):</span>
+                  <span className="text-[10px] text-cyan-400">Onde ver: Painel Rakuten &gt; Links &gt; Link Builder (`id=...`)</span>
                 </div>
                 <input
                   type="text"
-                  value={formData.nuuvemPartnerId}
-                  onChange={(e) => setFormData({ ...formData, nuuvemPartnerId: e.target.value })}
-                  placeholder="ex: albertgamer ou seu código Awin"
+                  value={formData.rakutenSid || ''}
+                  onChange={(e) => setFormData({ ...formData, rakutenSid: e.target.value })}
+                  placeholder="ex: OHkHh7XU04U"
                   className="w-full bg-[#101822] border border-[#2a475e] focus:border-[#66c0f4] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
+                  <span className="font-semibold">Nuuvem (Tag de Parceiro / Awin):</span>
+                  <span className="text-[10px] text-cyan-400">Onde ver: Rodapé da Nuuvem &gt; Programa de Afiliados (`partner=...`)</span>
+                </div>
+                <input
+                  type="text"
+                  value={formData.nuuvemPartnerId}
+                  onChange={(e) => setFormData({ ...formData, nuuvemPartnerId: e.target.value })}
+                  placeholder="ex: albertgamer"
+                  className="w-full bg-[#101822] border border-[#2a475e] focus:border-[#66c0f4] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
+                  <span className="font-semibold">Colar Link Customizado / HTML de Jogo (Ex: Cyberpunk):</span>
+                  <span className="text-[10px] text-emerald-400">Cole o link da Rakuten/Nuuvem ou tag &lt;a href="..."&gt;</span>
+                </div>
+                <textarea
+                  rows={2}
+                  value={formData.customGameLinks?.["Cyberpunk 2077"] || ''}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    let finalUrl = val;
+                    if (val.includes('href=')) {
+                      const match = val.match(/href=["']([^"']+)["']/i);
+                      if (match && match[1]) finalUrl = match[1];
+                    }
+                    // Limpa automaticamente o slug descontinuado -microsoft que causava erro 404
+                    finalUrl = finalUrl.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077');
+
+                    setFormData({
+                      ...formData,
+                      customGameLinks: {
+                        ...(formData.customGameLinks || {}),
+                        "Cyberpunk 2077": finalUrl,
+                        "Cyberpunk 2077: Ultimate Edition": finalUrl
+                      }
+                    });
+                  }}
+                  placeholder='Cole aqui seu link ou código HTML do jogo (ex: Cyberpunk): &lt;a href="https://click.linksynergy.com/link?id=OHkHh7XU04U..."&gt;...&lt;/a&gt;'
+                  className="w-full bg-[#101822] border border-[#2a475e] focus:border-[#66c0f4] rounded-lg px-3 py-2 text-[11px] text-white outline-none font-mono"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">O link inserido acima é verificado e ativado imediatamente no botão 'Oferta' de Cyberpunk 2077.</span>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
                   <span className="font-semibold">Amazon Associados (Tag de Rastreamento):</span>
-                  <a href="https://associados.amazon.com.br" target="_blank" rel="noreferrer" className="text-[11px] text-[#66c0f4] hover:underline flex items-center gap-1">
-                    <span>Criar conta Amazon</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                  <span className="text-[10px] text-slate-400">ex: albertgames-20</span>
                 </div>
                 <input
                   type="text"
                   value={formData.amazonAssociateId}
                   onChange={(e) => setFormData({ ...formData, amazonAssociateId: e.target.value })}
                   placeholder="ex: albertgames-20"
-                  className="w-full bg-[#101822] border border-[#2a475e] focus:border-[#66c0f4] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
-                  <span className="font-semibold">Green Man Gaming (Affiliate ID / Tap Tag):</span>
-                  <span className="text-[10px] text-slate-400">Opcional para público internacional</span>
-                </div>
-                <input
-                  type="text"
-                  value={formData.gmgAffiliateId}
-                  onChange={(e) => setFormData({ ...formData, gmgAffiliateId: e.target.value })}
-                  placeholder="ex: albertgmg"
                   className="w-full bg-[#101822] border border-[#2a475e] focus:border-[#66c0f4] rounded-lg px-3 py-2 text-xs text-white outline-none font-mono"
                 />
               </div>

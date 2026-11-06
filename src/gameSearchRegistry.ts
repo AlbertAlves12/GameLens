@@ -425,10 +425,25 @@ export const GLOBAL_GAME_DATABASE: SearchedGameItem[] = [
     short_description: "A jornada final da aclamada franquia com chefes desafiadores e universo melancólico."
   },
 
-  // GOD OF WAR
+  // GOD OF WAR FRANCHISE
+  {
+    id: "2322010",
+    name: "God of War Ragnarök",
+    image: "https://cdn.akamai.steamstatic.com/steam/apps/2322010/header.jpg",
+    price: "R$ 249,00",
+    regular_price: 249.00,
+    deal_price: 249.00,
+    discount: 0,
+    source: "Steam & Nuuvem Oficial",
+    user_rating: 95,
+    developer: "Santa Monica Studio",
+    release_year: 2024,
+    genres: ["Ação", "Aventura", "Mitologia Nórdica"],
+    short_description: "Embarque em uma jornada mítica ao lado de Kratos e Atreus em busca de respostas antes que o Ragnarök chegue."
+  },
   {
     id: "1593500",
-    name: "God of War",
+    name: "God of War (2018)",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
     price: "R$ 79,96",
     regular_price: 199.90,

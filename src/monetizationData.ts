@@ -47,6 +47,7 @@ export interface MonetizationSettings {
   adsensePublisherId: string;
   adsEnabled: boolean;
   editorialName: string;
+  customGameLinks?: Record<string, string>;
 }
 
 export interface DealItem {
@@ -54,7 +55,7 @@ export interface DealItem {
   name: string;
   platform: 'PC' | 'PlayStation' | 'Xbox' | 'Nintendo';
   platform_label: string;
-  store: 'Nuuvem' | 'Hype Games' | 'Amazon';
+  store: 'Nuuvem' | 'Hype Games' | 'Amazon' | 'Steam Store';
   regular_price: number;
   deal_price: number;
   discount_percent: number;
@@ -99,7 +100,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 99.95,
     discount_percent: 50,
     rating: 89,
-    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Cyberpunk%202077&partner=albertgamer",
+    deal_url: "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077-microsoft",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
     badge: "Sucesso de Vendas",
     review_verdict: "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
@@ -219,7 +220,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 124.50,
     discount_percent: 50,
     rating: 88,
-    deal_url: "https://www.nuuvem.com",
+    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Forza%20Horizon%205&partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1551360/header.jpg",
     badge: "Corrida em Mundo Aberto -50%",
     review_verdict: "O melhor jogo de corrida arcade da atualidade, ambientado no vibrante México."
@@ -377,7 +378,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "CD PROJEKT RED",
     release_year: 2020,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Cyberpunk%202077&partner=albertgamer",
+    store_url: "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077-microsoft",
     description: "Um RPG de ação e aventura em mundo aberto ambientado em Night City, uma megalópole obcecada por poder, glamour e bio-modificações.",
     review_verdict: "A redenção completa. Com o patch 2.0 e a expansão Phantom Liberty com Idris Elba, tornou-se um dos melhores RPGs futuristas já feitos.",
     headline: "Night City ressurge como o ápice do visual ray tracing e narrativa cyberpunk",
@@ -425,7 +426,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "FromSoftware Inc.",
     release_year: 2022,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/item/elden-ring",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Elden%20Ring&partner=albertgamer",
     description: "Levante-se, Maculado, e seja guiado pela graça para portar o poder do Anel Prístino e se tornar um Lorde Prístino nas Terras Intermédias.",
     review_verdict: "Vencedor incontestável de Jogo do Ano. A liberdade de desbravar castelos e catacumbas em qualquer ordem redefine a exploração gamer.",
     headline: "A apoteose do design de mundos abertos e combate desafiador",
@@ -449,7 +450,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Larian Studios",
     release_year: 2023,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Baldur%27s%20Gate%203&partner=albertgamer",
     description: "Reúna seu grupo e retorne aos Reinos Esquecidos em uma história de companheirismo, traição, sacrifício e o apelo do poder supremo.",
     review_verdict: "O RPG definitivo dos tempos modernos. Liberdade absoluta de decisões, combate tático tridimensional e centenas de horas sem qualquer microtransação.",
     headline: "O novo marco histórico dos RPGs: liberdade absoluta que redefine os videogames",
@@ -473,7 +474,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Rockstar North",
     release_year: 2015,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Grand%20Theft%20Auto%20V&partner=albertgamer",
     description: "Quando um jovem malandro de rua, um ladrão de bancos aposentado e um psicopata aterrorizante se veem envolvidos com criminosos e o submundo do governo, eles precisam realizar uma série de golpes arriscados.",
     review_verdict: "Um dos jogos mais vendidos de toda a história humana. A campanha de Michael, Trevor e Franklin é pura sátira social de alto calibre com multiplayer vivo.",
     headline: "O titã do entretenimento continua relevante e divertido mesmo após mais de uma década",
@@ -499,7 +500,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Playground Games",
     release_year: 2021,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Forza%20Horizon%205&partner=albertgamer",
     description: "Sua derradeira Aventura Horizon espera por você! Explore as paisagens dinâmicas e em constante evolução do México em centenas dos melhores carros do mundo.",
     review_verdict: "O rei incontestável dos jogos de corrida arcade. Cenários deslumbrantes, centenas de veículos licenciados e jogabilidade impecável no controle ou volante.",
     headline: "A celebração máxima da cultura automotiva em um México colorido e cheio de vida",
@@ -645,7 +646,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "343 Industries",
     release_year: 2021,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Halo%20Infinite&partner=albertgamer",
     description: "Quando toda a esperança foi perdida e o destino da humanidade está em jogo, Master Chief está pronto para enfrentar o inimigo mais impiedoso que já enfrentou.",
     review_verdict: "O gancho retrátil revoluciona o movimento de Master Chief. Multiplayer gratuito e campanha em mundo semiaberto muito envolvente.",
     headline: "O retorno do Master Chief com gunplay tático dinâmico e mapa aberto no anel Zeta Halo",
@@ -669,7 +670,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Bethesda Game Studios",
     release_year: 2023,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Starfield&partner=albertgamer",
     description: "Starfield é o primeiro universo novo em mais de 25 anos da Bethesda Game Studios. Crie qualquer personagem que desejar e explore com liberdade inigualável mais de 1.000 planetas.",
     review_verdict: "Combate espacial envolvente, construção minuciosa de naves e facções ricas com assinatura clássica de RPGs da Bethesda.",
     headline: "A grande odisseia espacial da Bethesda com construção detalhada de naves e exploração",
@@ -781,7 +782,7 @@ export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   pixKey: 'albertalves1205@gmail.com',
   pixReceiverName: 'Albert Alves',
   pixCity: 'SAO PAULO',
-  rakutenSid: '4770537',
+  rakutenSid: 'OHkHh7XU04U',
   hypeMid: '53304',
   nuuvemPartnerId: 'albertgamer',
   amazonAssociateId: 'albertgames-20',
@@ -789,7 +790,11 @@ export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   humblePartnerId: 'albertgames',
   adsensePublisherId: 'ca-pub-7421185206250000',
   adsEnabled: true,
-  editorialName: 'GameLens Editorial & Reviews'
+  editorialName: 'GameLens Editorial & Reviews',
+  customGameLinks: {
+    "Cyberpunk 2077": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077",
+    "Cyberpunk 2077: Ultimate Edition": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077"
+  }
 };
 
 export const INITIAL_REVIEWS: Record<string, GameReview> = {
@@ -1015,24 +1020,90 @@ export const INITIAL_REVIEWS: Record<string, GameReview> = {
 };
 
 /**
+ * Mapeamento de Slugs Oficiais e Verificados na Nuuvem
+ */
+export const NUUVEM_VERIFIED_SLUGS: Record<string, string> = {
+  "Cyberpunk 2077": "cyberpunk-2077",
+  "Cyberpunk 2077: Ultimate Edition": "cyberpunk-2077",
+  "Elden Ring": "elden-ring",
+  "Elden Ring Shadow of the Erdtree": "elden-ring-shadow-of-the-erdtree",
+  "Baldur's Gate 3": "baldurs-gate-3",
+  "The Witcher 3: Wild Hunt": "the-witcher-3-wild-hunt",
+  "The Witcher 3: Wild Hunt - Complete Edition": "the-witcher-3-wild-hunt",
+  "Resident Evil 4": "resident-evil-4",
+  "Resident Evil 4 Remake": "resident-evil-4",
+  "Grand Theft Auto V": "grand-theft-auto-v-premium-edition",
+  "Grand Theft Auto V: Premium Edition": "grand-theft-auto-v-premium-edition",
+  "Grand Theft Auto: The Trilogy – The Definitive Edition": "grand-theft-auto-the-trilogy-the-definitive-edition",
+  "Grand Theft Auto: The Trilogy - The Definitive Edition": "grand-theft-auto-the-trilogy-the-definitive-edition",
+  "Grand Theft Auto The Trilogy The Definitive Edition": "grand-theft-auto-the-trilogy-the-definitive-edition",
+  "GTA Trilogy": "grand-theft-auto-the-trilogy-the-definitive-edition",
+  "Grand Theft Auto IV": "grand-theft-auto-iv-the-complete-edition",
+  "Grand Theft Auto IV: The Complete Edition": "grand-theft-auto-iv-the-complete-edition",
+  "God of War": "god-of-war",
+  "Helldivers 2": "helldivers-2",
+  "HELLDIVERS™ 2": "helldivers-2",
+  "Hogwarts Legacy": "hogwarts-legacy",
+  "Red Dead Redemption 2": "red-dead-redemption-ii",
+  "Rise of the Tomb Raider": "rise-of-the-tomb-raider-20-year-celebration",
+  "Rise of the Tomb Raider™": "rise-of-the-tomb-raider-20-year-celebration",
+  "Shadow of the Tomb Raider": "shadow-of-the-tomb-raider-definitive-edition",
+  "Shadow of the Tomb Raider: Definitive Edition": "shadow-of-the-tomb-raider-definitive-edition",
+};
+
+/**
+ * Retorna URL oficial de busca na Nuuvem com verificação de customGameLinks e tag de afiliado
+ * Evita erros 404 redirecionando para slugs verificados ou catálogo de busca da Nuuvem
+ */
+export function getNuuvemSearchUrl(gameName: string, config: MonetizationSettings): string {
+  const customLink = config.customGameLinks?.[gameName];
+  if (customLink) {
+    // Corrige link com slug antigo descontinuado da Microsoft se presente
+    return customLink.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077');
+  }
+
+  const partner = encodeURIComponent(config.nuuvemPartnerId || 'albertgamer');
+  const trimmed = gameName.trim();
+  const slug = NUUVEM_VERIFIED_SLUGS[trimmed];
+
+  if (slug) {
+    return `https://www.nuuvem.com/br-pt/item/${slug}?partner=${partner}`;
+  }
+
+  // Remove caracteres especiais como en-dash (–), colons e parênteses para a busca da Nuuvem não dar 404
+  const cleanSearch = trimmed.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(cleanSearch)}&partner=${partner}`;
+}
+
+/**
+ * Retorna URL oficial limpa da Hype Games (sem erro 400 da Rakuten)
+ */
+export function getHypeSearchUrl(gameName: string, config: MonetizationSettings): string {
+  const custom = config.customGameLinks?.[gameName];
+  if (custom && custom.includes('hype.games')) return custom;
+
+  // Remove caracteres especiais como en-dash (–), colons e parênteses para a busca da Hype Games funcionar
+  const cleanSearch = gameName.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `https://hype.games/br/search?q=${encodeURIComponent(cleanSearch)}`;
+}
+
+/**
  * Constrói links de afiliado dinâmicos com as tags do usuário
  */
 export function getAffiliateUrls(game: { id: string; name: string }, config: MonetizationSettings) {
   const query = encodeURIComponent(game.name);
-  const sid = config.rakutenSid || '4770537';
-  const mid = config.hypeMid || '53304';
 
   return {
-    nuuvem: `https://www.nuuvem.com/br-pt/catalog/search?q=${query}&partner=${encodeURIComponent(config.nuuvemPartnerId || 'albertgamer')}`,
-    hypeGames: `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${query}`)}`,
-    amazon: undefined, // Amazon só vende mídia física e consoles, não possui chaves de ativação PC
+    nuuvem: getNuuvemSearchUrl(game.name, config),
+    hypeGames: getHypeSearchUrl(game.name, config),
+    amazon: undefined, // Amazon só vende mídia física e consoles
     gmg: `https://www.greenmangaming.com/search?query=${query}&tap_a=${encodeURIComponent(config.gmgAffiliateId || 'gmgpartner')}`,
     steam: `https://store.steampowered.com/app/${game.id}/`
   };
 }
 
 /**
- * Requisitos de Sistema Reais e Específicos por Jogo para PC
+ * Requisitos de Sistema Reais e Específicos por Jogo para PC (Base Abrangente)
  */
 export const REAL_GAME_SPECS: Record<string, {
   os: string;
@@ -1041,6 +1112,13 @@ export const REAL_GAME_SPECS: Record<string, {
   graphics: string;
   storage: string;
 }> = {
+  '1547000': {
+    os: 'Windows 10 64-bit',
+    processor: 'Mínimo: Intel Core i5-6600K / AMD FX-6300 (Recomendado: Intel Core i7-2700K / AMD Ryzen 5 2600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: Nvidia GeForce GTX 760 2GB / AMD Radeon R9 280 3GB (Recomendado: Nvidia GeForce GTX 1060 6GB / AMD Radeon RX 570 4GB)',
+    storage: '45 GB livre',
+  },
   '1091500': {
     os: 'Windows 10/11 64-bit',
     processor: 'Mínimo: Core i7-6700 / Ryzen 5 1600 (Recomendado: Core i7-12700 / Ryzen 7 7800X3D)',
@@ -1076,20 +1154,6 @@ export const REAL_GAME_SPECS: Record<string, {
     graphics: 'Mínimo: GTX 660 2GB / HD 7870 2GB (Recomendado: GTX 770 / R9 290)',
     storage: '50 GB SSD/HD',
   },
-  '105600': {
-    os: 'Windows 7/8/10/11 32/64-bit',
-    processor: 'Mínimo: Dual Core 2.0 GHz (Recomendado: Dual Core 3.0 GHz)',
-    memory: 'Mínimo: 2.5 GB RAM (Recomendado: 4 GB RAM)',
-    graphics: 'Mínimo: 128 MB VRAM Shader Model 2.0+ (Recomendado: 512 MB VRAM)',
-    storage: '500 MB livre',
-  },
-  '570': {
-    os: 'Windows 10/11 64-bit',
-    processor: 'Mínimo: Dual core Intel / AMD 2.8 GHz (Recomendado: Quad Core 3.2 GHz)',
-    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
-    graphics: 'Mínimo: GeForce 8600/9600GT / Radeon HD2600 (Recomendado: GTX 960 / RX 560)',
-    storage: '60 GB livre',
-  },
   '2050650': {
     os: 'Windows 10/11 64-bit',
     processor: 'Mínimo: Core i5-7500 / Ryzen 3 1200 (Recomendado: Core i7-8700 / Ryzen 5 3600)',
@@ -1104,12 +1168,103 @@ export const REAL_GAME_SPECS: Record<string, {
     graphics: 'Mínimo: NVIDIA 9800 GT 1GB / AMD HD 4870 1GB (Recomendado: GTX 660 2GB / HD 7870 2GB)',
     storage: '110 GB livre',
   },
+  '12210': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Intel Core 2 Quad 2.4GHz / AMD Phenom X3 2.1GHz (Recomendado: Intel Core i5)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: 512MB NVIDIA 8600 / 512MB ATI 3870 (Recomendado: GTX 660 / RX 550)',
+    storage: '22 GB livre',
+  },
+  '391220': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Intel Core i3-2100 / AMD Phenom II (Recomendado: Intel Core i7-3770K / AMD FX-8350)',
+    memory: 'Mínimo: 6 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GTX 650 2GB / AMD HD 7770 2GB (Recomendado: NVIDIA GTX 970 / AMD R9 290x)',
+    storage: '25 GB livre',
+  },
+  '750920': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Intel Core i3-3220 / AMD FX 4300 (Recomendado: Intel Core i7-4770K / AMD Ryzen 5 1600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GTX 660 / AMD Radeon HD 7850 (Recomendado: NVIDIA GTX 1060 6GB / AMD Radeon RX 480 8GB)',
+    storage: '40 GB livre',
+  },
   '553850': {
     os: 'Windows 10/11 64-bit',
     processor: 'Mínimo: Core i7-4790K / Ryzen 5 1500X (Recomendado: Core i7-9700K / Ryzen 7 3700X)',
     memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
     graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 470 4GB (Recomendado: RTX 2060 / RX 6600 XT)',
     storage: '100 GB SSD livre',
+  },
+  '1174180': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Intel Core i5-2500K / AMD FX-6300 (Recomendado: Intel Core i7-4770K / AMD Ryzen 5 1500X)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 12 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GeForce GTX 770 2GB / AMD Radeon R9 280 3GB (Recomendado: NVIDIA GeForce GTX 1060 6GB / AMD Radeon RX 480 4GB)',
+    storage: '150 GB livre',
+  },
+  '990080': {
+    os: 'Windows 10 64-bit',
+    processor: 'Mínimo: Intel Core i5-6600 / AMD Ryzen 5 1400 (Recomendado: Intel Core i7-8700 / AMD Ryzen 5 3600)',
+    memory: 'Mínimo: 16 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GeForce GTX 960 4GB / AMD Radeon RX 470 4GB (Recomendado: NVIDIA GeForce 1080 Ti / AMD Radeon RX 5700 XT)',
+    storage: '85 GB SSD livre',
+  },
+  '2358720': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Intel Core i5-8400 / AMD Ryzen 5 1600 (Recomendado: Intel Core i7-9700 / AMD Ryzen 5 5500)',
+    memory: 'Mínimo: 16 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GeForce GTX 1060 6GB / AMD Radeon RX 580 8GB (Recomendado: NVIDIA GeForce RTX 2060 / AMD Radeon RX 5700 XT)',
+    storage: '130 GB SSD livre',
+  },
+  '1551360': {
+    os: 'Windows 10 (v1909 ou superior) 64-bit',
+    processor: 'Mínimo: Intel i5-4460 / AMD Ryzen 3 1200 (Recomendado: Intel i7-4790 / AMD Ryzen 5 1500X)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: NVidia GTX 970 / AMD RX 470 (Recomendado: NVidia GTX 1070 / AMD RX 590)',
+    storage: '110 GB livre',
+  },
+  '1817070': {
+    os: 'Windows 10 64-bit',
+    processor: 'Mínimo: Intel Core i3-4160 (Recomendado: Intel Core i5-4670 / AMD Ryzen 5 1600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GTX 950 / AMD Radeon RX 470 (Recomendado: NVIDIA GTX 1060 6GB / AMD Radeon RX 580)',
+    storage: '75 GB SSD livre',
+  },
+  '1716740': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: AMD Ryzen 5 2600X / Intel Core i7-6800K (Recomendado: AMD Ryzen 5 3600X / Intel Core i5-10600K)',
+    memory: 'Mínimo: 16 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: AMD Radeon RX 5700 / NVIDIA GeForce GTX 1070 Ti (Recomendado: AMD Radeon RX 6800 XT / NVIDIA GeForce RTX 2080)',
+    storage: '125 GB SSD livre',
+  },
+  '1790600': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Intel Core i5-9600K / AMD Ryzen 5 2600 (Recomendado: Intel Core i7-9700K / AMD Ryzen 5 3600)',
+    memory: 'Mínimo: 16 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: Nvidia GeForce GTX 980 / AMD Radeon RX 590 (Recomendado: Nvidia GeForce RTX 2060 / AMD Radeon RX Vega 64)',
+    storage: '100 GB livre',
+  },
+  '1888930': {
+    os: 'Windows 10 64-bit (v1909 ou superior)',
+    processor: 'Mínimo: AMD Ryzen 5 1500X / Intel Core i7-4770K (Recomendado: AMD Ryzen 5 3600X / Intel Core i7-8700)',
+    memory: 'Mínimo: 16 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: AMD Radeon 470 (4 GB) / NVIDIA GeForce GTX 970 (4 GB) (Recomendado: AMD Radeon RX 6600 XT / NVIDIA GeForce RTX 2070 Super)',
+    storage: '100 GB SSD livre',
+  },
+  '105600': {
+    os: 'Windows 7/8/10/11 32/64-bit',
+    processor: 'Mínimo: Dual Core 2.0 GHz (Recomendado: Dual Core 3.0 GHz)',
+    memory: 'Mínimo: 2.5 GB RAM (Recomendado: 4 GB RAM)',
+    graphics: 'Mínimo: 128 MB VRAM Shader Model 2.0+ (Recomendado: 512 MB VRAM)',
+    storage: '500 MB livre',
+  },
+  '570': {
+    os: 'Windows 10/11 64-bit',
+    processor: 'Mínimo: Dual core Intel / AMD 2.8 GHz (Recomendado: Quad Core 3.2 GHz)',
+    memory: 'Mínimo: 4 GB RAM (Recomendado: 8 GB RAM)',
+    graphics: 'Mínimo: GeForce 8600/9600GT / Radeon HD2600 (Recomendado: GTX 960 / RX 560)',
+    storage: '60 GB livre',
   },
   '413150': {
     os: 'Windows 7/8/10/11 32/64-bit',
@@ -1148,10 +1303,51 @@ export const REAL_GAME_SPECS: Record<string, {
   }
 };
 
+export function getSteamAppId(id?: string, name?: string): string {
+  const cleanNum = String(id || '').replace(/[^0-9]/g, '');
+  if (cleanNum && cleanNum.length >= 3 && cleanNum.length <= 8) {
+    return cleanNum;
+  }
+  const nameLower = (name || '').toLowerCase().trim();
+  if (nameLower.includes('cyberpunk')) return '1091500';
+  if (nameLower.includes('elden ring')) return '1245620';
+  if (nameLower.includes('baldur')) return '1086940';
+  if (nameLower.includes('counter-strike') || nameLower.includes('cs2') || nameLower.includes('cs:go')) return '730';
+  if (nameLower.includes('witcher')) return '292030';
+  if (nameLower.includes('resident evil') || nameLower.includes('re4')) return '2050650';
+  if (nameLower.includes('tomb raider')) {
+    if (nameLower.includes('rise')) return '391220';
+    if (nameLower.includes('shadow')) return '750920';
+    return '391220';
+  }
+  if (nameLower.includes('dragon ball') || nameLower.includes('sparking')) return '1790600';
+  if (nameLower.includes('wukong')) return '2358720';
+  if (nameLower.includes('hogwarts')) return '990080';
+  if (nameLower.includes('red dead') || nameLower.includes('rdr2')) return '1174180';
+  if (nameLower.includes('spider-man') || nameLower.includes('spiderman')) return '1817070';
+  if (nameLower.includes('forza')) return '1551360';
+  if (nameLower.includes('starfield')) return '1716740';
+  if (nameLower.includes('last of us')) return '1888930';
+  if (nameLower.includes('trilogy') || nameLower.includes('definitive edition')) {
+    if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return '1547000';
+  }
+  if (nameLower.includes('grand theft auto iv') || nameLower.includes('gta iv') || nameLower.includes('gta 4')) return '12210';
+  if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return '271590';
+  if (nameLower.includes('helldivers')) return '553850';
+  if (nameLower.includes('god of war')) return '1593500';
+  if (nameLower.includes('terraria')) return '105600';
+  if (nameLower.includes('stardew')) return '413150';
+  if (nameLower.includes('dota')) return '570';
+  if (nameLower.includes('hades')) return '1145360';
+  if (nameLower.includes('hollow knight')) return '367520';
+  if (nameLower.includes('civilization')) return '289070';
+  return '';
+}
+
 export function getRealGameSpecs(gameId: string, gameName: string, releaseYear?: number) {
-  const idStr = String(gameId || '').replace(/[^0-9]/g, '');
-  if (REAL_GAME_SPECS[idStr]) {
-    return REAL_GAME_SPECS[idStr];
+  const appId = getSteamAppId(gameId, gameName);
+  if (appId && REAL_GAME_SPECS[appId]) {
+    return REAL_GAME_SPECS[appId];
   }
 
   const nameLower = (gameName || '').toLowerCase();
@@ -1161,6 +1357,20 @@ export function getRealGameSpecs(gameId: string, gameName: string, releaseYear?:
   if (nameLower.includes('counter-strike') || nameLower.includes('cs2') || nameLower.includes('cs:go')) return REAL_GAME_SPECS['730'];
   if (nameLower.includes('witcher')) return REAL_GAME_SPECS['292030'];
   if (nameLower.includes('resident evil') || nameLower.includes('re4')) return REAL_GAME_SPECS['2050650'];
+  if (nameLower.includes('tomb raider')) {
+    if (nameLower.includes('rise')) return REAL_GAME_SPECS['391220'];
+    if (nameLower.includes('shadow')) return REAL_GAME_SPECS['750920'];
+    return REAL_GAME_SPECS['391220'];
+  }
+  if (nameLower.includes('dragon ball') || nameLower.includes('sparking')) return REAL_GAME_SPECS['1790600'];
+  if (nameLower.includes('wukong')) return REAL_GAME_SPECS['2358720'];
+  if (nameLower.includes('hogwarts')) return REAL_GAME_SPECS['990080'];
+  if (nameLower.includes('red dead') || nameLower.includes('rdr2')) return REAL_GAME_SPECS['1174180'];
+  if (nameLower.includes('spider-man') || nameLower.includes('spiderman')) return REAL_GAME_SPECS['1817070'];
+  if (nameLower.includes('forza')) return REAL_GAME_SPECS['1551360'];
+  if (nameLower.includes('starfield')) return REAL_GAME_SPECS['1716740'];
+  if (nameLower.includes('last of us')) return REAL_GAME_SPECS['1888930'];
+  if (nameLower.includes('grand theft auto iv') || nameLower.includes('gta iv') || nameLower.includes('gta 4')) return REAL_GAME_SPECS['12210'];
   if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return REAL_GAME_SPECS['271590'];
   if (nameLower.includes('helldivers')) return REAL_GAME_SPECS['553850'];
   if (nameLower.includes('god of war')) return REAL_GAME_SPECS['1593500'];
@@ -1183,9 +1393,9 @@ export function getRealGameSpecs(gameId: string, gameName: string, releaseYear?:
   } else if (yr >= 2018) {
     return {
       os: 'Windows 10 64-bit',
-      processor: 'Mínimo: Core i5-8400 / Ryzen 3 3100 (Recomendado: Core i7-8700 / Ryzen 5 3600)',
+      processor: 'Mínimo: Core i5-8400 / Ryzen 5 2600 (Recomendado: Core i7-8700 / Ryzen 5 3600)',
       memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
-      graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 560 (Recomendado: GTX 1070 8GB / RX 590)',
+      graphics: 'Mínimo: GTX 1050 Ti 4GB / RX 570 (Recomendado: GTX 1070 8GB / RX 590)',
       storage: '50 GB livre',
     };
   } else {
@@ -1257,7 +1467,7 @@ export function generateProceduralAiReview(
     bottomLine: `Veredito final do Agente IA: Recomendação oficial com selo ${badge}. Uma adição indispensável à sua coleção.`,
     author: `${editorialName} (Agente IA)`,
     readTime: "3 min de leitura",
-    updatedAt: "Gerado com Inteligência Artificial",
+    updatedAt: `Edição de Hoje • ${new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}`,
     bestDeal: {
       partnerStore: "Nuuvem",
       discountLabel: "Parceiro Oficial",

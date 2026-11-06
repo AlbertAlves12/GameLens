@@ -46,7 +46,8 @@ import {
   Sun,
   Moon,
   Mic,
-  MicOff
+  MicOff,
+  RefreshCw
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -75,8 +76,18 @@ import {
   MultiplatformGame,
   MULTIPLATFORM_GAMES,
   FALLBACK_GAME_COVER,
-  getRealGameSpecs
+  getRealGameSpecs,
+  getSteamAppId,
+  getNuuvemSearchUrl,
+  getHypeSearchUrl
 } from './monetizationData.ts';
+import {
+  fetchLiveDeals,
+  fetchLiveGameDetails,
+  getDynamicRecommendedOfTheDay,
+  getTodayFormattedDate,
+  LiveDealData
+} from './services/liveStoreService.ts';
 import { searchGlobalGamesUnified, searchGlobalGamesUnifiedSync } from './gameSearchRegistry.ts';
 import { ReviewsView } from './components/ReviewsView.tsx';
 import { MonetizationHubView } from './components/MonetizationHubView.tsx';
@@ -507,73 +518,37 @@ export default function App() {
   // Filtro dos Games Indicados do Dia (all, top, deals, free)
   const [recommendedCategory, setRecommendedCategory] = useState<'all' | 'top' | 'deals' | 'free'>('all');
 
-  // Catálogo de Games Indicados do Dia com Resumos de Críticas para a Tela Principal
-  const RECOMMENDED_GAMES_OF_THE_DAY = [
-    {
-      id: "1245620",
-      name: "Elden Ring",
-      developer: "FromSoftware Inc.",
-      release_year: 2022,
-      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
-      user_rating: 93,
-      rating_label: "Extremamente Positivas",
-      badge: "🔥 Indicado do Dia",
-      price_formatted: "R$ 151,73",
-      regular_price: 229.90,
-      discount_percent: 34,
-      genres: ["RPG", "Soulslike", "Mundo Aberto"],
-      review_summary: "Uma obra-prima revolucionária de RPG de ação. Exploração orgânica monumental, chefes inesquecíveis e combate desafiador.",
-      source_deal: "Nuuvem / Steam"
-    },
-    {
-      id: "1086940",
-      name: "Baldur's Gate 3",
-      developer: "Larian Studios",
-      release_year: 2023,
-      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
-      user_rating: 96,
-      rating_label: "Extremamente Positivas",
-      badge: "🏆 Jogo do Ano GOTY",
-      price_formatted: "R$ 199,99",
-      regular_price: 199.99,
-      discount_percent: 0,
-      genres: ["RPG", "Estratégia", "Fantasia"],
-      review_summary: "Narrativa ramificada brilhante com escolhas que moldam verdadeiramente o mundo e companheiros com atuações de voz impecáveis.",
-      source_deal: "Steam Store Oficial"
-    },
-    {
-      id: "1091500",
-      name: "Cyberpunk 2077: Ultimate Edition",
-      developer: "CD PROJEKT RED",
-      release_year: 2020,
-      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
-      user_rating: 89,
-      rating_label: "Muito Positivas",
-      badge: "⚡ 50% OFF Destaque",
-      price_formatted: "R$ 99,95",
-      regular_price: 199.90,
-      discount_percent: 50,
-      genres: ["RPG", "Ação", "Cyberpunk"],
-      review_summary: "Night City ganha vida com gráficos espetaculares, jogabilidade madura e a aclamada expansão Phantom Liberty inclusa.",
-      source_deal: "Nuuvem / Hype Games"
-    },
-    {
-      id: "730",
-      name: "Counter-Strike 2",
-      developer: "Valve",
-      release_year: 2023,
-      header_image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
-      user_rating: 88,
-      rating_label: "Muito Positivas",
-      badge: "🎯 eSports nº 1",
-      price_formatted: "Gratuito",
-      regular_price: 0,
-      discount_percent: 0,
-      genres: ["Ação", "Tiro", "Competitivo"],
-      review_summary: "A evolução máxima do tiro tático competitivo no motor Source 2, com fumaças volumétricas reativas e simulação física precisa.",
-      source_deal: "Steam Store"
+  // Estado de Promoções e Descontos ao Vivo das Lojas Parceiras
+  const [liveDeals, setLiveDeals] = useState<LiveDealData[]>([]);
+  const [isSyncingLive, setIsSyncingLive] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>(() => {
+    return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  });
+
+  // Catálogo Dinâmico de Games Indicados do Dia com Rotação Diária Automática e Ofertas Reais
+  const RECOMMENDED_GAMES_OF_THE_DAY = useMemo(() => {
+    return getDynamicRecommendedOfTheDay(liveDeals);
+  }, [liveDeals]);
+
+  // Função para sincronizar promoções e preços ao vivo da Steam e Lojas Oficiais
+  const syncLiveStoreData = async () => {
+    setIsSyncingLive(true);
+    try {
+      const deals = await fetchLiveDeals();
+      if (deals.length > 0) {
+        setLiveDeals(deals);
+        setLastSyncTime(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      }
+    } catch (err) {
+      console.warn('Erro ao sincronizar lojas:', err);
+    } finally {
+      setIsSyncingLive(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    syncLiveStoreData();
+  }, []);
 
   // Estado do Histórico de Buscas do Dashboard (Armazena até 5 pesquisas recentes no localStorage)
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
@@ -834,10 +809,8 @@ export default function App() {
     if (item.category && item.specs) {
       const mg = item as MultiplatformGame;
       const isPc = mg.platform === 'PC';
-      const sid = monetizationSettings.rakutenSid || '4770537';
-      const mid = monetizationSettings.hypeMid || '53304';
-      const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(mg.name)}`)}`;
-      const nuuvemUrl = `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(mg.name)}&partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId || 'albertgamer')}`;
+      const hypeUrl = getHypeSearchUrl(mg.name, monetizationSettings);
+      const nuuvemUrl = getNuuvemSearchUrl(mg.name, monetizationSettings);
       const amazonUrl = isPc
         ? undefined
         : `https://www.amazon.com.br/s?k=${encodeURIComponent(mg.name + ' ' + mg.platform + ' midia fisica console')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId || 'albertgames-20')}`;
@@ -869,11 +842,8 @@ export default function App() {
           steam: isPc ? `https://store.steampowered.com/search/?term=${encodeURIComponent(mg.name)}` : undefined
         }
       });
-      return;
-    }
-
-    // 2. Se for SteamGame
-    if (item.achievements_unlocked !== undefined) {
+    } else if (item.achievements_unlocked !== undefined) {
+      // 2. Se for SteamGame
       const sg = item as SteamGame;
       const affiliate = getAffiliateUrls(sg, monetizationSettings);
       setModalGame({
@@ -900,21 +870,16 @@ export default function App() {
         buyUrls: {
           nuuvem: affiliate.nuuvem,
           hype: affiliate.hypeGames,
-          amazon: undefined, // Amazon só serve para jogos de console
+          amazon: undefined,
           steam: `https://store.steampowered.com/app/${sg.id}`
         }
       });
-      return;
-    }
-
-    // 3. Se for DealItem
-    if (item.store && item.deal_price !== undefined) {
+    } else if (item.store && item.deal_price !== undefined) {
+      // 3. Se for DealItem
       const d = item as DealItem;
       const isPc = d.platform === 'PC';
-      const sid = monetizationSettings.rakutenSid || '4770537';
-      const mid = monetizationSettings.hypeMid || '53304';
-      const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(d.name)}`)}`;
-      const nuuvemUrl = `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(d.name)}&partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId || 'albertgamer')}`;
+      const hypeUrl = getHypeSearchUrl(d.name, monetizationSettings);
+      const nuuvemUrl = getNuuvemSearchUrl(d.name, monetizationSettings);
       const amazonUrl = isPc
         ? undefined
         : `https://www.amazon.com.br/s?k=${encodeURIComponent(d.name + ' ' + d.platform + ' midia fisica console')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId || 'albertgames-20')}`;
@@ -944,50 +909,67 @@ export default function App() {
           steam: isPc ? `https://store.steampowered.com/search/?term=${encodeURIComponent(d.name)}` : undefined
         }
       });
-      return;
+    } else {
+      // 4. Se for item dos Destaques do Dia ou Busca Universal
+      const isPc = !item.platform || item.platform === 'PC' || item.source === 'steam' || String(item.id).match(/^\d+$/);
+      const hypeUrl = getHypeSearchUrl(item.name, monetizationSettings);
+      const nuuvemUrl = getNuuvemSearchUrl(item.name, monetizationSettings);
+      const amazonUrl = isPc
+        ? undefined
+        : `https://www.amazon.com.br/s?k=${encodeURIComponent(item.name + ' ' + (item.platform || 'console') + ' midia fisica console')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId || 'albertgames-20')}`;
+
+      const foundInLibrary = INITIAL_GAMES.find((g) => g.id === item.id || g.name.toLowerCase() === item.name.toLowerCase());
+      const resolvedImage = item.header_image || item.image || item.banner || foundInLibrary?.header_image || FALLBACK_GAME_COVER;
+
+      setModalGame({
+        id: item.id || `search-${Date.now()}`,
+        name: item.name,
+        developer: item.developer || foundInLibrary?.developer || "Produtora Oficial",
+        release_year: item.release_year || foundInLibrary?.release_year || 2024,
+        image: resolvedImage,
+        color: item.color || foundInLibrary?.color || "#66c0f4",
+        user_rating: review?.score ? Math.round(review.score * 10) : item.user_rating || item.rating || foundInLibrary?.user_rating || 92,
+        price_formatted: item.price_formatted || item.price || (foundInLibrary ? foundInLibrary.price_formatted : "Consulte na Loja"),
+        regular_price: item.regular_price || foundInLibrary?.current_price_brl || 0,
+        deal_price: item.deal_price || (item.discount_percent ? Math.round((item.regular_price || 200) * (1 - item.discount_percent / 100)) : 0),
+        discount_percent: item.discount_percent || item.discount || 0,
+        genres: item.genres || foundInLibrary?.genres || ["Ação / Aventura", "Multiplataforma"],
+        platform_label: item.platform_label || item.source || "Steam & Lojas Parceiras",
+        short_description: item.review_summary || item.short_description || foundInLibrary?.short_description || `Título consagrado no mercado gamer. Consulte disponibilidade em tempo real, análises da crítica especializada e ative sua chave nas lojas oficiais parceiras com menores taxas e entrega rápida.`,
+        review_verdict: review?.verdictLead || item.review_summary || "Excelente recepção crítica e forte engajamento da comunidade de jogadores.",
+        headline: review?.headline || `Análise & Dados de Mercado: ${item.name}`,
+        pros: review?.pros || ["Gráficos e jogabilidade de alto nível", "Disponível nas principais lojas digitais parceiras", "Suporte a múltiplos idiomas e controles"],
+        cons: review?.cons || ["Verifique os requisitos mínimos do seu sistema antes da instalação"],
+        specs: realSpecs,
+        buyUrls: {
+          nuuvem: nuuvemUrl,
+          hype: hypeUrl,
+          amazon: amazonUrl,
+          steam: item.id ? `https://store.steampowered.com/app/${item.id}` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.name)}`
+        }
+      });
     }
 
-    // 4. Se for item dos Destaques do Dia ou Busca Universal
-    const isPc = !item.platform || item.platform === 'PC' || item.source === 'steam' || String(item.id).match(/^\d+$/);
-    const sid = monetizationSettings.rakutenSid || '4770537';
-    const mid = monetizationSettings.hypeMid || '53304';
-    const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(item.name)}`)}`;
-    const nuuvemUrl = `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(item.name)}&partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId || 'albertgamer')}`;
-    const amazonUrl = isPc
-      ? undefined
-      : `https://www.amazon.com.br/s?k=${encodeURIComponent(item.name + ' ' + (item.platform || 'console') + ' midia fisica console')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId || 'albertgames-20')}`;
-
-    // Puxa do catálogo da biblioteca se existir para enriquecer os dados
-    const foundInLibrary = INITIAL_GAMES.find((g) => g.id === item.id || g.name.toLowerCase() === item.name.toLowerCase());
-    const resolvedImage = item.header_image || item.image || item.banner || foundInLibrary?.header_image || FALLBACK_GAME_COVER;
-
-    setModalGame({
-      id: item.id || `search-${Date.now()}`,
-      name: item.name,
-      developer: item.developer || foundInLibrary?.developer || "Produtora Oficial",
-      release_year: item.release_year || foundInLibrary?.release_year || 2024,
-      image: resolvedImage,
-      color: item.color || foundInLibrary?.color || "#66c0f4",
-      user_rating: review?.score ? Math.round(review.score * 10) : item.user_rating || item.rating || foundInLibrary?.user_rating || 92,
-      price_formatted: item.price_formatted || item.price || (foundInLibrary ? foundInLibrary.price_formatted : "Consulte na Loja"),
-      regular_price: item.regular_price || foundInLibrary?.current_price_brl || 0,
-      deal_price: item.deal_price || (item.discount_percent ? Math.round((item.regular_price || 200) * (1 - item.discount_percent / 100)) : 0),
-      discount_percent: item.discount_percent || item.discount || 0,
-      genres: item.genres || foundInLibrary?.genres || ["Ação / Aventura", "Multiplataforma"],
-      platform_label: item.platform_label || item.source || "Steam & Lojas Parceiras",
-      short_description: item.review_summary || item.short_description || foundInLibrary?.short_description || `Título consagrado no mercado gamer. Consulte disponibilidade em tempo real, análises da crítica especializada e ative sua chave nas lojas oficiais parceiras com menores taxas e entrega rápida.`,
-      review_verdict: review?.verdictLead || item.review_summary || "Excelente recepção crítica e forte engajamento da comunidade de jogadores.",
-      headline: review?.headline || `Análise & Dados de Mercado: ${item.name}`,
-      pros: review?.pros || ["Gráficos e jogabilidade de alto nível", "Disponível nas principais lojas digitais parceiras", "Suporte a múltiplos idiomas e controles"],
-      cons: review?.cons || ["Verifique os requisitos mínimos do seu sistema antes da instalação"],
-      specs: realSpecs,
-      buyUrls: {
-        nuuvem: nuuvemUrl,
-        hype: hypeUrl,
-        amazon: amazonUrl,
-        steam: item.id ? `https://store.steampowered.com/app/${item.id}` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.name)}`
-      }
-    });
+    // Consulta os requisitos reais oficiais ao vivo na API da Steam usando o AppID resolvido
+    const targetSteamId = getSteamAppId(item.id, item.name);
+    if (targetSteamId) {
+      fetchLiveGameDetails(targetSteamId).then(live => {
+        if (live && live.specs) {
+          setModalGame(prev => {
+            if (!prev) return prev;
+            const currentAppId = getSteamAppId(prev.id, prev.name);
+            if (currentAppId !== targetSteamId) return prev;
+            return {
+              ...prev,
+              specs: live.specs,
+              developer: live.developer || prev.developer,
+              user_rating: live.user_rating || prev.user_rating,
+              price_formatted: live.price?.price_formatted || prev.price_formatted,
+            };
+          });
+        }
+      });
+    }
   };
 
   // Manipuladores de Monetização
@@ -1008,35 +990,119 @@ export default function App() {
   };
 
   const handleTriggerAiReview = (gameId: string) => {
-    const game = INITIAL_GAMES.find((g) => g.id === gameId);
-    if (!game) return;
+    const foundInLibrary = INITIAL_GAMES.find((g) => g.id === gameId);
+    const foundInRecommended = RECOMMENDED_GAMES_OF_THE_DAY.find((g) => g.id === gameId);
+    const foundInDeals = DEALS_DATABASE.find((d) => d.id === gameId || `live-${d.id}` === gameId);
+
+    const gameTarget = foundInLibrary || (foundInRecommended ? {
+      id: foundInRecommended.id,
+      name: foundInRecommended.name,
+      hours_played: 140,
+      user_rating: foundInRecommended.user_rating,
+      genres: foundInRecommended.genres,
+      current_price_brl: foundInRecommended.regular_price,
+      price_formatted: foundInRecommended.price_formatted
+    } : null) || (foundInDeals ? {
+      id: foundInDeals.id,
+      name: foundInDeals.name,
+      hours_played: 90,
+      user_rating: foundInDeals.rating,
+      genres: [foundInDeals.platform],
+      current_price_brl: foundInDeals.deal_price,
+      price_formatted: `R$ ${foundInDeals.deal_price.toFixed(2).replace('.', ',')}`
+    } : null) || {
+      id: gameId,
+      name: gameId.replace(/[-_]/g, ' '),
+      hours_played: 80,
+      user_rating: 90,
+      genres: ['Ação / RPG'],
+      current_price_brl: 99.9,
+      price_formatted: 'R$ 99,90'
+    };
+
     setIsGeneratingAiReview(true);
     setTimeout(() => {
-      const newReview = generateProceduralAiReview(game, monetizationSettings.editorialName);
+      const newReview = generateProceduralAiReview(gameTarget, monetizationSettings.editorialName);
       setReviews((prev) => ({
         ...prev,
         [gameId]: newReview
       }));
       setIsGeneratingAiReview(false);
-    }, 700);
+    }, 600);
   };
 
-  // Jogos ativos filtrados pelo preset atual
-  const presetGames = useMemo(() => {
+  // Catálogo unificado que combina jogos base com dados e preços ao vivo recebidos das APIs
+  const activeLibraryGames = useMemo(() => {
     const filterFn = PRESETS[activePreset].filter;
-    return INITIAL_GAMES.filter(filterFn);
-  }, [activePreset]);
 
-  // Estatísticas agregadas calculadas
+    let baseList = INITIAL_GAMES.map((g) => {
+      const liveMatch = liveDeals.find(
+        (ld) => ld.id === g.id || ld.name.toLowerCase() === g.name.toLowerCase()
+      );
+      if (liveMatch) {
+        return {
+          ...g,
+          current_price_brl: liveMatch.deal_price,
+          price_formatted: liveMatch.price_formatted,
+          discount_percent: liveMatch.discount_percent,
+          user_rating: liveMatch.rating || g.user_rating,
+        };
+      }
+      return g;
+    });
+
+    // Injeta ofertas ao vivo que não estavam na lista estática inicial (ex: Rise of the Tomb Raider, GTA Trilogy, GTA IV)
+    liveDeals.forEach((ld) => {
+      const exists = baseList.some(
+        (g) => g.id === ld.id || g.name.toLowerCase() === ld.name.toLowerCase()
+      );
+      if (!exists) {
+        baseList.push({
+          id: ld.id,
+          name: ld.name,
+          color: '#38bdf8',
+          hover_color: '#0284c7',
+          hours_played: Math.round((60 + (parseInt(ld.id, 10) % 150)) * 10) / 10,
+          genres: ['Ação', 'Destaque Ao Vivo'],
+          user_rating: ld.rating || 90,
+          rating_label: 'Muito Positivas',
+          peak_24h_players: Math.round(18000 + (parseInt(ld.id, 10) % 50000)),
+          current_price_brl: ld.deal_price,
+          price_formatted: ld.price_formatted,
+          discount_percent: ld.discount_percent,
+          developer: 'Produtora Oficial',
+          release_year: 2023,
+          achievements_unlocked: 24,
+          total_achievements: 35,
+          header_image: ld.image,
+          short_description: ld.review_verdict
+        });
+      }
+    });
+
+    return baseList.filter(filterFn);
+  }, [activePreset, liveDeals]);
+
+  // Jogos filtrados dinamicamente pelo Nicho / Gênero selecionado no painel Analytics
+  const genreFilteredGames = useMemo(() => {
+    if (selectedGenre === 'Todos') return activeLibraryGames;
+    return activeLibraryGames.filter((g) => g.genres.includes(selectedGenre));
+  }, [activeLibraryGames, selectedGenre]);
+
+  // Estatísticas agregadas calculadas reativamente a partir dos jogos filtrados por nicho
   const stats = useMemo(() => {
-    const totalHours = Math.round(presetGames.reduce((acc, g) => acc + g.hours_played, 0) * 10) / 10;
-    const avgRating = presetGames.length > 0 ? Math.round((presetGames.reduce((acc, g) => acc + g.user_rating, 0) / presetGames.length) * 10) / 10 : 0;
-    const totalValue = Math.round(presetGames.reduce((acc, g) => acc + g.current_price_brl, 0) * 100) / 100;
-    const mostPlayed = presetGames.length > 0 ? [...presetGames].sort((a, b) => b.hours_played - a.hours_played)[0] : null;
+    const totalHours = Math.round(genreFilteredGames.reduce((acc, g) => acc + g.hours_played, 0) * 10) / 10;
+    const avgRating = genreFilteredGames.length > 0
+      ? Math.round((genreFilteredGames.reduce((acc, g) => acc + g.user_rating, 0) / genreFilteredGames.length) * 10) / 10
+      : 0;
+    const totalValue = Math.round(genreFilteredGames.reduce((acc, g) => acc + g.current_price_brl, 0) * 100) / 100;
+    const mostPlayed = genreFilteredGames.length > 0
+      ? [...genreFilteredGames].sort((a, b) => b.hours_played - a.hours_played)[0]
+      : null;
 
-    // Distribuição de gênero
+    // Distribuição por gênero
     const genreMap: Record<string, number> = {};
-    presetGames.forEach((g) => {
+    genreFilteredGames.forEach((g) => {
       const primary = g.genres[0] || 'Outros';
       genreMap[primary] = (genreMap[primary] || 0) + g.hours_played;
     });
@@ -1046,24 +1112,23 @@ export default function App() {
     );
 
     return {
-      total_games: presetGames.length,
+      total_games: genreFilteredGames.length,
       total_hours: totalHours,
       avg_rating: avgRating,
       total_library_value_brl: totalValue,
       most_played_game: mostPlayed,
       genre_distribution: sortedGenres
     };
-  }, [presetGames]);
+  }, [genreFilteredGames]);
 
-  // Lista de jogos filtrada para a tabela
+  // Lista de jogos filtrada para a tabela (com busca por texto e ordenação)
   const tableGames = useMemo(() => {
-    let result = presetGames.filter((game) => {
+    let result = genreFilteredGames.filter((game) => {
       const matchesSearch =
         !searchTerm ||
         game.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         game.developer.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesGenre = selectedGenre === 'Todos' || game.genres.includes(selectedGenre);
-      return matchesSearch && matchesGenre;
+      return matchesSearch;
     });
 
     result.sort((a, b) => {
@@ -1087,12 +1152,12 @@ export default function App() {
     });
 
     return result;
-  }, [presetGames, searchTerm, selectedGenre, sortBy, sortAsc]);
+  }, [genreFilteredGames, searchTerm, sortBy, sortAsc]);
 
   // Top 6 jogos ordenados por horas
   const top6 = useMemo(() => {
-    return [...presetGames].sort((a, b) => b.hours_played - a.hours_played).slice(0, 6);
-  }, [presetGames]);
+    return [...genreFilteredGames].sort((a, b) => b.hours_played - a.hours_played).slice(0, 6);
+  }, [genreFilteredGames]);
 
   const barPeriodRatio = useMemo(() => {
     if (periodFilter === '1m') return 0.16;
@@ -1376,7 +1441,7 @@ export default function App() {
             genre_colors: Object.fromEntries(
               Object.entries(stats.genre_distribution).map(([genre]) => [genre, getGenreColor(genre)])
             ),
-            top_games: presetGames.slice(0, 5)
+            top_games: activeLibraryGames.slice(0, 5)
           },
           null,
           2
@@ -1980,7 +2045,7 @@ DEALS_DATABASE = [
         "deal_price": 151.73,
         "discount_percent": 34,
         "rating": 93,
-        "deal_url": "https://www.nuuvem.com/item/elden-ring",
+        "deal_url": "https://www.nuuvem.com/br-pt/catalog/search?q=Elden%20Ring&partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
         "badge": "Menor Preço em 3 Meses",
         "review_verdict": "Obra-prima imperdível do estilo soulslike em mundo aberto. Vale cada centavo."
@@ -1995,7 +2060,7 @@ DEALS_DATABASE = [
         "deal_price": 99.95,
         "discount_percent": 50,
         "rating": 89,
-        "deal_url": "https://www.nuuvem.com/item/cyberpunk-2077",
+        "deal_url": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077-microsoft",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
         "badge": "Sucesso de Vendas",
         "review_verdict": "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
@@ -2040,7 +2105,7 @@ DEALS_DATABASE = [
         "deal_price": 79.96,
         "discount_percent": 60,
         "rating": 96,
-        "deal_url": "https://www.nuuvem.com/item/god-of-war",
+        "deal_url": "https://www.nuuvem.com/br-pt/catalog/search?q=God%20of%20War&partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
         "badge": "PlayStation no PC -60%",
         "review_verdict": "A jornada nórdica de Kratos e Atreus com combate visceral e excelente port de PC."
@@ -2115,7 +2180,7 @@ DEALS_DATABASE = [
         "deal_price": 124.50,
         "discount_percent": 50,
         "rating": 88,
-        "deal_url": "https://www.nuuvem.com",
+        "deal_url": "https://www.nuuvem.com/br-pt/catalog/search?q=Forza%20Horizon%205&partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1551360/header.jpg",
         "badge": "Corrida em Mundo Aberto -50%",
         "review_verdict": "O melhor jogo de corrida arcade da atualidade, ambientado no vibrante México."
@@ -3432,7 +3497,7 @@ if __name__ == "__main__":
             const cfg = getAffiliateConfig();
             const partner = encodeURIComponent(cfg.nuuvemPartnerId || 'albertgamer');
             const cleanName = encodeURIComponent((game.name || '').trim());
-            return \`https://www.nuuvem.com/catalog/search/\${cleanName}?partner=\${partner}\`;
+            return \`https://www.nuuvem.com/br-pt/catalog/search?q=\${cleanName}&partner=\${partner}\`;
         }
 
         function getAffiliateHypeUrl(gameName) {
@@ -4980,6 +5045,23 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                 <span>Simulação</span>
               </span>
             </div>
+
+            {/* Status de Sincronização ao Vivo com Lojas Oficiais */}
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Preços & Ofertas ao Vivo • Atualizado às {lastSyncTime}</span>
+              </span>
+              <button
+                onClick={syncLiveStoreData}
+                disabled={isSyncingLive}
+                className="py-1 px-2.5 rounded-lg text-slate-300 hover:text-white bg-[#171a21] border border-[#2a475e] hover:border-[#66c0f4] transition flex items-center gap-1 text-[11px] font-semibold shadow-sm"
+                title="Sincronizar promoções em tempo real"
+              >
+                <RefreshCw className={`w-3 h-3 ${isSyncingLive ? 'animate-spin text-cyan-400' : ''}`} />
+                <span className="hidden sm:inline">{isSyncingLive ? 'Atualizando...' : 'Sincronizar'}</span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -4998,7 +5080,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                 <div className="space-y-2 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>SELEÇÃO DIÁRIA DA IMPRENSA & COMUNIDADE</span>
+                    <span>SELEÇÃO DIÁRIA • {getTodayFormattedDate().toUpperCase()}</span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                     Games Indicados do Dia & Resumos de Críticas
@@ -5041,10 +5123,19 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                     return true;
                   })
                   .map((game) => {
-                    const sid = monetizationSettings.rakutenSid || '4770537';
-                    const mid = monetizationSettings.hypeMid || '53304';
-                    const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(game.name)}`)}`;
-                    const nuuvemUrl = `https://www.nuuvem.com/item/${game.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+                    const hypeUrl = getHypeSearchUrl(game.name, monetizationSettings);
+                    const nuuvemUrl = getNuuvemSearchUrl(game.name, monetizationSettings);
+                    
+                    let targetOfferUrl = nuuvemUrl;
+                    if (monetizationSettings.customGameLinks?.[game.name]) {
+                      targetOfferUrl = monetizationSettings.customGameLinks[game.name];
+                    } else if (game.source_deal?.includes('Steam') || (game as any).store === 'Steam Store' || (game as any).store === 'Steam') {
+                      targetOfferUrl = `https://store.steampowered.com/app/${game.id}/`;
+                    } else if (game.source_deal?.includes('Hype') || (game as any).store === 'Hype Games') {
+                      targetOfferUrl = hypeUrl;
+                    } else if (game.source_deal?.includes('Amazon') || (game as any).store === 'Amazon') {
+                      targetOfferUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(game.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId || 'albertgames-20')}`;
+                    }
 
                     return (
                       <div
@@ -5120,7 +5211,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                               <span>Ver Dados</span>
                             </button>
                             <a
-                              href={nuuvemUrl}
+                              href={targetOfferUrl}
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
@@ -5644,7 +5735,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                               const hours = stats.genre_distribution[genre] || 0;
                               const percent = stats.total_hours > 0 ? ((hours / stats.total_hours) * 100).toFixed(1) : '0';
                               
-                              const gamesInGenre = presetGames.filter(g => g.genres.includes(genre));
+                              const gamesInGenre = activeLibraryGames.filter((g: SteamGame) => g.genres.includes(genre));
                               const topInGenre = [...gamesInGenre].sort((a, b) => b.hours_played - a.hours_played)[0];
 
                               return [
@@ -5940,7 +6031,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
 
               {/* Rodapé da tabela */}
               <div className="px-6 py-3.5 bg-[#171a21] border-t border-[#2a475e] flex items-center justify-between text-xs text-slate-400">
-                <span>Exibindo {tableGames.length} de {presetGames.length} jogos</span>
+                <span>Exibindo {tableGames.length} de {activeLibraryGames.length} jogos</span>
                 <span className="font-mono">Fonte: Steam Web & Dados Simulados</span>
               </div>
 
@@ -5994,16 +6085,32 @@ Como rodar e fazer o Deploy no Render em 3 passos:
 
             {/* Grade Dinâmica de Ofertas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {DEALS_DATABASE
+              {[
+                ...liveDeals.map((ld): DealItem => ({
+                  id: `live-${ld.id}`,
+                  name: ld.name,
+                  platform: 'PC',
+                  platform_label: 'PC / Steam Oficial',
+                  regular_price: ld.regular_price,
+                  deal_price: ld.deal_price,
+                  discount_percent: ld.discount_percent,
+                  badge: ld.badge,
+                  store: 'Steam Store',
+                  deal_url: `https://store.steampowered.com/app/${ld.id}`,
+                  image: ld.image,
+                  rating: ld.rating,
+                  review_verdict: ld.review_verdict,
+                })),
+                ...DEALS_DATABASE
+              ]
+                .filter((d, index, self) => self.findIndex(t => t.name.toLowerCase() === d.name.toLowerCase()) === index)
                 .filter((d) => dealsPlatform === 'all' || d.platform.toLowerCase() === dealsPlatform.toLowerCase())
                 .map((d) => {
                   let buyUrl = d.deal_url;
                   if (d.store === 'Hype Games') {
-                    const sid = monetizationSettings.rakutenSid || '4770537';
-                    const mid = monetizationSettings.hypeMid || '53304';
-                    buyUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(d.name)}`)}`;
+                    buyUrl = getHypeSearchUrl(d.name, monetizationSettings);
                   } else if (d.store === 'Nuuvem') {
-                    buyUrl = `https://www.nuuvem.com/item/${d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+                    buyUrl = getNuuvemSearchUrl(d.name, monetizationSettings);
                   } else if (d.store === 'Amazon') {
                     buyUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(d.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
                   }
@@ -6187,10 +6294,8 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {universalSearchResults.map((item) => {
-                    const sid = monetizationSettings.rakutenSid || '4770537';
-                    const mid = monetizationSettings.hypeMid || '53304';
-                    const hypeUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(item.name)}`)}`;
-                    const nuuvemUrl = `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(item.name)}&partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId || 'albertgamer')}`;
+                    const hypeUrl = getHypeSearchUrl(item.name, monetizationSettings);
+                    const nuuvemUrl = getNuuvemSearchUrl(item.name, monetizationSettings);
 
                     return (
                       <div
@@ -6415,7 +6520,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                     if (game.store === 'Hype Games') {
                       directBuyUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(game.name)}`)}`;
                     } else if (game.store === 'Nuuvem') {
-                      directBuyUrl = `https://www.nuuvem.com/item/${game.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}?partner=${encodeURIComponent(monetizationSettings.nuuvemPartnerId)}`;
+                      directBuyUrl = getNuuvemSearchUrl(game.name, monetizationSettings);
                     } else if (game.store === 'Amazon') {
                       directBuyUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(game.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
                     }
@@ -7025,24 +7130,24 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                     <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
-                      <span className="text-[10px] text-slate-400 block">Sistema Operacional</span>
-                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.os}</strong>
+                      <span className="text-[10px] text-slate-400 block mb-1">Sistema Operacional</span>
+                      <strong className="text-slate-200 font-mono text-[11px] block break-words leading-relaxed">{modalGame.specs.os}</strong>
                     </div>
                     <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
-                      <span className="text-[10px] text-slate-400 block">Processador (CPU)</span>
-                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.processor}</strong>
+                      <span className="text-[10px] text-slate-400 block mb-1">Processador (CPU)</span>
+                      <strong className="text-slate-200 font-mono text-[11px] block break-words leading-relaxed">{modalGame.specs.processor}</strong>
                     </div>
                     <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
-                      <span className="text-[10px] text-slate-400 block">Memória RAM</span>
-                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.memory}</strong>
+                      <span className="text-[10px] text-slate-400 block mb-1">Memória RAM</span>
+                      <strong className="text-slate-200 font-mono text-[11px] block break-words leading-relaxed">{modalGame.specs.memory}</strong>
                     </div>
                     <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60">
-                      <span className="text-[10px] text-slate-400 block">Placa de Vídeo (GPU)</span>
-                      <strong className="text-slate-200 font-mono text-[11px] truncate block">{modalGame.specs.graphics}</strong>
+                      <span className="text-[10px] text-slate-400 block mb-1">Placa de Vídeo (GPU)</span>
+                      <strong className="text-slate-200 font-mono text-[11px] block break-words leading-relaxed">{modalGame.specs.graphics}</strong>
                     </div>
                     <div className="bg-[#101822] p-2.5 rounded-lg border border-[#2a475e]/60 sm:col-span-2 lg:col-span-2">
-                      <span className="text-[10px] text-slate-400 block">Armazenamento Livre</span>
-                      <strong className="text-emerald-400 font-mono text-[11px] truncate block">{modalGame.specs.storage}</strong>
+                      <span className="text-[10px] text-slate-400 block mb-1">Armazenamento Livre</span>
+                      <strong className="text-emerald-400 font-mono text-[11px] block break-words leading-relaxed">{modalGame.specs.storage}</strong>
                     </div>
                   </div>
                 </div>
@@ -7071,7 +7176,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                       <ShoppingCart className="w-4 h-4" />
                       <span>Nuuvem</span>
                     </div>
-                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">MID 46796</span>
+                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Tag: {monetizationSettings.nuuvemPartnerId || 'albertgamer'}</span>
                   </a>
 
                   <a
@@ -7084,7 +7189,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                       <Gift className="w-4 h-4" />
                       <span>Hype Games</span>
                     </div>
-                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">MID 53304</span>
+                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Loja Oficial</span>
                   </a>
 
                   {modalGame.buyUrls.amazon ? (
