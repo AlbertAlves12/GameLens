@@ -763,7 +763,17 @@ export default function App() {
   const [monetizationSettings, setMonetizationSettings] = useState<MonetizationSettings>(() => {
     try {
       const saved = localStorage.getItem('steam_lens_monetization');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...DEFAULT_MONETIZATION_SETTINGS,
+          ...parsed,
+          customGameLinks: {
+            ...DEFAULT_MONETIZATION_SETTINGS.customGameLinks,
+            ...(parsed.customGameLinks || {})
+          }
+        };
+      }
     } catch {
       // fallback
     }

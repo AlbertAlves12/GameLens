@@ -109,13 +109,13 @@ export const DEALS_DATABASE: DealItem[] = [
     id: "deal-witcher3",
     name: "The Witcher 3: Wild Hunt - Complete Edition",
     platform: "PC",
-    platform_label: "PC / Steam",
-    store: "Hype Games",
+    platform_label: "PC / Steam & Nuuvem",
+    store: "Nuuvem",
     regular_price: 129.99,
     deal_price: 32.49,
     discount_percent: 75,
     rating: 97,
-    deal_url: "https://hype.games/br/search?q=The%20Witcher%203",
+    deal_url: "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679623634&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fbundle%2fthe-witcher-3-wild-hunt-remastered-nintendo-switch-2",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
     badge: "Desconto Histórico -75%",
     review_verdict: "Um dos maiores RPGs da história. Por esse valor, é compra obrigatória."
@@ -305,8 +305,8 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
     developer: "CD PROJEKT RED",
     release_year: 2015,
-    store: "Hype Games",
-    store_url: "https://hype.games/br/search?q=The%20Witcher%203",
+    store: "Nuuvem",
+    store_url: "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679623634&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fbundle%2fthe-witcher-3-wild-hunt-remastered-nintendo-switch-2",
     description: "Encarne Geralt de Rívia em um dos mundos de fantasia sombria mais ricos da história dos jogos. Inclui as aclamadas expansões Hearts of Stone e Blood and Wine.",
     review_verdict: "O padrão-ouro das missões secundárias e narrativa madura nos RPGs modernos. Com 75% OFF, é item indispensável em qualquer biblioteca.",
     headline: "O RPG definitivo da década passada ainda supera a maioria dos lançamentos atuais",
@@ -793,7 +793,10 @@ export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   editorialName: 'GameLens Editorial & Reviews',
   customGameLinks: {
     "Cyberpunk 2077": "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer",
-    "Cyberpunk 2077: Ultimate Edition": "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer"
+    "Cyberpunk 2077: Ultimate Edition": "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer",
+    "The Witcher 3": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679623634&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fbundle%2fthe-witcher-3-wild-hunt-remastered-nintendo-switch-2",
+    "The Witcher 3: Wild Hunt": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679623634&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fbundle%2fthe-witcher-3-wild-hunt-remastered-nintendo-switch-2",
+    "The Witcher 3: Wild Hunt - Complete Edition": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679623634&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fbundle%2fthe-witcher-3-wild-hunt-remastered-nintendo-switch-2"
   }
 };
 
@@ -1044,27 +1047,28 @@ export const NUUVEM_VERIFIED_SLUGS: Record<string, string> = {
  * Evita erros 404 redirecionando para slugs verificados ou catálogo de busca da Nuuvem
  */
 export function getNuuvemSearchUrl(gameName: string, config: MonetizationSettings): string {
-  const customLink = config.customGameLinks?.[gameName];
-  if (customLink) {
-    // Se o customLink for LinkSynergy que costuma falhar por aprovação, redireciona para Nuuvem direta
-    if (customLink.includes('linksynergy.com') && customLink.includes('nuuvem.com')) {
-      const match = customLink.match(/murl=([^&]+)/);
-      if (match && match[1]) {
-        try {
-          const decoded = decodeURIComponent(match[1]);
-          return `${decoded.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077')}?partner=albertgamer`;
-        } catch {
-          // fallback
-        }
-      }
+  const trimmed = gameName.trim();
+  const lower = trimmed.toLowerCase();
+  
+  let customLink = config.customGameLinks?.[trimmed] || config.customGameLinks?.[gameName];
+  if (!customLink) {
+    if (lower.includes('witcher')) {
+      customLink = config.customGameLinks?.["The Witcher 3: Wild Hunt - Complete Edition"] || 
+                   config.customGameLinks?.["The Witcher 3: Wild Hunt"] ||
+                   config.customGameLinks?.["The Witcher 3"];
+    } else if (lower.includes('cyberpunk')) {
+      customLink = config.customGameLinks?.["Cyberpunk 2077: Ultimate Edition"] || 
+                   config.customGameLinks?.["Cyberpunk 2077"];
     }
+  }
+
+  if (customLink) {
     return customLink.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077');
   }
 
   const rawPartner = config.nuuvemPartnerId || 'albertgamer';
   // Sanitiza caso o usuário tenha colado sem querer link ou parâmetros com &
   const partner = encodeURIComponent((rawPartner.includes('&') || rawPartner.includes('=')) ? 'albertgamer' : rawPartner);
-  const trimmed = gameName.trim();
   const slug = NUUVEM_VERIFIED_SLUGS[trimmed];
 
   if (slug) {
@@ -1073,7 +1077,6 @@ export function getNuuvemSearchUrl(gameName: string, config: MonetizationSetting
 
   // Limpa caracteres especiais e simplifica nomes compostos para garantir retorno 200 imediato
   let cleanSearch = trimmed;
-  const lower = trimmed.toLowerCase();
   if (lower.includes('trilogy') && (lower.includes('grand theft auto') || lower.includes('gta'))) {
     cleanSearch = 'Grand Theft Auto';
   } else if (lower.includes('witcher')) {

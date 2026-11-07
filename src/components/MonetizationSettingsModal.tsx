@@ -144,9 +144,43 @@ export const MonetizationSettingsModal: React.FC<SettingsModalProps> = ({
                 />
               </div>
 
+              {/* Link Customizado: The Witcher 3 */}
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
-                  <span className="font-semibold">Colar Link Customizado / HTML de Jogo (Ex: Cyberpunk):</span>
+                  <span className="font-semibold text-emerald-400">Link Customizado / Rakuten Nuuvem — The Witcher 3:</span>
+                  <span className="text-[10px] text-cyan-400">Aceita link direto ou tag &lt;a href="..."&gt;</span>
+                </div>
+                <textarea
+                  rows={2}
+                  value={formData.customGameLinks?.["The Witcher 3: Wild Hunt - Complete Edition"] || formData.customGameLinks?.["The Witcher 3: Wild Hunt"] || ''}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    let finalUrl = val;
+                    if (val.includes('href=')) {
+                      const match = val.match(/href=["']([^"']+)["']/i);
+                      if (match && match[1]) finalUrl = match[1];
+                    }
+
+                    setFormData({
+                      ...formData,
+                      customGameLinks: {
+                        ...(formData.customGameLinks || {}),
+                        "The Witcher 3": finalUrl,
+                        "The Witcher 3: Wild Hunt": finalUrl,
+                        "The Witcher 3: Wild Hunt - Complete Edition": finalUrl
+                      }
+                    });
+                  }}
+                  placeholder='Cole o link da Rakuten ou código HTML do The Witcher 3...'
+                  className="w-full bg-[#101822] border border-[#2a475e] focus:border-[#66c0f4] rounded-lg px-3 py-2 text-[11px] text-white outline-none font-mono"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">Ativado nos cards e no botão 'Nuuvem' de The Witcher 3 com seu rastreamento Rakuten.</span>
+              </div>
+
+              {/* Link Customizado: Cyberpunk 2077 */}
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
+                  <span className="font-semibold text-cyan-400">Link Customizado — Cyberpunk 2077:</span>
                   <span className="text-[10px] text-emerald-400">Cole o link da Rakuten/Nuuvem ou tag &lt;a href="..."&gt;</span>
                 </div>
                 <textarea
@@ -159,7 +193,6 @@ export const MonetizationSettingsModal: React.FC<SettingsModalProps> = ({
                       const match = val.match(/href=["']([^"']+)["']/i);
                       if (match && match[1]) finalUrl = match[1];
                     }
-                    // Limpa automaticamente o slug descontinuado -microsoft que causava erro 404
                     finalUrl = finalUrl.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077');
 
                     setFormData({
