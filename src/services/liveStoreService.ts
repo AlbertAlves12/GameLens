@@ -322,7 +322,9 @@ export function getDynamicRecommendedOfTheDay(liveDeals: LiveDealData[] = []): t
           discount_percent: d.discount_percent,
           genres: poolMatch?.genres || ['Ação', 'Destaque'],
           review_summary: poolMatch?.review_summary || `Desconto em tempo real verificado hoje na loja parceira com -${d.discount_percent}% de redução sobre o preço regular.`,
-          source_deal: d.store || 'Steam / Nuuvem'
+          source_deal: d.store || 'Steam / Nuuvem',
+          is_package: d.is_package,
+          steam_url: d.steam_url
         };
       });
     }

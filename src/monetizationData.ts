@@ -85,7 +85,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 151.73,
     discount_percent: 34,
     rating: 93,
-    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Elden%20Ring&partner=albertgamer",
+    deal_url: "https://www.nuuvem.com/br-pt/item/elden-ring?partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
     badge: "Menor Preço em 3 Meses",
     review_verdict: "Obra-prima imperdível do estilo soulslike em mundo aberto. Vale cada centavo."
@@ -100,7 +100,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 99.95,
     discount_percent: 50,
     rating: 89,
-    deal_url: "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077-microsoft",
+    deal_url: "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
     badge: "Sucesso de Vendas",
     review_verdict: "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
@@ -115,7 +115,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 32.49,
     discount_percent: 75,
     rating: 97,
-    deal_url: "https://hype.games/br",
+    deal_url: "https://hype.games/br/search?q=The%20Witcher%203",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
     badge: "Desconto Histórico -75%",
     review_verdict: "Um dos maiores RPGs da história. Por esse valor, é compra obrigatória."
@@ -130,7 +130,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 98.96,
     discount_percent: 67,
     rating: 92,
-    deal_url: "https://hype.games/br",
+    deal_url: "https://hype.games/br/search?q=Red%20Dead%20Redemption%202",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg",
     badge: "Top Avaliado",
     review_verdict: "Narrativa cinematográfica sem paralelo com mundo aberto hiper-realista da Rockstar."
@@ -145,7 +145,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 79.96,
     discount_percent: 60,
     rating: 96,
-    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=God%20of%20War&partner=albertgamer",
+    deal_url: "https://www.nuuvem.com/br-pt/item/god-of-war?partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
     badge: "PlayStation no PC -60%",
     review_verdict: "A jornada nórdica de Kratos e Atreus com combate visceral e excelente port de PC."
@@ -160,7 +160,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 124.50,
     discount_percent: 50,
     rating: 97,
-    deal_url: "https://hype.games/br",
+    deal_url: "https://hype.games/br/search?q=Resident%20Evil%204",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg",
     badge: "Terror Clássico -50%",
     review_verdict: "Um dos melhores remakes já feitos na indústria. Ação intensa e visuais deslumbrantes."
@@ -175,7 +175,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 239.90,
     discount_percent: 31,
     rating: 90,
-    deal_url: "https://www.amazon.com.br",
+    deal_url: "https://www.amazon.com.br/s?k=Spider-Man+2+PS5&tag=albertgames-20",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg",
     badge: "Exclusivo PS5",
     review_verdict: "Gráficos de tirar o fôlego, exploração ágil por Nova York e combate refinado de Peter e Miles."
@@ -190,7 +190,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 95.00,
     discount_percent: 5,
     rating: 99,
-    deal_url: "https://hype.games/br",
+    deal_url: "https://hype.games/br/search?q=PlayStation%20Store",
     image: PSN_GIFTCARD_SVG,
     badge: "Crédito Digital Instantâneo",
     review_verdict: "Ativação oficial de créditos na PSN brasileira com entrega imediata e Pix."
@@ -205,7 +205,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 149.90,
     discount_percent: 17,
     rating: 98,
-    deal_url: "https://hype.games/br",
+    deal_url: "https://hype.games/br/search?q=Xbox%20Game%20Pass",
     image: XBOX_GAMEPASS_SVG,
     badge: "O Melhor Custo-Benefício Gamer",
     review_verdict: "Centenas de jogos no catálogo, lançamentos Day One, EA Play e nuvem no celular e PC."
@@ -220,7 +220,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 124.50,
     discount_percent: 50,
     rating: 88,
-    deal_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Forza%20Horizon%205&partner=albertgamer",
+    deal_url: "https://www.nuuvem.com/br-pt/catalog/search/Forza%20Horizon%205?partner=albertgamer",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1551360/header.jpg",
     badge: "Corrida em Mundo Aberto -50%",
     review_verdict: "O melhor jogo de corrida arcade da atualidade, ambientado no vibrante México."
@@ -235,7 +235,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 289.00,
     discount_percent: 28,
     rating: 96,
-    deal_url: "https://www.amazon.com.br",
+    deal_url: "https://www.amazon.com.br/s?k=Zelda+Tears+of+the+Kingdom+Nintendo+Switch&tag=albertgames-20",
     image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
     badge: "Jogo do Ano Switch",
     review_verdict: "Criatividade sem limites com a mecânica de fusão e exploração vertical fantástica."
@@ -250,7 +250,7 @@ export const DEALS_DATABASE: DealItem[] = [
     deal_price: 96.00,
     discount_percent: 4,
     rating: 99,
-    deal_url: "https://hype.games/br",
+    deal_url: "https://hype.games/br/search?q=Nintendo%20eShop",
     image: NINTENDO_GIFTCARD_SVG,
     badge: "Crédito Oficial Nintendo",
     review_verdict: "Compre jogos digitais e DLCs na eShop brasileira com facilidade e segurança."
@@ -306,7 +306,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "CD PROJEKT RED",
     release_year: 2015,
     store: "Hype Games",
-    store_url: "https://hype.games/br",
+    store_url: "https://hype.games/br/search?q=The%20Witcher%203",
     description: "Encarne Geralt de Rívia em um dos mundos de fantasia sombria mais ricos da história dos jogos. Inclui as aclamadas expansões Hearts of Stone e Blood and Wine.",
     review_verdict: "O padrão-ouro das missões secundárias e narrativa madura nos RPGs modernos. Com 75% OFF, é item indispensável em qualquer biblioteca.",
     headline: "O RPG definitivo da década passada ainda supera a maioria dos lançamentos atuais",
@@ -330,7 +330,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Rockstar Games",
     release_year: 2019,
     store: "Hype Games",
-    store_url: "https://hype.games/br",
+    store_url: "https://hype.games/br/search?q=Red%20Dead%20Redemption%202",
     description: "América, 1899. Arthur Morgan e a gangue Van der Linde são forçados a fugir pelo interior selvagem dos Estados Unidos em um conto épico sobre o fim da era dos foras da lei.",
     review_verdict: "O auge técnico do mundo aberto. Nível de detalhe, física e atuação dramática sem concorrente no mercado.",
     headline: "Um marco da ficção ocidental interativa e realismo cinematográfico",
@@ -354,7 +354,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Santa Monica Studio",
     release_year: 2022,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=God%20of%20War&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/item/god-of-war?partner=albertgamer",
     description: "Vivendo como um homem longe da sombra dos deuses, Kratos deve se adaptar a terras nórdicas desconhecidas e guiar seu filho Atreus em uma jornada visceral.",
     review_verdict: "Port primoroso para PC com suporte a DLSS, FSR e taxas de quadro desbloqueadas. Combate de peso ímpar.",
     headline: "A redenção nórdica do Fantasma de Esparta brilha com maestria nos computadores",
@@ -378,7 +378,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "CD PROJEKT RED",
     release_year: 2020,
     store: "Nuuvem",
-    store_url: "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077-microsoft",
+    store_url: "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer",
     description: "Um RPG de ação e aventura em mundo aberto ambientado em Night City, uma megalópole obcecada por poder, glamour e bio-modificações.",
     review_verdict: "A redenção completa. Com o patch 2.0 e a expansão Phantom Liberty com Idris Elba, tornou-se um dos melhores RPGs futuristas já feitos.",
     headline: "Night City ressurge como o ápice do visual ray tracing e narrativa cyberpunk",
@@ -402,7 +402,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "CAPCOM Co., Ltd.",
     release_year: 2023,
     store: "Hype Games",
-    store_url: "https://hype.games/br",
+    store_url: "https://hype.games/br/search?q=Resident%20Evil%204",
     description: "Seis anos se passaram desde o desastre em Raccoon City. Leon S. Kennedy rastreia a filha sequestrada do presidente até um vilarejo europeu aterrorizante.",
     review_verdict: "Remake exemplar que honra o clássico de 2005 e adiciona parry de faca cirúrgico, atmosfera densa e gráficos de cair o queixo na RE Engine.",
     headline: "Ação de sobrevivência em sua forma mais refinada, tensa e viciante",
@@ -426,7 +426,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "FromSoftware Inc.",
     release_year: 2022,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Elden%20Ring&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/item/elden-ring?partner=albertgamer",
     description: "Levante-se, Maculado, e seja guiado pela graça para portar o poder do Anel Prístino e se tornar um Lorde Prístino nas Terras Intermédias.",
     review_verdict: "Vencedor incontestável de Jogo do Ano. A liberdade de desbravar castelos e catacumbas em qualquer ordem redefine a exploração gamer.",
     headline: "A apoteose do design de mundos abertos e combate desafiador",
@@ -450,7 +450,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Larian Studios",
     release_year: 2023,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Baldur%27s%20Gate%203&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search/Baldurs%20Gate%203?partner=albertgamer",
     description: "Reúna seu grupo e retorne aos Reinos Esquecidos em uma história de companheirismo, traição, sacrifício e o apelo do poder supremo.",
     review_verdict: "O RPG definitivo dos tempos modernos. Liberdade absoluta de decisões, combate tático tridimensional e centenas de horas sem qualquer microtransação.",
     headline: "O novo marco histórico dos RPGs: liberdade absoluta que redefine os videogames",
@@ -474,7 +474,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Rockstar North",
     release_year: 2015,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Grand%20Theft%20Auto%20V&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search/Grand%20Theft%20Auto%20V?partner=albertgamer",
     description: "Quando um jovem malandro de rua, um ladrão de bancos aposentado e um psicopata aterrorizante se veem envolvidos com criminosos e o submundo do governo, eles precisam realizar uma série de golpes arriscados.",
     review_verdict: "Um dos jogos mais vendidos de toda a história humana. A campanha de Michael, Trevor e Franklin é pura sátira social de alto calibre com multiplayer vivo.",
     headline: "O titã do entretenimento continua relevante e divertido mesmo após mais de uma década",
@@ -500,7 +500,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Playground Games",
     release_year: 2021,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Forza%20Horizon%205&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search/Forza%20Horizon%205?partner=albertgamer",
     description: "Sua derradeira Aventura Horizon espera por você! Explore as paisagens dinâmicas e em constante evolução do México em centenas dos melhores carros do mundo.",
     review_verdict: "O rei incontestável dos jogos de corrida arcade. Cenários deslumbrantes, centenas de veículos licenciados e jogabilidade impecável no controle ou volante.",
     headline: "A celebração máxima da cultura automotiva em um México colorido e cheio de vida",
@@ -524,7 +524,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Insomniac Games",
     release_year: 2023,
     store: "Amazon",
-    store_url: "https://www.amazon.com.br",
+    store_url: "https://www.amazon.com.br/s?k=Spider-Man+2+PS5&tag=albertgames-20",
     description: "Os Spiders Peter Parker e Miles Morales retornam para uma nova e emocionante aventura na aclamada franquia Marvel's Spider-Man para PS5. Enfrente Venom, Kraven e outros vilões.",
     review_verdict: "Aproveitamento exemplar do poder do SSD do PS5 com transição instantânea entre Peter e Miles e balanço de teias ultra-veloz com asas de teia.",
     headline: "A experiência definitiva de ser o Amigão da Vizinhança com gráficos de ponta",
@@ -548,7 +548,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Santa Monica Studio",
     release_year: 2022,
     store: "Amazon",
-    store_url: "https://www.amazon.com.br",
+    store_url: "https://www.amazon.com.br/s?k=God+of+War+Ragnarok+PS5&tag=albertgames-20",
     description: "Junte-se a Kratos e Atreus em uma jornada mítica por respostas antes que o Ragnarök comece. Visite todos os Nove Reinos e enfrente deuses nórdicos.",
     review_verdict: "Conclusão triunfal da saga nórdica. Combate expandido com a Lança Draupnir e atuações dramáticas inesquecíveis.",
     headline: "Uma obra-prima narrativa e técnica que encerra com chave de ouro a era nórdica",
@@ -572,7 +572,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Naughty Dog",
     release_year: 2022,
     store: "Amazon",
-    store_url: "https://www.amazon.com.br",
+    store_url: "https://www.amazon.com.br/s?k=The+Last+of+Us+Part+1+PS5&tag=albertgames-20",
     description: "Em uma civilização devastada, onde infectados e sobreviventes veteranos estão à solta, Joel, um protagonista abatido, é contratado para contrabandear Ellie, de 14 anos.",
     review_verdict: "Reconstruído do zero com visuais hiper-realistas, IA moderna dos inimigos e acessibilidade pioneira. Uma das narrativas mais impactantes da história.",
     headline: "A história comovente de Joel e Ellie reinventada para o hardware de nova geração",
@@ -596,7 +596,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Sony Interactive Entertainment",
     release_year: 2026,
     store: "Hype Games",
-    store_url: "https://hype.games/br",
+    store_url: "https://hype.games/br/search?q=PlayStation%20Store",
     description: "Adicione R$ 100 em créditos oficiais na sua carteira PlayStation Network. Use para comprar jogos completos, assinaturas PlayStation Plus Essential/Extra/Deluxe ou moedas virtuais.",
     review_verdict: "A melhor e mais segura maneira de comprar na PSN brasileira, evitando IOF de cartão internacional e podendo pagar com Pix em segundos.",
     headline: "Crédito oficial com ativação digital instantânea e menor preço com desconto",
@@ -622,7 +622,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Microsoft Xbox",
     release_year: 2026,
     store: "Hype Games",
-    store_url: "https://hype.games/br",
+    store_url: "https://hype.games/br/search?q=Xbox%20Game%20Pass",
     description: "Acesso ilimitado a centenas de jogos de alta qualidade para consoles Xbox Series X|S, Xbox One, PC e jogos via nuvem (Cloud Gaming) no celular, TV ou navegador.",
     review_verdict: "O melhor investimento da indústria gamer hoje. Todos os lançamentos dos estúdios Xbox e Bethesda chegam no Day One, mais catálogo EA Play incluído.",
     headline: "O serviço por assinatura mais completo e vantajoso para jogadores de PC e Console",
@@ -646,7 +646,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "343 Industries",
     release_year: 2021,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Halo%20Infinite&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search/Halo%20Infinite?partner=albertgamer",
     description: "Quando toda a esperança foi perdida e o destino da humanidade está em jogo, Master Chief está pronto para enfrentar o inimigo mais impiedoso que já enfrentou.",
     review_verdict: "O gancho retrátil revoluciona o movimento de Master Chief. Multiplayer gratuito e campanha em mundo semiaberto muito envolvente.",
     headline: "O retorno do Master Chief com gunplay tático dinâmico e mapa aberto no anel Zeta Halo",
@@ -670,7 +670,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Bethesda Game Studios",
     release_year: 2023,
     store: "Nuuvem",
-    store_url: "https://www.nuuvem.com/br-pt/catalog/search?q=Starfield&partner=albertgamer",
+    store_url: "https://www.nuuvem.com/br-pt/catalog/search/Starfield?partner=albertgamer",
     description: "Starfield é o primeiro universo novo em mais de 25 anos da Bethesda Game Studios. Crie qualquer personagem que desejar e explore com liberdade inigualável mais de 1.000 planetas.",
     review_verdict: "Combate espacial envolvente, construção minuciosa de naves e facções ricas com assinatura clássica de RPGs da Bethesda.",
     headline: "A grande odisseia espacial da Bethesda com construção detalhada de naves e exploração",
@@ -696,7 +696,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Nintendo",
     release_year: 2023,
     store: "Amazon",
-    store_url: "https://www.amazon.com.br",
+    store_url: "https://www.amazon.com.br/s?k=Zelda+Tears+of+the+Kingdom+Nintendo+Switch&tag=albertgames-20",
     description: "Uma jornada épica pelas terras e pelos céus de Hyrule aguarda por você. Crie suas próprias máquinas, armas e soluções com as novas habilidades Ultrahand e Fuse.",
     review_verdict: "Um triunfo inacreditável de física e liberdade criativa em um console portátil. O sistema de fusão de itens e construção redefine o gênero.",
     headline: "O jogo que desafia os limites do design mecânico e imaginação do jogador",
@@ -720,7 +720,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Nintendo EPD",
     release_year: 2023,
     store: "Amazon",
-    store_url: "https://www.amazon.com.br",
+    store_url: "https://www.amazon.com.br/s?k=Super+Mario+Bros+Wonder+Nintendo+Switch&tag=albertgames-20",
     description: "A clássica jogabilidade de rolagem lateral de Mario é virada de cabeça para baixo com a introdução das Wonder Flowers, efeitos hilários que mudam as fases.",
     review_verdict: "O Mario 2D mais criativo em quase 30 anos. Cada fase traz uma surpresa visual e mecânica nova que coloca um sorriso no rosto de qualquer jogador.",
     headline: "Criatividade sem amarras e animações espetaculares no Reino Flor",
@@ -744,7 +744,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "MercurySteam / Nintendo",
     release_year: 2021,
     store: "Amazon",
-    store_url: "https://www.amazon.com.br",
+    store_url: "https://www.amazon.com.br/s?k=Metroid+Dread+Nintendo+Switch&tag=albertgames-20",
     description: "Junte-se a Samus Aran enquanto ela escapa de um planeta alienígena hostil infestado por uma ameaça mecânica sinistra conhecida como os robôs E.M.M.I.",
     review_verdict: "Controle ultra-fluido de Samus a 60 FPS com perseguições tensas que aceleram o coração e chefes desafiadores e justos.",
     headline: "O retorno triunfal da caçadora de recompensas ao estilo clássico 2D",
@@ -768,7 +768,7 @@ export const MULTIPLATFORM_GAMES: MultiplatformGame[] = [
     developer: "Nintendo of America",
     release_year: 2026,
     store: "Hype Games",
-    store_url: "https://hype.games/br",
+    store_url: "https://hype.games/br/search?q=Nintendo%20eShop",
     description: "Código digital oficial para adicionar R$ 100 à sua conta da Nintendo eShop brasileira. Compre lançamentos digitais, DLCs de Pokémon e Smash Bros, ou assine o Nintendo Switch Online.",
     review_verdict: "O meio mais cômodo de carregar fundos na eShop brasileira, com cashback de moedas de ouro da Nintendo mantido integralmente.",
     headline: "Ativação instantânea de créditos para a loja oficial do Nintendo Switch",
@@ -1027,20 +1027,12 @@ export const NUUVEM_VERIFIED_SLUGS: Record<string, string> = {
   "Cyberpunk 2077: Ultimate Edition": "cyberpunk-2077",
   "Elden Ring": "elden-ring",
   "Elden Ring Shadow of the Erdtree": "elden-ring-shadow-of-the-erdtree",
-  "Baldur's Gate 3": "baldurs-gate-3",
-  "The Witcher 3: Wild Hunt": "the-witcher-3-wild-hunt",
-  "The Witcher 3: Wild Hunt - Complete Edition": "the-witcher-3-wild-hunt",
   "Resident Evil 4": "resident-evil-4",
   "Resident Evil 4 Remake": "resident-evil-4",
-  "Grand Theft Auto V": "grand-theft-auto-v-premium-edition",
-  "Grand Theft Auto V: Premium Edition": "grand-theft-auto-v-premium-edition",
-  "Grand Theft Auto IV": "grand-theft-auto-iv-the-complete-edition",
-  "Grand Theft Auto IV: The Complete Edition": "grand-theft-auto-iv-the-complete-edition",
   "God of War": "god-of-war",
   "Helldivers 2": "helldivers-2",
   "HELLDIVERS™ 2": "helldivers-2",
   "Hogwarts Legacy": "hogwarts-legacy",
-  "Red Dead Redemption 2": "red-dead-redemption-ii",
   "Rise of the Tomb Raider": "rise-of-the-tomb-raider-20-year-celebration",
   "Rise of the Tomb Raider™": "rise-of-the-tomb-raider-20-year-celebration",
   "Shadow of the Tomb Raider": "shadow-of-the-tomb-raider-definitive-edition",
@@ -1079,15 +1071,22 @@ export function getNuuvemSearchUrl(gameName: string, config: MonetizationSetting
     return `https://www.nuuvem.com/br-pt/item/${slug}?partner=${partner}`;
   }
 
-  // Se for título longo ou com subtítulo como GTA Trilogy, simplifica para o nome da franquia para garantir resultados
+  // Limpa caracteres especiais e simplifica nomes compostos para garantir retorno 200 imediato
   let cleanSearch = trimmed;
-  if (trimmed.toLowerCase().includes('trilogy') && (trimmed.toLowerCase().includes('grand theft auto') || trimmed.toLowerCase().includes('gta'))) {
+  const lower = trimmed.toLowerCase();
+  if (lower.includes('trilogy') && (lower.includes('grand theft auto') || lower.includes('gta'))) {
     cleanSearch = 'Grand Theft Auto';
+  } else if (lower.includes('witcher')) {
+    cleanSearch = 'The Witcher';
+  } else if (lower.includes('baldur')) {
+    cleanSearch = 'Baldurs Gate';
+  } else if (lower.includes('red dead') || lower.includes('rdr2')) {
+    cleanSearch = 'Red Dead Redemption';
   } else {
     cleanSearch = trimmed.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
-  return `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(cleanSearch)}&partner=${partner}`;
+  return `https://www.nuuvem.com/br-pt/catalog/search/${encodeURIComponent(cleanSearch)}?partner=${partner}`;
 }
 
 /**
@@ -1099,8 +1098,15 @@ export function getHypeSearchUrl(gameName: string, config: MonetizationSettings)
 
   const trimmed = gameName.trim();
   let cleanSearch = trimmed;
-  if (trimmed.toLowerCase().includes('trilogy') && (trimmed.toLowerCase().includes('grand theft auto') || trimmed.toLowerCase().includes('gta'))) {
+  const lower = trimmed.toLowerCase();
+  if (lower.includes('trilogy') && (lower.includes('grand theft auto') || lower.includes('gta'))) {
     cleanSearch = 'Grand Theft Auto';
+  } else if (lower.includes('witcher')) {
+    cleanSearch = 'The Witcher';
+  } else if (lower.includes('baldur')) {
+    cleanSearch = 'Baldurs Gate';
+  } else if (lower.includes('red dead') || lower.includes('rdr2')) {
+    cleanSearch = 'Red Dead Redemption';
   } else {
     cleanSearch = trimmed.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
   }
@@ -1119,7 +1125,7 @@ export function getAffiliateUrls(game: { id: string; name: string }, config: Mon
     hypeGames: getHypeSearchUrl(game.name, config),
     amazon: undefined, // Amazon só vende mídia física e consoles
     gmg: `https://www.greenmangaming.com/search?query=${query}&tap_a=${encodeURIComponent(config.gmgAffiliateId || 'gmgpartner')}`,
-    steam: `https://store.steampowered.com/app/${game.id}/`
+    steam: (game as any).steam_url || ((game as any).is_package || (game as any).type === 1 || String(game.id) === '817628' ? `https://store.steampowered.com/sub/${game.id}/` : `https://store.steampowered.com/app/${game.id}/`)
   };
 }
 

@@ -839,7 +839,7 @@ export default function App() {
           nuuvem: nuuvemUrl,
           hype: hypeUrl,
           amazon: amazonUrl,
-          steam: isPc ? `https://store.steampowered.com/search/?term=${encodeURIComponent(mg.name)}` : undefined
+          steam: isPc ? ((mg as any).steam_url || (mg.store_url && mg.store_url.includes('steampowered.com') ? mg.store_url : `https://store.steampowered.com/search/?term=${encodeURIComponent(mg.name)}`)) : undefined
         }
       });
     } else if (item.achievements_unlocked !== undefined) {
@@ -871,7 +871,7 @@ export default function App() {
           nuuvem: affiliate.nuuvem,
           hype: affiliate.hypeGames,
           amazon: undefined,
-          steam: `https://store.steampowered.com/app/${sg.id}`
+          steam: (sg as any).steam_url || ((sg as any).is_package || String(sg.id) === '817628' ? `https://store.steampowered.com/sub/${sg.id}` : `https://store.steampowered.com/app/${sg.id}`)
         }
       });
     } else if (item.store && item.deal_price !== undefined) {
@@ -906,7 +906,7 @@ export default function App() {
           nuuvem: nuuvemUrl,
           hype: hypeUrl,
           amazon: amazonUrl,
-          steam: isPc ? `https://store.steampowered.com/search/?term=${encodeURIComponent(d.name)}` : undefined
+          steam: isPc ? ((d as any).steam_url || (d.deal_url && d.deal_url.includes('steampowered.com') ? d.deal_url : (d.id && String(d.id).includes('817628') ? 'https://store.steampowered.com/sub/817628' : `https://store.steampowered.com/search/?term=${encodeURIComponent(d.name)}`))) : undefined
         }
       });
     } else {
@@ -2064,7 +2064,7 @@ DEALS_DATABASE = [
         "deal_price": 99.95,
         "discount_percent": 50,
         "rating": 89,
-        "deal_url": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077-microsoft",
+        "deal_url": "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
         "badge": "Sucesso de Vendas",
         "review_verdict": "Totalmente reformulado e polido. A expansão Phantom Liberty eleva o jogo a outro patamar."
@@ -2079,7 +2079,7 @@ DEALS_DATABASE = [
         "deal_price": 32.49,
         "discount_percent": 75,
         "rating": 97,
-        "deal_url": "https://hype.games/br",
+        "deal_url": "https://hype.games/br/search?q=The%20Witcher%203",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
         "badge": "Desconto Histórico -75%",
         "review_verdict": "Um dos maiores RPGs da história. Por esse valor, é compra obrigatória."
@@ -2094,7 +2094,7 @@ DEALS_DATABASE = [
         "deal_price": 98.96,
         "discount_percent": 67,
         "rating": 92,
-        "deal_url": "https://hype.games/br",
+        "deal_url": "https://hype.games/br/search?q=Red%20Dead%20Redemption%202",
         "image": "https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg",
         "badge": "Top Avaliado",
         "review_verdict": "Narrativa cinematográfica sem paralelo com mundo aberto hiper-realista da Rockstar."
@@ -3505,12 +3505,8 @@ if __name__ == "__main__":
         }
 
         function getAffiliateHypeUrl(gameName) {
-            const cfg = getAffiliateConfig();
-            const sid = cfg.rakutenSid || '4770537';
-            const mid = cfg.hypeMid || '53304';
             const cleanName = encodeURIComponent((gameName || '').trim());
-            const targetUrl = \`https://hype.games/br/search?q=\${cleanName}\`;
-            return \`https://click.linksynergy.com/deeplink?id=\${sid}&mid=\${mid}&murl=\${encodeURIComponent(targetUrl)}\`;
+            return \`https://hype.games/br/search?q=\${cleanName}\`;
         }
 
         function getAffiliateAmazonUrl(game, platform = '') {
@@ -5134,7 +5130,8 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                     if (monetizationSettings.customGameLinks?.[game.name]) {
                       targetOfferUrl = monetizationSettings.customGameLinks[game.name];
                     } else if (game.source_deal?.includes('Steam') || (game as any).store === 'Steam Store' || (game as any).store === 'Steam') {
-                      targetOfferUrl = `https://store.steampowered.com/app/${game.id}/`;
+                      const isPkg = (game as any).is_package || (game as any).type === 1 || String(game.id) === '817628';
+                      targetOfferUrl = (game as any).steam_url || (isPkg ? `https://store.steampowered.com/sub/${game.id}/` : `https://store.steampowered.com/app/${game.id}/`);
                     } else if (game.source_deal?.includes('Hype') || (game as any).store === 'Hype Games') {
                       targetOfferUrl = hypeUrl;
                     } else if (game.source_deal?.includes('Amazon') || (game as any).store === 'Amazon') {
@@ -6100,7 +6097,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                   discount_percent: ld.discount_percent,
                   badge: ld.badge,
                   store: 'Steam Store',
-                  deal_url: `https://store.steampowered.com/app/${ld.id}`,
+                  deal_url: ld.steam_url || (ld.is_package || String(ld.id) === '817628' ? `https://store.steampowered.com/sub/${ld.id}` : `https://store.steampowered.com/app/${ld.id}`),
                   image: ld.image,
                   rating: ld.rating,
                   review_verdict: ld.review_verdict,
@@ -6370,7 +6367,14 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                               <span>→</span>
                             </a>
                             <a
-                              href={`https://store.steampowered.com/app/${item.id}`}
+                              href={
+                                (item as any).steam_url ||
+                                ((item as any).is_package || (item as any).type === 1 || String(item.id) === '817628'
+                                  ? `https://store.steampowered.com/sub/${item.id}`
+                                  : /^\d+$/.test(String(item.id))
+                                  ? `https://store.steampowered.com/app/${item.id}`
+                                  : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.name)}`)
+                              }
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
@@ -6518,15 +6522,13 @@ Como rodar e fazer o Deploy no Render em 3 passos:
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {pagedGames.map((game) => {
-                    const sid = monetizationSettings.rakutenSid || '4770537';
-                    const mid = monetizationSettings.hypeMid || '53304';
                     let directBuyUrl = game.store_url || 'https://www.nuuvem.com';
                     if (game.store === 'Hype Games') {
-                      directBuyUrl = `https://click.linksynergy.com/deeplink?id=${sid}&mid=${mid}&murl=${encodeURIComponent(`https://hype.games/br/search?q=${encodeURIComponent(game.name)}`)}`;
+                      directBuyUrl = getHypeSearchUrl(game.name, monetizationSettings);
                     } else if (game.store === 'Nuuvem') {
                       directBuyUrl = getNuuvemSearchUrl(game.name, monetizationSettings);
                     } else if (game.store === 'Amazon') {
-                      directBuyUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(game.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId)}`;
+                      directBuyUrl = `https://www.amazon.com.br/s?k=${encodeURIComponent(game.name + ' jogo')}&tag=${encodeURIComponent(monetizationSettings.amazonAssociateId || 'albertgames-20')}`;
                     }
 
                     // Cores de badge por plataforma
