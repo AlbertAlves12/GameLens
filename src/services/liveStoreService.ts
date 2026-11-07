@@ -19,6 +19,9 @@ export interface LiveDealData {
   badge: string;
   rating: number;
   review_verdict: string;
+  type?: number;
+  is_package?: boolean;
+  steam_url?: string;
 }
 
 export interface LiveGameDetails {
@@ -30,6 +33,8 @@ export interface LiveGameDetails {
   short_description: string;
   header_image: string;
   user_rating: number;
+  is_package?: boolean;
+  steam_url?: string;
   price: {
     regular_price: number;
     deal_price: number;

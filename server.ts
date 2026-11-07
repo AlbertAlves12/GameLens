@@ -38,8 +38,8 @@ function parseRequirementsHtml(minHtml?: string, recHtml?: string) {
   function extractField(html?: string, fieldNames: string[] = []): string {
     if (!html) return '';
     for (const name of fieldNames) {
-      // Procura formato <strong>Nome*:</strong> valor ou <li><strong>Nome...</strong> valor
-      const regex = new RegExp(`<strong>\\s*${name}\\s*\\*?:?\\s*<\\/strong>:?\\s*([^<\\n\\r]+)`, 'i');
+      // Procura formato <strong>Nome*:</strong> valor ou <li><strong>Nome...</strong> valor com qualquer pontuação interna
+      const regex = new RegExp(`<strong>\\s*${name}[^<]*<\\/strong>:?\\s*([^<\\n\\r]+)`, 'i');
       const match = html.match(regex);
       if (match && match[1]) {
         const clean = stripHtml(match[1]).trim();
@@ -61,8 +61,8 @@ function parseRequirementsHtml(minHtml?: string, recHtml?: string) {
   const minGpu = extractField(minHtml, ['Placa gráfica', 'Graphics', 'Vídeo', 'GPU', 'Placa de vídeo']);
   const recGpu = extractField(recHtml, ['Placa gráfica', 'Graphics', 'Vídeo', 'GPU', 'Placa de vídeo']);
 
-  const minStorage = extractField(minHtml, ['Espaço no disco', 'Storage', 'Disco rígido', 'Armazenamento']);
-  const recStorage = extractField(recHtml, ['Espaço no disco', 'Storage', 'Disco rígido', 'Armazenamento']);
+  const minStorage = extractField(minHtml, ['Espaço no disco', 'Storage', 'Disco rígido', 'Armazenamento', 'Espaço em disco']);
+  const recStorage = extractField(recHtml, ['Espaço no disco', 'Storage', 'Disco rígido', 'Armazenamento', 'Espaço em disco']);
 
   return {
     os: minOs ? (recOs && recOs !== minOs ? `Mín: ${minOs} | Rec: ${recOs}` : minOs) : 'Windows 10/11 64-bit',
@@ -83,7 +83,7 @@ function parseRequirementsHtml(minHtml?: string, recHtml?: string) {
 
 async function start() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   app.use(express.json());
 
@@ -108,21 +108,31 @@ async function start() {
       const specialsRaw = data.specials?.items || [];
       const topSellersRaw = data.top_sellers?.items || [];
 
-      const formattedSpecials = specialsRaw.map((item: any) => ({
-        id: String(item.id),
-        name: item.name,
-        discount_percent: item.discount_percent || 0,
-        regular_price: item.original_price ? item.original_price / 100 : 0,
-        deal_price: item.final_price ? item.final_price / 100 : 0,
-        price_formatted: item.final_price ? `R$ ${(item.final_price / 100).toFixed(2).replace('.', ',')}` : 'Gratuito',
-        image: item.large_capsule_image || item.header_image || `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg`,
-        store: 'Steam Store',
-        platform: 'PC',
-        platform_label: 'PC / Steam Oficial',
-        badge: item.discount_percent >= 50 ? `🔥 -${item.discount_percent}% SUPER OFERTA` : `⚡ -${item.discount_percent}% OFF`,
-        rating: 92,
-        review_verdict: `Desconto oficial em tempo real verificado na Steam Brasil: -${item.discount_percent}% de economia.`,
-      }));
+      const formattedSpecials = specialsRaw.map((item: any) => {
+        const isPackage = item.type === 1;
+        const steamUrl = isPackage
+          ? `https://store.steampowered.com/sub/${item.id}`
+          : `https://store.steampowered.com/app/${item.id}`;
+
+        return {
+          id: String(item.id),
+          type: item.type,
+          is_package: isPackage,
+          steam_url: steamUrl,
+          name: item.name,
+          discount_percent: item.discount_percent || 0,
+          regular_price: item.original_price ? item.original_price / 100 : 0,
+          deal_price: item.final_price ? item.final_price / 100 : 0,
+          price_formatted: item.final_price ? `R$ ${(item.final_price / 100).toFixed(2).replace('.', ',')}` : 'Gratuito',
+          image: item.large_capsule_image || item.header_image || `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg`,
+          store: 'Steam Store',
+          platform: 'PC',
+          platform_label: 'PC / Steam Oficial',
+          badge: item.discount_percent >= 50 ? `🔥 -${item.discount_percent}% SUPER OFERTA` : `⚡ -${item.discount_percent}% OFF`,
+          rating: 92,
+          review_verdict: `Desconto oficial em tempo real verificado na Steam Brasil: -${item.discount_percent}% de economia.`,
+        };
+      });
 
       setCache(cacheKey, formattedSpecials);
       res.json({
@@ -157,16 +167,89 @@ async function start() {
     }
 
     try {
-      const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&cc=br&l=portuguese`, {
+      // 1. Tenta buscar como App individual
+      let response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&cc=br&l=portuguese`, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       });
 
-      if (!response.ok) {
-        throw new Error(`Steam HTTP ${response.status}`);
-      }
+      let json = response.ok ? await response.json() : null;
+      let gameData = json && json[appId]?.success ? json[appId].data : null;
+      let isPackage = false;
 
-      const json = await response.json();
-      const gameData = json[appId]?.data;
+      // 2. Se falhar, tenta buscar como Package/Bundle (ex: GTA Trilogy 817628)
+      if (!gameData) {
+        const pkgRes = await fetch(`https://store.steampowered.com/api/packagedetails?packageids=${appId}&cc=br&l=portuguese`, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        });
+        if (pkgRes.ok) {
+          const pkgJson = await pkgRes.json();
+          const pkgData = pkgJson && pkgJson[appId]?.success ? pkgJson[appId].data : null;
+          if (pkgData) {
+            isPackage = true;
+            // Busca os requisitos do primeiro aplicativo do pacote
+            const subAppId = pkgData.apps?.[0]?.id || (pkgData.name.includes('Trilogy') ? '1547000' : null);
+            let subSpecs: any = null;
+            if (subAppId) {
+              try {
+                const subAppRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${subAppId}&cc=br&l=portuguese`, {
+                  headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+                });
+                if (subAppRes.ok) {
+                  const subAppJson = await subAppRes.json();
+                  const subAppData = subAppJson && subAppJson[subAppId]?.data;
+                  if (subAppData) {
+                    const pcReq = subAppData.pc_requirements;
+                    subSpecs = parseRequirementsHtml(pcReq?.minimum, pcReq?.recommended);
+                  }
+                }
+              } catch {
+                // Ignore subapp error
+              }
+            }
+
+            const price = pkgData.price
+              ? {
+                  regular_price: pkgData.price.initial / 100,
+                  deal_price: pkgData.price.final / 100,
+                  discount_percent: pkgData.price.discount_percent,
+                  price_formatted: `R$ ${(pkgData.price.final / 100).toFixed(2).replace('.', ',')}`,
+                  currency: pkgData.price.currency || 'BRL',
+                }
+              : {
+                  regular_price: 0,
+                  deal_price: 0,
+                  discount_percent: 0,
+                  price_formatted: 'Consulte na Loja',
+                  currency: 'BRL',
+                };
+
+            const payload = {
+              id: appId,
+              is_package: true,
+              steam_url: `https://store.steampowered.com/sub/${appId}`,
+              name: pkgData.name,
+              developer: 'Rockstar Games',
+              publisher: 'Rockstar Games',
+              release_date: 'Disponível',
+              short_description: stripHtml(pkgData.page_content || ''),
+              header_image: pkgData.header_image || pkgData.small_logo,
+              user_rating: 90,
+              price,
+              specs: subSpecs || {
+                os: 'Windows 10 64-bit',
+                processor: 'Mínimo: Intel Core i5-6600K / AMD FX-6300 (Recomendado: Intel Core i7-2700K / AMD Ryzen 5 2600)',
+                memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+                graphics: 'Mínimo: NVIDIA GeForce GTX 760 2GB / AMD Radeon R9 280 3GB (Recomendado: NVIDIA GeForce GTX 970 4GB / AMD Radeon RX 570 4GB)',
+                storage: '45 GB livre',
+              },
+              genres: ['Ação', 'Mundo Aberto', 'Coleção'],
+            };
+
+            setCache(cacheKey, payload);
+            return res.json({ success: true, source: 'live_package', data: payload });
+          }
+        }
+      }
 
       if (!gameData) {
         return res.status(404).json({ error: 'Jogo não encontrado na Steam' });
@@ -194,6 +277,8 @@ async function start() {
 
       const payload = {
         id: appId,
+        is_package: false,
+        steam_url: `https://store.steampowered.com/app/${appId}`,
         name: gameData.name,
         developer: gameData.developers?.[0] || 'Produtora Oficial',
         publisher: gameData.publishers?.[0] || 'Distribuidora',

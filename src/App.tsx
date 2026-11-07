@@ -945,7 +945,7 @@ export default function App() {
           nuuvem: nuuvemUrl,
           hype: hypeUrl,
           amazon: amazonUrl,
-          steam: item.id ? `https://store.steampowered.com/app/${item.id}` : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.name)}`
+          steam: (item as any).steam_url || (item.id ? ((item as any).is_package || (item as any).type === 1 || String(item.id) === '817628' ? `https://store.steampowered.com/sub/${item.id}` : `https://store.steampowered.com/app/${item.id}`) : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.name)}`)
         }
       });
     }
@@ -965,6 +965,10 @@ export default function App() {
               developer: live.developer || prev.developer,
               user_rating: live.user_rating || prev.user_rating,
               price_formatted: live.price?.price_formatted || prev.price_formatted,
+              buyUrls: {
+                ...prev.buyUrls,
+                steam: live.steam_url || prev.buyUrls.steam
+              }
             };
           });
         }
@@ -7176,7 +7180,7 @@ Como rodar e fazer o Deploy no Render em 3 passos:
                       <ShoppingCart className="w-4 h-4" />
                       <span>Nuuvem</span>
                     </div>
-                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Tag: {monetizationSettings.nuuvemPartnerId || 'albertgamer'}</span>
+                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Tag: {(monetizationSettings.nuuvemPartnerId && !monetizationSettings.nuuvemPartnerId.includes('&') && !monetizationSettings.nuuvemPartnerId.includes('=')) ? monetizationSettings.nuuvemPartnerId : 'albertgamer'}</span>
                   </a>
 
                   <a

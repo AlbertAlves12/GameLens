@@ -792,8 +792,8 @@ export const DEFAULT_MONETIZATION_SETTINGS: MonetizationSettings = {
   adsEnabled: true,
   editorialName: 'GameLens Editorial & Reviews',
   customGameLinks: {
-    "Cyberpunk 2077": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077",
-    "Cyberpunk 2077: Ultimate Edition": "https://click.linksynergy.com/link?id=OHkHh7XU04U&offerid=1692636.4679618360&type=2&murl=https%3a%2f%2fwww.nuuvem.com%2fbr-pt%2fitem%2fcyberpunk-2077"
+    "Cyberpunk 2077": "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer",
+    "Cyberpunk 2077: Ultimate Edition": "https://www.nuuvem.com/br-pt/item/cyberpunk-2077?partner=albertgamer"
   }
 };
 
@@ -1034,10 +1034,6 @@ export const NUUVEM_VERIFIED_SLUGS: Record<string, string> = {
   "Resident Evil 4 Remake": "resident-evil-4",
   "Grand Theft Auto V": "grand-theft-auto-v-premium-edition",
   "Grand Theft Auto V: Premium Edition": "grand-theft-auto-v-premium-edition",
-  "Grand Theft Auto: The Trilogy – The Definitive Edition": "grand-theft-auto-the-trilogy-the-definitive-edition",
-  "Grand Theft Auto: The Trilogy - The Definitive Edition": "grand-theft-auto-the-trilogy-the-definitive-edition",
-  "Grand Theft Auto The Trilogy The Definitive Edition": "grand-theft-auto-the-trilogy-the-definitive-edition",
-  "GTA Trilogy": "grand-theft-auto-the-trilogy-the-definitive-edition",
   "Grand Theft Auto IV": "grand-theft-auto-iv-the-complete-edition",
   "Grand Theft Auto IV: The Complete Edition": "grand-theft-auto-iv-the-complete-edition",
   "God of War": "god-of-war",
@@ -1058,11 +1054,24 @@ export const NUUVEM_VERIFIED_SLUGS: Record<string, string> = {
 export function getNuuvemSearchUrl(gameName: string, config: MonetizationSettings): string {
   const customLink = config.customGameLinks?.[gameName];
   if (customLink) {
-    // Corrige link com slug antigo descontinuado da Microsoft se presente
+    // Se o customLink for LinkSynergy que costuma falhar por aprovação, redireciona para Nuuvem direta
+    if (customLink.includes('linksynergy.com') && customLink.includes('nuuvem.com')) {
+      const match = customLink.match(/murl=([^&]+)/);
+      if (match && match[1]) {
+        try {
+          const decoded = decodeURIComponent(match[1]);
+          return `${decoded.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077')}?partner=albertgamer`;
+        } catch {
+          // fallback
+        }
+      }
+    }
     return customLink.replace('cyberpunk-2077-microsoft', 'cyberpunk-2077');
   }
 
-  const partner = encodeURIComponent(config.nuuvemPartnerId || 'albertgamer');
+  const rawPartner = config.nuuvemPartnerId || 'albertgamer';
+  // Sanitiza caso o usuário tenha colado sem querer link ou parâmetros com &
+  const partner = encodeURIComponent((rawPartner.includes('&') || rawPartner.includes('=')) ? 'albertgamer' : rawPartner);
   const trimmed = gameName.trim();
   const slug = NUUVEM_VERIFIED_SLUGS[trimmed];
 
@@ -1070,8 +1079,14 @@ export function getNuuvemSearchUrl(gameName: string, config: MonetizationSetting
     return `https://www.nuuvem.com/br-pt/item/${slug}?partner=${partner}`;
   }
 
-  // Remove caracteres especiais como en-dash (–), colons e parênteses para a busca da Nuuvem não dar 404
-  const cleanSearch = trimmed.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  // Se for título longo ou com subtítulo como GTA Trilogy, simplifica para o nome da franquia para garantir resultados
+  let cleanSearch = trimmed;
+  if (trimmed.toLowerCase().includes('trilogy') && (trimmed.toLowerCase().includes('grand theft auto') || trimmed.toLowerCase().includes('gta'))) {
+    cleanSearch = 'Grand Theft Auto';
+  } else {
+    cleanSearch = trimmed.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
   return `https://www.nuuvem.com/br-pt/catalog/search?q=${encodeURIComponent(cleanSearch)}&partner=${partner}`;
 }
 
@@ -1082,8 +1097,14 @@ export function getHypeSearchUrl(gameName: string, config: MonetizationSettings)
   const custom = config.customGameLinks?.[gameName];
   if (custom && custom.includes('hype.games')) return custom;
 
-  // Remove caracteres especiais como en-dash (–), colons e parênteses para a busca da Hype Games funcionar
-  const cleanSearch = gameName.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  const trimmed = gameName.trim();
+  let cleanSearch = trimmed;
+  if (trimmed.toLowerCase().includes('trilogy') && (trimmed.toLowerCase().includes('grand theft auto') || trimmed.toLowerCase().includes('gta'))) {
+    cleanSearch = 'Grand Theft Auto';
+  } else {
+    cleanSearch = trimmed.replace(/[\u2010-\u2015:™®()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
   return `https://hype.games/br/search?q=${encodeURIComponent(cleanSearch)}`;
 }
 
@@ -1112,11 +1133,18 @@ export const REAL_GAME_SPECS: Record<string, {
   graphics: string;
   storage: string;
 }> = {
+  '817628': {
+    os: 'Windows 10 64-bit',
+    processor: 'Mínimo: Intel Core i5-6600K / AMD FX-6300 (Recomendado: Intel Core i7-2700K / AMD Ryzen 5 2600)',
+    memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
+    graphics: 'Mínimo: NVIDIA GeForce GTX 760 2GB / AMD Radeon R9 280 3GB (Recomendado: NVIDIA GeForce GTX 970 4GB / AMD Radeon RX 570 4GB)',
+    storage: '45 GB livre',
+  },
   '1547000': {
     os: 'Windows 10 64-bit',
     processor: 'Mínimo: Intel Core i5-6600K / AMD FX-6300 (Recomendado: Intel Core i7-2700K / AMD Ryzen 5 2600)',
     memory: 'Mínimo: 8 GB RAM (Recomendado: 16 GB RAM)',
-    graphics: 'Mínimo: Nvidia GeForce GTX 760 2GB / AMD Radeon R9 280 3GB (Recomendado: Nvidia GeForce GTX 1060 6GB / AMD Radeon RX 570 4GB)',
+    graphics: 'Mínimo: NVIDIA GeForce GTX 760 2GB / AMD Radeon R9 280 3GB (Recomendado: NVIDIA GeForce GTX 970 4GB / AMD Radeon RX 570 4GB)',
     storage: '45 GB livre',
   },
   '1091500': {
@@ -1329,7 +1357,7 @@ export function getSteamAppId(id?: string, name?: string): string {
   if (nameLower.includes('starfield')) return '1716740';
   if (nameLower.includes('last of us')) return '1888930';
   if (nameLower.includes('trilogy') || nameLower.includes('definitive edition')) {
-    if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return '1547000';
+    if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return '817628';
   }
   if (nameLower.includes('grand theft auto iv') || nameLower.includes('gta iv') || nameLower.includes('gta 4')) return '12210';
   if (nameLower.includes('grand theft auto') || nameLower.includes('gta')) return '271590';
